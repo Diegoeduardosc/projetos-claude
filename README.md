@@ -1,6 +1,6 @@
 # Calculadora CLI
 
-Uma calculadora de linha de commando simples escrita em Python.
+Uma calculadora de linha de comando simples escrita em Python.
 
 ## Instalação
 
