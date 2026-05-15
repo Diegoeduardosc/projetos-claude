@@ -1,0 +1,2809 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CINEA · BI Dashboard · PUC Minas</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --purple:    #4F2D7F;
+  --purple-l:  #6B3FA0;
+  --purple-xl: #EEE8F8;
+  --pink:      #E91E8C;
+  --pink-l:    #FF6BB5;
+  --pink-xl:   #FDE8F4;
+  --cyan:      #00B4CC;
+  --cyan-l:    #4DD8E8;
+  --cyan-xl:   #E0F9FC;
+  --gold:      #F5A623;
+  --gold-xl:   #FFF4E0;
+  --green:     #27AE60;
+  --red:       #E74C3C;
+  --bg:        #0E0B16;
+  --bg2:       #16111F;
+  --bg3:       #1E1730;
+  --card:      #1A1428;
+  --card2:     #221B34;
+  --border:    rgba(255,255,255,0.07);
+  --text:      #F0ECF8;
+  --text2:     #A899C0;
+  --text3:     #6B5F85;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* GRID NOISE BACKGROUND */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 10% 20%, rgba(79,45,127,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 80%, rgba(233,30,140,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(0,180,204,0.06) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* SIDEBAR */
+.sidebar {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: 220px;
+  background: var(--card);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  padding: 0 0 24px;
+}
+
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+.sidebar-logo .brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+.sidebar-logo .sub {
+  font-size: 0.68rem;
+  color: var(--text3);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.nav-group {
+  padding: 8px 12px 4px;
+}
+.nav-label {
+  font-size: 0.62rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text3);
+  padding: 0 8px;
+  margin-bottom: 6px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: var(--text2);
+  font-size: 0.83rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  margin-bottom: 2px;
+  border: 1px solid transparent;
+}
+.nav-item:hover { background: var(--card2); color: var(--text); }
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(79,45,127,0.5), rgba(233,30,140,0.2));
+  color: var(--text);
+  border-color: rgba(79,45,127,0.4);
+}
+.nav-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 0 12px;
+}
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(39,174,96,0.1);
+  border: 1px solid rgba(39,174,96,0.2);
+  border-radius: 10px;
+  font-size: 0.75rem;
+  color: var(--green);
+  font-weight: 600;
+}
+.live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+/* MAIN */
+.main {
+  margin-left: 220px;
+  position: relative;
+  z-index: 1;
+}
+
+/* TOPBAR */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(14,11,22,0.8);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.topbar-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.filter-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 0.78rem;
+  color: var(--text2);
+  cursor: pointer;
+  background: var(--card);
+  transition: all 0.2s;
+}
+.filter-pill:hover { border-color: var(--purple-l); color: var(--text); }
+.filter-pill.active { border-color: var(--pink); color: var(--pink); background: rgba(233,30,140,0.08); }
+.sync-time {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--text3);
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+
+/* CONTENT */
+.content {
+  padding: 28px 32px;
+}
+
+/* SECTION PAGE */
+.page { display: none; animation: fadeUp 0.35s ease; }
+.page.active { display: block; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  color: var(--text);
+}
+.section-sub {
+  font-size: 0.8rem;
+  color: var(--text3);
+  margin-top: 4px;
+}
+
+/* STAT CARDS */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.stat-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.14); }
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 16px 16px 0 0;
+}
+.stat-card.purple::before { background: linear-gradient(90deg, var(--purple), var(--purple-l)); }
+.stat-card.pink::before   { background: linear-gradient(90deg, var(--pink), var(--pink-l)); }
+.stat-card.cyan::before   { background: linear-gradient(90deg, var(--cyan), var(--cyan-l)); }
+.stat-card.gold::before   { background: linear-gradient(90deg, var(--gold), #FFD166); }
+
+.stat-label { font-size: 0.72rem; color: var(--text3); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 10px; }
+.stat-value { font-size: 2rem; font-weight: 700; color: var(--text); line-height: 1; }
+.stat-unit  { font-size: 0.85rem; color: var(--text2); margin-left: 4px; }
+.stat-change {
+  font-size: 0.72rem;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.stat-change.up   { color: var(--green); }
+.stat-change.down { color: var(--red); }
+.stat-icon {
+  position: absolute;
+  right: 18px; top: 18px;
+  font-size: 1.3rem;
+  opacity: 0.3;
+}
+
+/* GRID 2 COL */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.grid-60-40 { display: grid; grid-template-columns: 60fr 40fr; gap: 16px; margin-bottom: 20px; }
+.grid-40-60 { display: grid; grid-template-columns: 40fr 60fr; gap: 16px; margin-bottom: 20px; }
+
+/* CARD */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+}
+.card-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text3);
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-title span { color: var(--text2); font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 0.75rem; }
+
+/* KPI BARS */
+.kpi-item { margin-bottom: 16px; }
+.kpi-item:last-child { margin-bottom: 0; }
+.kpi-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 7px;
+}
+.kpi-name { font-size: 0.8rem; color: var(--text2); }
+.kpi-vals { font-family: 'DM Mono', monospace; font-size: 0.78rem; }
+.kpi-cur  { color: var(--text); font-weight: 600; }
+.kpi-sep  { color: var(--text3); margin: 0 4px; }
+.kpi-tgt  { color: var(--text3); }
+.kpi-pct  { font-size: 0.7rem; margin-left: 6px; padding: 2px 6px; border-radius: 6px; }
+.kpi-track { background: rgba(255,255,255,0.06); border-radius: 100px; height: 6px; overflow: hidden; }
+.kpi-fill  { height: 100%; border-radius: 100px; transition: width 1.2s cubic-bezier(0.16,1,0.3,1); }
+
+/* DONUT CHART */
+.donut-wrap {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.donut-svg { flex-shrink: 0; }
+.donut-legend { display: flex; flex-direction: column; gap: 10px; }
+.legend-item { display: flex; align-items: center; gap: 8px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.legend-name { font-size: 0.78rem; color: var(--text2); }
+.legend-pct  { font-size: 0.78rem; color: var(--text); font-weight: 600; margin-left: auto; font-family: 'DM Mono', monospace; }
+
+/* BAR CHART */
+.bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 120px; }
+.bar-col { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+.bar-fill { width: 100%; border-radius: 6px 6px 0 0; transition: height 1.2s cubic-bezier(0.16,1,0.3,1); min-height: 4px; }
+.bar-label { font-size: 0.62rem; color: var(--text3); text-align: center; }
+.bar-val   { font-size: 0.68rem; color: var(--text2); font-family: 'DM Mono', monospace; }
+
+/* PERSON CARD */
+.person-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+.person-card {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  transition: border-color 0.2s;
+}
+.person-card:hover { border-color: rgba(255,255,255,0.14); }
+.person-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.85rem; color: white;
+  flex-shrink: 0;
+  position: relative;
+}
+.avatar::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid;
+  opacity: 0.4;
+}
+.avatar.pink { background: linear-gradient(135deg, #E91E8C, #FF6BB5); }
+.avatar.pink::after { border-color: var(--pink); }
+.avatar.purple { background: linear-gradient(135deg, #4F2D7F, #7C4DBD); }
+.avatar.purple::after { border-color: var(--purple-l); }
+.avatar.cyan { background: linear-gradient(135deg, #00B4CC, #4DD8E8); }
+.avatar.cyan::after { border-color: var(--cyan); }
+
+.person-name { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+.person-role { font-size: 0.72rem; color: var(--text3); margin-top: 1px; }
+.person-kpis { display: flex; flex-direction: column; gap: 8px; }
+.pkpi { display: flex; justify-content: space-between; font-size: 0.76rem; }
+.pkpi-name { color: var(--text3); }
+.pkpi-val  { color: var(--text); font-family: 'DM Mono', monospace; font-weight: 500; }
+
+/* TIMELINE / ROADMAP */
+.roadmap { position: relative; padding-left: 28px; }
+.roadmap::before {
+  content: '';
+  position: absolute;
+  left: 9px; top: 8px; bottom: 8px;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--purple), var(--pink), var(--cyan));
+  border-radius: 2px;
+}
+.rm-item {
+  position: relative;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: border-color 0.2s;
+}
+.rm-item:hover { border-color: rgba(255,255,255,0.14); }
+.rm-item:last-child { margin-bottom: 0; }
+.rm-dot {
+  position: absolute;
+  left: -22px; top: 18px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+}
+.rm-phase {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+}
+.rm-title { font-size: 0.88rem; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.rm-items { display: flex; flex-wrap: wrap; gap: 6px; }
+.rm-tag {
+  font-size: 0.7rem;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.06);
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
+.rm-status {
+  position: absolute;
+  right: 16px; top: 14px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+.rm-status.done    { background: rgba(39,174,96,0.15); color: var(--green); }
+.rm-status.now     { background: rgba(245,166,35,0.15); color: var(--gold); }
+.rm-status.next    { background: rgba(79,45,127,0.2); color: var(--purple-l); }
+.rm-status.future  { background: rgba(255,255,255,0.05); color: var(--text3); }
+
+/* ACTIVITY TABLE */
+.act-table { width: 100%; border-collapse: collapse; }
+.act-table th {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text3);
+  text-align: left;
+  padding: 0 12px 10px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+}
+.act-table td {
+  font-size: 0.8rem;
+  color: var(--text2);
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.act-table tr:last-child td { border-bottom: none; }
+.act-table tr:hover td { background: rgba(255,255,255,0.02); }
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+.status-pill.ok     { background: rgba(39,174,96,0.12); color: var(--green); }
+.status-pill.warn   { background: rgba(245,166,35,0.12); color: var(--gold); }
+.status-pill.alert  { background: rgba(231,76,60,0.12); color: var(--red); }
+.status-pill.idle   { background: rgba(255,255,255,0.05); color: var(--text3); }
+
+/* GAUGE */
+.gauge-wrap { display: flex; flex-direction: column; align-items: center; }
+.gauge-label { font-size: 0.75rem; color: var(--text3); margin-top: 8px; text-align: center; }
+.gauge-val   { font-size: 1.6rem; font-weight: 700; color: var(--text); margin-top: 2px; }
+
+/* MEETING PANEL */
+.meeting-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+.meeting-card {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+}
+.meeting-person {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.meeting-dept {
+  font-size: 0.7rem;
+  color: var(--text3);
+  margin-bottom: 14px;
+}
+.gap-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 0.78rem;
+  color: var(--text2);
+}
+.gap-item:last-child { border-bottom: none; }
+.gap-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.gap-text { flex: 1; }
+
+/* ═══ EDIT MODE ═══ */
+.edit-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 16px; border: 1px solid rgba(79,45,127,0.5);
+  border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  color: var(--purple-l); cursor: pointer;
+  background: rgba(79,45,127,0.12);
+  transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+}
+.edit-btn:hover { border-color: var(--purple-l); background: rgba(79,45,127,0.22); }
+.edit-btn.saving { border-color: var(--green); color: var(--green); background: rgba(39,174,96,0.12); }
+
+body.edit-mode .ed {
+  outline: 1px dashed rgba(79,45,127,0.65);
+  border-radius: 3px; padding: 1px 4px; margin: -1px -4px;
+  cursor: text; min-width: 16px; display: inline-block;
+}
+body.edit-mode .ed:hover { outline-color: var(--purple-l); background: rgba(79,45,127,0.1); }
+body.edit-mode .ed:focus { outline: 2px solid var(--purple-l); background: rgba(79,45,127,0.15); outline-offset: 0; }
+body.edit-mode .stat-value { cursor: pointer; outline: 1px dashed rgba(79,45,127,0.4); border-radius: 4px; padding: 2px 4px; }
+body.edit-mode .stat-value:hover { outline-color: var(--purple-l); background: rgba(79,45,127,0.08); }
+body.edit-mode .status-pill { cursor: pointer; }
+body.edit-mode .status-pill:hover { opacity: 0.75; transform: scale(1.06); transition: all 0.15s; }
+body.edit-mode .gap-dot { cursor: pointer; transition: transform 0.15s; }
+body.edit-mode .gap-dot:hover { transform: scale(1.5); }
+
+.edit-hint-bar {
+  display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: var(--card2); border: 1px solid rgba(79,45,127,0.5);
+  border-radius: 24px; padding: 9px 22px; font-size: 0.75rem;
+  color: var(--text2); z-index: 999; white-space: nowrap;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+body.edit-mode .edit-hint-bar { display: block; }
+
+/* ═══ MODAL DE SENHA ═══ */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+  z-index: 9000; align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--card); border: 1px solid rgba(79,45,127,0.5);
+  border-radius: 20px; padding: 36px 40px; width: 360px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  animation: fadeUp 0.25s ease;
+}
+.modal-logo {
+  font-family: 'Playfair Display', serif; font-size: 1.3rem;
+  color: var(--text); text-align: center; margin-bottom: 4px;
+}
+.modal-sub {
+  font-size: 0.72rem; color: var(--text3); text-align: center;
+  letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 28px;
+}
+.modal-label {
+  font-size: 0.75rem; color: var(--text3); margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+.modal-input {
+  width: 100%; background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text); font-size: 0.95rem;
+  padding: 12px 16px; font-family: 'DM Mono', monospace;
+  outline: none; transition: border-color 0.2s; margin-bottom: 6px;
+}
+.modal-input:focus { border-color: var(--purple-l); }
+.modal-error {
+  font-size: 0.72rem; color: var(--red); min-height: 18px;
+  margin-bottom: 16px; text-align: center;
+}
+.modal-btn {
+  width: 100%; padding: 12px; border: none;
+  background: linear-gradient(135deg, var(--purple), var(--purple-l));
+  color: #fff; font-size: 0.88rem; font-weight: 600;
+  border-radius: 10px; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: opacity 0.2s; margin-bottom: 10px;
+}
+.modal-btn:hover { opacity: 0.88; }
+.modal-btn.secondary {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--text2); font-weight: 400;
+}
+.modal-divider {
+  height: 1px; background: var(--border); margin: 18px 0;
+}
+.modal-change-wrap { display: none; }
+.modal-change-wrap.visible { display: block; }
+.modal-change-title {
+  font-size: 0.72rem; color: var(--text3); text-align: center;
+  margin-bottom: 14px; text-transform: uppercase; letter-spacing: 1px;
+}
+
+/* ═══ EXTRAS EDIT MODE ═══ */
+body.edit-mode .rm-status { cursor: pointer; }
+body.edit-mode .rm-status:hover { opacity: 0.75; transform: scale(1.04); transition: all 0.15s; }
+body.edit-mode .ck-icon { cursor: pointer !important; }
+body.edit-mode .ck-icon:hover { transform: scale(1.3); transition: transform 0.15s; }
+body.edit-mode .idea-effort { cursor: pointer; }
+body.edit-mode .idea-effort:hover { opacity: 0.75; transform: scale(1.04); transition: all 0.15s; }
+body.edit-mode .bar-val { cursor: text; }
+body.edit-mode .pbi-editable { outline: 1px dashed rgba(79,45,127,0.5); border-radius: 3px; padding: 1px 4px; cursor: text; }
+body.edit-mode .pbi-editable:hover { outline-color: var(--purple-l); background: rgba(79,45,127,0.08); }
+body.edit-mode .rm-tag { cursor: text; }
+body.edit-mode .idea-tag { cursor: text; }
+
+/* Gauge label editable */
+.gauge-label { font-size: 0.75rem; color: var(--text3); text-align: center; margin-top: 6px; }
+
+/* IMPLEMENTATION IDEAS */
+.idea-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+.idea-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.idea-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.14); }
+.idea-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: radial-gradient(ellipse at top left, var(--glow-color, rgba(79,45,127,0.08)), transparent 60%);
+}
+.idea-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--text3);
+  margin-bottom: 8px;
+}
+.idea-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.idea-desc {
+  font-size: 0.78rem;
+  color: var(--text2);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+.idea-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.idea-tag {
+  font-size: 0.68rem;
+  padding: 3px 8px;
+  border-radius: 20px;
+  border: 1px solid;
+}
+.idea-effort {
+  position: absolute;
+  top: 18px; right: 18px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+
+/* MINI LINE CHART */
+.sparkline { display: flex; align-items: flex-end; gap: 3px; height: 40px; }
+.spark-bar { flex: 1; border-radius: 3px 3px 0 0; opacity: 0.7; min-height: 4px; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+/* RESPONSIVE */
+@media (max-width: 1200px) {
+  .stat-grid { grid-template-columns: repeat(2,1fr); }
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+}
+
+/* GESTOR GERAL */
+.gestor-geral-card {
+  margin: 0 12px 16px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(79,45,127,0.35), rgba(233,30,140,0.15));
+  border: 1px solid rgba(79,45,127,0.4);
+  border-radius: 12px;
+}
+.gestor-geral-label {
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 8px;
+}
+.gestor-geral-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.gestor-geral-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple), var(--purple-l));
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.75rem; color: white;
+  flex-shrink: 0;
+}
+.gestor-geral-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+.gestor-geral-role {
+  font-size: 0.65rem;
+  color: var(--text3);
+  margin-top: 2px;
+}
+
+/* DIEGO BADGE TOPBAR */
+.diego-topbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 8px;
+  background: rgba(79,45,127,0.2);
+  border: 1px solid rgba(79,45,127,0.35);
+  border-radius: 20px;
+}
+.diego-topbar-avatar {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cyan), var(--cyan-l));
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.65rem; color: white;
+  flex-shrink: 0;
+}
+.diego-topbar-info {
+  font-size: 0.72rem;
+  color: var(--text2);
+}
+.diego-topbar-info strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* TEAM MANAGEMENT PAGE */
+.team-page-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.team-dept-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.team-dept-card.hub { border-top: 3px solid var(--pink); }
+.team-dept-card.inov { border-top: 3px solid var(--purple-l); }
+.team-dept-card.tec { border-top: 3px solid var(--cyan); }
+
+.team-dept-title {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text3);
+  margin-bottom: 14px;
+}
+.member-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.member-row:last-child { border-bottom: none; }
+.member-info { flex: 1; }
+.member-name-lbl { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+.member-role-lbl { font-size: 0.7rem; color: var(--text3); margin-top: 1px; }
+.member-tasks-lbl { font-size: 0.7rem; color: var(--text2); margin-top: 6px; }
+.task-chip-wrap { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.task-chip {
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  color: var(--text2);
+}
+.shared-chip {
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(245,166,35,0.1);
+  border: 1px solid rgba(245,166,35,0.2);
+  color: var(--gold);
+}
+
+/* TASK TABLE */
+.task-full-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.task-full-table th {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text3);
+  text-align: left;
+  padding: 8px 12px 10px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+}
+.task-full-table td {
+  font-size: 0.79rem;
+  color: var(--text2);
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  vertical-align: middle;
+}
+.task-full-table tr:last-child td { border-bottom: none; }
+.task-full-table tr:hover td { background: rgba(255,255,255,0.02); }
+.assignee-pills { display: flex; flex-wrap: wrap; gap: 4px; }
+.assignee-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.05);
+  color: var(--text2);
+}
+.assignee-pill.hub-pill { background: rgba(233,30,140,0.08); border-color: rgba(233,30,140,0.2); color: var(--pink-l); }
+.assignee-pill.inov-pill { background: rgba(79,45,127,0.12); border-color: rgba(79,45,127,0.3); color: var(--purple-l); }
+.assignee-pill.tec-pill { background: rgba(0,180,204,0.08); border-color: rgba(0,180,204,0.2); color: var(--cyan-l); }
+
+.shared-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(245,166,35,0.1);
+  border: 1px solid rgba(245,166,35,0.2);
+  color: var(--gold);
+}
+.individual-tag {
+  font-size: 0.68rem;
+  color: var(--text3);
+}
+
+/* ADD TASK ROW */
+.add-task-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.add-task-input {
+  flex: 1;
+  min-width: 180px;
+  padding: 8px 12px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+}
+.add-task-input:focus { border-color: var(--purple-l); }
+.add-task-input::placeholder { color: var(--text3); }
+.add-task-select {
+  padding: 8px 12px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+  min-width: 130px;
+}
+.add-task-select:focus { border-color: var(--purple-l); }
+.add-task-btn {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, var(--purple), var(--purple-l));
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.add-task-btn:hover { opacity: 0.85; }
+
+/* EXPORT BAR */
+.export-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: rgba(79,45,127,0.1);
+  border: 1px solid rgba(79,45,127,0.25);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.export-bar-left { font-size: 0.8rem; color: var(--text2); }
+.export-bar-left strong { color: var(--text); display: block; margin-bottom: 2px; }
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  background: linear-gradient(135deg, var(--purple), var(--purple-l));
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: opacity 0.2s;
+}
+.export-btn:hover { opacity: 0.85; }
+.save-notif {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--green);
+  padding: 6px 14px;
+  background: rgba(39,174,96,0.1);
+  border: 1px solid rgba(39,174,96,0.2);
+  border-radius: 20px;
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">CINEA</div>
+    <div class="sub">NED · PUC Minas · 2026</div>
+  </div>
+
+
+  <div class="gestor-geral-card">
+    <div class="gestor-geral-label">Gestor do CINEA</div>
+    <div class="gestor-geral-row">
+      <div class="gestor-geral-avatar">JC</div>
+      <div>
+        <div class="gestor-geral-name">Prof. João Carlos<br>Oliveira Caetano</div>
+        <div class="gestor-geral-role">Gestor Geral · CINEA / NED</div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Visão Geral</div>
+    <div class="nav-item active" onclick="showPage('overview',this)">
+      <div class="nav-dot" style="background:var(--purple-l)"></div>
+      Dashboard Geral
+    </div>
+    <div class="nav-item" onclick="showPage('roadmap',this)">
+      <div class="nav-dot" style="background:var(--gold)"></div>
+      Roadmap BI
+    </div>
+    <div class="nav-item" onclick="showPage('ideas',this)">
+      <div class="nav-dot" style="background:var(--pink)"></div>
+      Ideias de Implantação
+    </div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">Departamentos</div>
+    <div class="nav-item" onclick="showPage('team',this)">
+      <div class="nav-dot" style="background:var(--purple-l)"></div>
+      Equipe & Tarefas
+    </div>
+    <div class="nav-item" onclick="showPage('hub',this)">
+      <div class="nav-dot" style="background:var(--pink)"></div>
+      Hub – Rosimeire
+    </div>
+    <div class="nav-item" onclick="showPage('inov',this)">
+      <div class="nav-dot" style="background:var(--purple-l)"></div>
+      Inovação – Cláudia
+    </div>
+    <div class="nav-item" onclick="showPage('tec',this)">
+      <div class="nav-dot" style="background:var(--cyan)"></div>
+      Tecnologias – Jefferson
+    </div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">Operacional</div>
+    <div class="nav-item" onclick="showPage('meeting',this)">
+      <div class="nav-dot" style="background:var(--green)"></div>
+      Reunião Semanal
+    </div>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      Dados simulados — OneDrive
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="page-title">Dashboard Geral</div>
+    <div class="topbar-right">
+      <div class="filter-pill active">2026/1</div>
+      <div class="filter-pill">2025/2</div>
+      <div class="filter-pill">2025/1</div>
+      <button id="edit-mode-btn" class="edit-btn" onclick="toggleEditMode()">✏️ Editar</button>
+      <div class="diego-topbar">
+        <div class="diego-topbar-avatar">DG</div>
+        <div class="diego-topbar-info"><strong>Diego</strong> · Dashboard</div>
+      </div>
+      <div class="sync-time" id="sync-time">Última sinc: --:--</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ═══════════════════════════════ OVERVIEW ═══════════════════════════════ -->
+    <div class="page active" id="page-overview">
+      <div style="margin-bottom:20px">
+        <div class="section-sub">Consolidado dos 3 departamentos · 1º semestre 2026</div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card purple">
+          <div class="stat-icon">👥</div>
+          <div class="stat-label">Total de Participantes</div>
+          <div class="stat-value">471<span class="stat-unit">pessoas</span></div>
+          <div class="stat-change up">↑ 8.5% vs semestre anterior</div>
+        </div>
+        <div class="stat-card pink">
+          <div class="stat-icon">📚</div>
+          <div class="stat-label">UDAs em Produção</div>
+          <div class="stat-value">362<span class="stat-unit">UDAs</span></div>
+          <div class="stat-change up">↑ 281 no 1º/2026</div>
+        </div>
+        <div class="stat-card cyan">
+          <div class="stat-icon">⭐</div>
+          <div class="stat-label">Satisfação Geral</div>
+          <div class="stat-value">95<span class="stat-unit">%</span></div>
+          <div class="stat-change up">↑ vs mês anterior</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-label">Formações Realizadas</div>
+          <div class="stat-value">37<span class="stat-unit">formações</span></div>
+          <div class="stat-change up">↑ 1º/2026 em andamento</div>
+        </div>
+      </div>
+
+      <div class="grid-60-40">
+        <!-- PARTICIPANTES POR INSTITUTO -->
+        <div class="card">
+          <div class="card-title">Participantes por Instituto <span>Formações para Novo Plano de Ensino 2025</span></div>
+          <div style="display:flex;gap:24px;align-items:flex-end">
+            <div style="flex:1">
+              <div style="font-size:0.72rem;color:var(--text3);margin-bottom:8px">Presencial</div>
+              <div class="bar-chart" id="bc-presencial"></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;padding:0 0 22px">
+              <div style="font-size:0.75rem;font-weight:600;color:var(--text)">Total</div>
+              <div style="font-size:1.8rem;font-weight:700;color:var(--pink)">434</div>
+              <div style="font-size:0.72rem;color:var(--text3)">77.4% presencial</div>
+              <div style="font-size:0.72rem;color:var(--text3)">22.6% remoto</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PARTICIPAÇÃO MODAL -->
+        <div class="card">
+          <div class="card-title">Modalidade de Participação</div>
+          <div class="donut-wrap" style="justify-content:center;padding:8px 0">
+            <svg class="donut-svg" width="110" height="110" viewBox="0 0 110 110">
+              <circle cx="55" cy="55" r="40" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="18"/>
+              <circle cx="55" cy="55" r="40" fill="none" stroke="var(--pink)" stroke-width="18"
+                stroke-dasharray="194 251" stroke-dashoffset="63" stroke-linecap="round"
+                style="transition:stroke-dasharray 1.2s ease"/>
+              <circle cx="55" cy="55" r="40" fill="none" stroke="var(--cyan)" stroke-width="18"
+                stroke-dasharray="57 251" stroke-dashoffset="-131" stroke-linecap="round"/>
+              <text x="55" y="50" text-anchor="middle" fill="var(--text)" font-size="13" font-weight="700" font-family="DM Sans">434</text>
+              <text x="55" y="64" text-anchor="middle" fill="var(--text3)" font-size="9" font-family="DM Sans">total</text>
+            </svg>
+            <div class="donut-legend">
+              <div class="legend-item">
+                <div class="legend-dot" style="background:var(--pink)"></div>
+                <div class="legend-name">Presencial</div>
+                <div class="legend-pct">336</div>
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background:var(--cyan)"></div>
+                <div class="legend-name">Remoto</div>
+                <div class="legend-pct">98</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PESSOAS CHAVE -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-title">Responsáveis por Departamento</div>
+        <div class="person-cards">
+          <div class="person-card">
+            <div class="person-header">
+              <div class="avatar pink">RO</div>
+              <div>
+                <div class="person-name">Rosimeire</div>
+                <div class="person-role">Hub de Integração e Relacionamento</div>
+              </div>
+            </div>
+            <div class="person-kpis">
+              <div class="pkpi"><span class="pkpi-name">Meta atendimentos/ano</span><span class="pkpi-val" data-sync="hub_t0">200</span></div>
+              <div class="pkpi"><span class="pkpi-name">Cursos atendidos</span><span class="pkpi-val" data-sync="hub_t1">80%</span></div>
+              <div class="pkpi"><span class="pkpi-name">Satisfação meta</span><span class="pkpi-val" data-sync="hub_t3">≥ 85%</span></div>
+            </div>
+          </div>
+          <div class="person-card">
+            <div class="person-header">
+              <div class="avatar purple">CL</div>
+              <div>
+                <div class="person-name">Cláudia</div>
+                <div class="person-role">Inovação Pedagógica e Formação Continuada</div>
+              </div>
+            </div>
+            <div class="person-kpis">
+              <div class="pkpi"><span class="pkpi-name">Formações/ano</span><span class="pkpi-val" data-sync="inov_t0">20</span></div>
+              <div class="pkpi"><span class="pkpi-name">Professores meta</span><span class="pkpi-val" data-sync="inov_t1">500</span></div>
+              <div class="pkpi"><span class="pkpi-name">Satisfação meta</span><span class="pkpi-val" data-sync="inov_t3">≥ 90%</span></div>
+            </div>
+          </div>
+          <div class="person-card">
+            <div class="person-header">
+              <div class="avatar cyan">JE</div>
+              <div>
+                <div class="person-name">Jefferson</div>
+                <div class="person-role">Tecnologias e Experiências de Aprendizagem</div>
+              </div>
+            </div>
+            <div class="person-kpis">
+              <div class="pkpi"><span class="pkpi-name">Docentes/ano</span><span class="pkpi-val" data-sync="tec_t0">300</span></div>
+              <div class="pkpi"><span class="pkpi-name">Tutores/ano</span><span class="pkpi-val" data-sync="tec_t2">100</span></div>
+              <div class="pkpi"><span class="pkpi-name">Acessos Guia</span><span class="pkpi-val" data-sync="tec_t3">1.000</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- POWER BI STATUS -->
+      <div class="card pbi-card" style="margin-bottom:20px">
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+          <span>Power BI <span id="pbi-status-label" style="font-size:0.72rem;font-weight:500;padding:3px 10px;border-radius:20px;background:rgba(231,76,60,0.12);color:var(--red);margin-left:8px">⬤ Não conectado</span></span>
+          <div style="display:flex;gap:8px">
+            <button onclick="pbiRegisterSync()" style="font-size:0.72rem;padding:4px 12px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif">🔄 Registrar sinc.</button>
+            <button onclick="pbiToggleStatus()" style="font-size:0.72rem;padding:4px 12px;border:1px solid rgba(79,45,127,0.4);border-radius:8px;background:rgba(79,45,127,0.1);color:var(--purple-l);cursor:pointer;font-family:'DM Sans',sans-serif">⚡ Alternar status</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:12px">
+          <div>
+            <div style="font-size:0.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Última sincronização</div>
+            <div style="font-size:0.85rem;font-weight:500;color:var(--text)" id="pbi-last-sync">—</div>
+          </div>
+          <div>
+            <div style="font-size:0.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Report ID</div>
+            <div style="font-size:0.75rem;color:var(--text2);font-family:'DM Mono',monospace" id="pbi-report-id" class="pbi-editable">—</div>
+          </div>
+          <div>
+            <div style="font-size:0.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Workspace ID</div>
+            <div style="font-size:0.75rem;color:var(--text2);font-family:'DM Mono',monospace" id="pbi-workspace-id" class="pbi-editable">—</div>
+          </div>
+        </div>
+        <div id="pbi-embed-wrap" style="display:none;margin-top:16px;border-radius:12px;overflow:hidden;border:1px solid var(--border)">
+          <iframe id="pbi-iframe" src="" title="CINEA Power BI" width="100%" height="450" frameborder="0" allowfullscreen></iframe>
+        </div>
+      </div>
+
+      <!-- STATUS UDAs -->
+      <div class="card">
+        <div class="card-title">Status de Produção UDA <span>Por período</span></div>
+        <table class="act-table">
+          <thead>
+            <tr>
+              <th>Período</th>
+              <th>Status</th>
+              <th>Quantidade</th>
+              <th>Progresso</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>2025</td><td><span class="status-pill warn">● Em produção</span></td><td>8</td><td><div class="kpi-track" style="width:120px"><div class="kpi-fill" style="width:44%;background:var(--gold)"></div></div></td></tr>
+            <tr><td>2025</td><td><span class="status-pill ok">● Finalizadas</span></td><td>10</td><td><div class="kpi-track" style="width:120px"><div class="kpi-fill" style="width:100%;background:var(--green)"></div></div></td></tr>
+            <tr><td>1º/2026</td><td><span class="status-pill warn">● Em produção</span></td><td>281</td><td><div class="kpi-track" style="width:120px"><div class="kpi-fill" style="width:70%;background:var(--gold)"></div></div></td></tr>
+            <tr><td>1º/2026</td><td><span class="status-pill ok">● Finalizadas</span></td><td>41</td><td><div class="kpi-track" style="width:120px"><div class="kpi-fill" style="width:100%;background:var(--green)"></div></div></td></tr>
+            <tr><td>2º/2026</td><td><span class="status-pill warn">● Em produção</span></td><td>81</td><td><div class="kpi-track" style="width:120px"><div class="kpi-fill" style="width:40%;background:var(--gold)"></div></div></td></tr>
+            <tr><td>2º/2026</td><td><span class="status-pill idle">● Não iniciadas</span></td><td>61</td><td><div class="kpi-track" style="width:120px"><div class="kpi-fill" style="width:0%;background:var(--text3)"></div></div></td></tr>
+            <tr><td>2º/2026</td><td><span class="status-pill idle">● Finalizadas</span></td><td>0</td><td><div class="kpi-track" style="width:120px"><div class="kpi-fill" style="width:0%;background:var(--green)"></div></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════ ROADMAP BI ═══════════════════════════════ -->
+    <div class="page" id="page-roadmap">
+      <div style="margin-bottom:20px">
+        <div class="section-sub">Power BI + Excel OneDrive · Planejamento de implementação</div>
+      </div>
+
+      <div class="grid-60-40">
+        <div class="card">
+          <div class="card-title">Fases de Implantação</div>
+          <div class="roadmap">
+            <div class="rm-item">
+              <div class="rm-dot" style="background:var(--green)"></div>
+              <div class="rm-status done">✓ Concluído</div>
+              <div class="rm-phase" style="color:var(--green)">Fase 1 · Diagnóstico</div>
+              <div class="rm-title">Levantamento de requisitos e estruturação dos setores</div>
+              <div class="rm-items">
+                <span class="rm-tag">Mapeamento de KPIs</span>
+                <span class="rm-tag">Definição de responsáveis</span>
+                <span class="rm-tag">Estrutura departamental</span>
+              </div>
+            </div>
+            <div class="rm-item">
+              <div class="rm-dot" style="background:var(--green)"></div>
+              <div class="rm-status done">✓ Concluído</div>
+              <div class="rm-phase" style="color:var(--green)">Fase 2 · Modelagem</div>
+              <div class="rm-title">Criação das planilhas Excel por departamento</div>
+              <div class="rm-items">
+                <span class="rm-tag">3 planilhas .xlsx</span>
+                <span class="rm-tag">Abas KPIs / Atividades / Reunião</span>
+                <span class="rm-tag">Fórmulas automáticas</span>
+              </div>
+            </div>
+            <div class="rm-item">
+              <div class="rm-dot" style="background:var(--gold)"></div>
+              <div class="rm-status now">▶ Agora</div>
+              <div class="rm-phase" style="color:var(--gold)">Fase 3 · Infraestrutura</div>
+              <div class="rm-title">Upload das planilhas no OneDrive institucional</div>
+              <div class="rm-items">
+                <span class="rm-tag">Upload por cada responsável</span>
+                <span class="rm-tag">Compartilhamento @pucminas.br</span>
+                <span class="rm-tag">Permissões de edição</span>
+              </div>
+            </div>
+            <div class="rm-item">
+              <div class="rm-dot" style="background:var(--purple-l)"></div>
+              <div class="rm-status next">→ Próximo</div>
+              <div class="rm-phase" style="color:var(--purple-l)">Fase 4 · Conexão</div>
+              <div class="rm-title">Conectar Power BI Desktop ao OneDrive</div>
+              <div class="rm-items">
+                <span class="rm-tag">Power BI Desktop</span>
+                <span class="rm-tag">OneDrive for Business</span>
+                <span class="rm-tag">Autenticação M365</span>
+              </div>
+            </div>
+            <div class="rm-item">
+              <div class="rm-dot" style="background:var(--text3)"></div>
+              <div class="rm-status future">Em breve</div>
+              <div class="rm-phase" style="color:var(--text3)">Fase 5 · Dashboard</div>
+              <div class="rm-title">Construção dos visuais e publicação no Power BI Service</div>
+              <div class="rm-items">
+                <span class="rm-tag">Visuais KPI</span>
+                <span class="rm-tag">Gauge / Medidor</span>
+                <span class="rm-tag">Tabelas dinâmicas</span>
+                <span class="rm-tag">Filtros por setor</span>
+              </div>
+            </div>
+            <div class="rm-item">
+              <div class="rm-dot" style="background:var(--text3)"></div>
+              <div class="rm-status future">Em breve</div>
+              <div class="rm-phase" style="color:var(--text3)">Fase 6 · Rotina</div>
+              <div class="rm-title">Treinamento da equipe e implantação da rotina semanal</div>
+              <div class="rm-items">
+                <span class="rm-tag">Treinamento Rosimeire</span>
+                <span class="rm-tag">Treinamento Cláudia</span>
+                <span class="rm-tag">Treinamento Jefferson</span>
+                <span class="rm-tag">Reunião semanal com painel</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="card">
+            <div class="card-title">Progresso Geral do Projeto</div>
+            <div class="gauge-wrap">
+              <svg width="160" height="90" viewBox="0 0 160 90">
+                <path d="M20,80 A60,60 0 0,1 140,80" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="16" stroke-linecap="round"/>
+                <path d="M20,80 A60,60 0 0,1 140,80" fill="none" stroke="url(#ggrad)" stroke-width="16" stroke-linecap="round"
+                  stroke-dasharray="188" stroke-dashoffset="94" id="gauge-arc"/>
+                <defs>
+                  <linearGradient id="ggrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="var(--purple)"/>
+                    <stop offset="100%" stop-color="var(--pink)"/>
+                  </linearGradient>
+                </defs>
+                <text x="80" y="72" text-anchor="middle" fill="var(--text)" font-size="22" font-weight="700" font-family="DM Sans">33%</text>
+              </svg>
+              <div class="gauge-label">2 de 6 fases concluídas</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Checklist de Pré-Requisitos</div>
+            <div style="display:flex;flex-direction:column;gap:10px" id="checklist-wrap">
+              <div class="ck-item" data-ck-state="done" style="display:flex;align-items:center;gap:10px;font-size:0.8rem">
+                <span class="ck-icon" style="color:var(--green);font-size:1rem;flex-shrink:0;cursor:default">✓</span>
+                <span class="ck-text" style="color:var(--text2)">Conta M365 institucional</span>
+              </div>
+              <div class="ck-item" data-ck-state="done" style="display:flex;align-items:center;gap:10px;font-size:0.8rem">
+                <span class="ck-icon" style="color:var(--green);font-size:1rem;flex-shrink:0;cursor:default">✓</span>
+                <span class="ck-text" style="color:var(--text2)">Planilhas Excel criadas</span>
+              </div>
+              <div class="ck-item" data-ck-state="pending" style="display:flex;align-items:center;gap:10px;font-size:0.8rem">
+                <span class="ck-icon" style="color:var(--gold);font-size:1rem;flex-shrink:0;cursor:default">○</span>
+                <span class="ck-text" style="color:var(--text2)">OneDrive configurado</span>
+              </div>
+              <div class="ck-item" data-ck-state="pending" style="display:flex;align-items:center;gap:10px;font-size:0.8rem">
+                <span class="ck-icon" style="color:var(--gold);font-size:1rem;flex-shrink:0;cursor:default">○</span>
+                <span class="ck-text" style="color:var(--text2)">Licença Power BI Pro</span>
+              </div>
+              <div class="ck-item" data-ck-state="open" style="display:flex;align-items:center;gap:10px;font-size:0.8rem">
+                <span class="ck-icon" style="color:var(--text3);font-size:1rem;flex-shrink:0;cursor:default">○</span>
+                <span class="ck-text" style="color:var(--text3)">Power BI Desktop instalado</span>
+              </div>
+              <div class="ck-item" data-ck-state="open" style="display:flex;align-items:center;gap:10px;font-size:0.8rem">
+                <span class="ck-icon" style="color:var(--text3);font-size:1rem;flex-shrink:0;cursor:default">○</span>
+                <span class="ck-text" style="color:var(--text3)">Treinamento da equipe</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Responsáveis por Fase</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;justify-content:space-between;font-size:0.78rem">
+                <span style="color:var(--text3)">Upload OneDrive</span>
+                <span style="color:var(--text2)">Rosimeire + Cláudia + Jefferson</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:0.78rem">
+                <span style="color:var(--text3)">Conexão Power BI</span>
+                <span style="color:var(--text2)">Gestor do Dashboard</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:0.78rem">
+                <span style="color:var(--text3)">Publicação Service</span>
+                <span style="color:var(--text2)">Gestor do Dashboard</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:0.78rem">
+                <span style="color:var(--text3)">Atualização semanal</span>
+                <span style="color:var(--text2)">Cada responsável</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════ IDEAS ═══════════════════════════════ -->
+    <div class="page" id="page-ideas">
+      <div style="margin-bottom:20px">
+        <div class="section-sub">Estratégias para evoluir o ecossistema de dados do CINEA</div>
+      </div>
+
+      <div class="idea-grid">
+        <div class="idea-card" style="--glow-color:rgba(233,30,140,0.1)">
+          <div class="idea-effort" style="background:rgba(39,174,96,0.15);color:var(--green)">Baixo esforço</div>
+          <div class="idea-num">01 —</div>
+          <div class="idea-title">Forms automáticos de pesquisa de satisfação</div>
+          <div class="idea-desc">Substituir coleta manual por Microsoft Forms enviado automaticamente após cada formação. Os dados chegam direto numa planilha Excel no OneDrive e alimentam o Power BI sem intervenção humana.</div>
+          <div class="idea-tags">
+            <span class="idea-tag" style="border-color:rgba(233,30,140,0.3);color:var(--pink);background:rgba(233,30,140,0.08)">Microsoft Forms</span>
+            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">OneDrive</span>
+            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Automático</span>
+          </div>
+        </div>
+
+        <div class="idea-card" style="--glow-color:rgba(79,45,127,0.1)">
+          <div class="idea-effort" style="background:rgba(245,166,35,0.15);color:var(--gold)">Médio esforço</div>
+          <div class="idea-num">02 —</div>
+          <div class="idea-title">Power Automate para alertas de gargalos</div>
+          <div class="idea-desc">Criar fluxos no Power Automate que detectam quando uma atividade fica "Pendente" por mais de 7 dias ou quando uma meta está abaixo de 60% e disparam um e-mail automático para o responsável.</div>
+          <div class="idea-tags">
+            <span class="idea-tag" style="border-color:rgba(79,45,127,0.4);color:var(--purple-l);background:rgba(79,45,127,0.1)">Power Automate</span>
+            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Alertas por e-mail</span>
+            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Monitoramento</span>
+          </div>
+        </div>
+
+        <div class="idea-card" style="--glow-color:rgba(0,180,204,0.08)">
+          <div class="idea-effort" style="background:rgba(245,166,35,0.15);color:var(--gold)">Médio esforço</div>
+          <div class="idea-num">03 —</div>
+          <div class="idea-title">Dashboard no Teams para as reuniões semanais</div>
+          <div class="idea-desc">Incorporar o relatório do Power BI como uma aba fixa no canal do CINEA no Microsoft Teams. Durante a reunião semanal, todos acessam os dados em tempo real diretamente no Teams, sem precisar abrir outro sistema.</div>
+          <div class="idea-tags">
+            <span class="idea-tag" style="border-color:rgba(0,180,204,0.3);color:var(--cyan);background:rgba(0,180,204,0.08)">Microsoft Teams</span>
+            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Integração nativa</span>
+            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Zero cliques extras</span>
+          </div>
+        </div>
+
+        <div class="idea-card" style="--glow-color:rgba(245,166,35,0.08)">
+          <div class="idea-effort" style="background:rgba(39,174,96,0.15);color:var(--green)">Baixo esforço</div>
+          <div class="idea-num">04 —</div>
+          <div class="idea-title">Template de ata digital integrado às planilhas</div>
+          <div class="idea-desc">Criar uma aba "Atas" nas planilhas com campos padronizados: data, gap relatado, decisão, prazo, responsável e status. O Power BI consolida todas as atas em uma visão histórica de gargalos resolvidos vs. pendentes.</div>
+          <div class="idea-tags">
+            <span class="idea-tag" style="border-color:rgba(245,166,35,0.3);color:var(--gold);background:rgba(245,166,35,0.08)">Excel</span>
+            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Histórico</span>
+            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Rastreabilidade</span>
+          </div>
+        </div>
+
+        <div class="idea-card" style="--glow-color:rgba(233,30,140,0.08)">
+          <div class="idea-effort" style="background:rgba(231,76,60,0.15);color:var(--red)">Alto esforço</div>
+          <div class="idea-num">05 —</div>
+          <div class="idea-title">Painel de acompanhamento de UDAs por autor</div>
+          <div class="idea-desc">Criar uma planilha mestra de UDAs com colunas: autor, instituto, status, data de entrega prevista e real. O Power BI gera um mapa de calor por instituto e identifica automaticamente autores com UDAs atrasadas.</div>
+          <div class="idea-tags">
+            <span class="idea-tag" style="border-color:rgba(233,30,140,0.3);color:var(--pink);background:rgba(233,30,140,0.08)">Mapa de calor</span>
+            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Atrasos automáticos</span>
+            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Por instituto</span>
+          </div>
+        </div>
+
+        <div class="idea-card" style="--glow-color:rgba(79,45,127,0.1)">
+          <div class="idea-effort" style="background:rgba(231,76,60,0.15);color:var(--red)">Alto esforço</div>
+          <div class="idea-num">06 —</div>
+          <div class="idea-title">Score de engajamento docente por instituto</div>
+          <div class="idea-desc">Cruzar dados de participação nas formações, produção de UDAs e uso do Canvas AVA para gerar um "score de engajamento" por docente e por instituto. O Power BI exibe um ranking e identifica onde focar os esforços do CINEA.</div>
+          <div class="idea-tags">
+            <span class="idea-tag" style="border-color:rgba(79,45,127,0.4);color:var(--purple-l);background:rgba(79,45,127,0.1)">Score composto</span>
+            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Ranking institutos</span>
+            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Canvas API</span>
+          </div>
+        </div>
+
+        <div class="idea-card" style="--glow-color:rgba(0,180,204,0.08)">
+          <div class="idea-effort" style="background:rgba(39,174,96,0.15);color:var(--green)">Baixo esforço</div>
+          <div class="idea-num">07 —</div>
+          <div class="idea-title">Relatório mensal automático em PDF</div>
+          <div class="idea-desc">Configurar o Power BI para gerar e enviar por e-mail um relatório PDF consolidado todo início de mês para a equipe CINEA e para a PROGRAD, com os principais indicadores do mês anterior e comparativo histórico.</div>
+          <div class="idea-tags">
+            <span class="idea-tag" style="border-color:rgba(0,180,204,0.3);color:var(--cyan);background:rgba(0,180,204,0.08)">Power BI Service</span>
+            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">E-mail automático</span>
+            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Para PROGRAD</span>
+          </div>
+        </div>
+
+        <div class="idea-card" style="--glow-color:rgba(245,166,35,0.08)">
+          <div class="idea-effort" style="background:rgba(245,166,35,0.15);color:var(--gold)">Médio esforço</div>
+          <div class="idea-num">08 —</div>
+          <div class="idea-title">Página pública de transparência CINEA</div>
+          <div class="idea-desc">Publicar uma versão simplificada e pública do dashboard (sem dados sensíveis) no site da PUC Minas ou no Guia do Professor, mostrando indicadores de formação e satisfação para toda a comunidade acadêmica.</div>
+          <div class="idea-tags">
+            <span class="idea-tag" style="border-color:rgba(245,166,35,0.3);color:var(--gold);background:rgba(245,166,35,0.08)">Publicação web</span>
+            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Transparência</span>
+            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Comunidade</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════ HUB ═══════════════════════════════ -->
+    <div class="page" id="page-hub">
+      <div class="section-header" style="margin-bottom:20px">
+        <div class="section-sub" style="color:var(--pink)">Responsável: Rosimeire</div>
+        <div class="avatar pink">RO</div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card pink"><div class="stat-icon">📋</div><div class="stat-label">Meta Atendimentos</div><div class="stat-value">200</div><div class="stat-change" style="color:var(--text3)">Meta anual</div></div>
+        <div class="stat-card pink"><div class="stat-icon">🏛️</div><div class="stat-label">Cursos a Atender</div><div class="stat-value">80<span class="stat-unit">%</span></div><div class="stat-change" style="color:var(--text3)">Do total de cursos</div></div>
+        <div class="stat-card pink"><div class="stat-icon">⏱️</div><div class="stat-label">Tempo de Resposta</div><div class="stat-value">5<span class="stat-unit">dias</span></div><div class="stat-change" style="color:var(--text3)">Máximo úteis</div></div>
+        <div class="stat-card pink"><div class="stat-icon">⭐</div><div class="stat-label">Satisfação Meta</div><div class="stat-value">85<span class="stat-unit">%</span></div><div class="stat-change" style="color:var(--text3)">Mínimo aceitável</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">KPIs do Setor</div>
+          <div class="kpi-item">
+            <div class="kpi-top"><span class="kpi-name">Atendimentos institucionais/ano</span><div class="kpi-vals"><span class="kpi-cur">0</span><span class="kpi-sep">/</span><span class="kpi-tgt" data-sync="hub_t0">200</span><span class="kpi-pct" style="background:rgba(231,76,60,0.1);color:var(--red)">0%</span></div></div>
+            <div class="kpi-track"><div class="kpi-fill" style="width:0%;background:linear-gradient(90deg,var(--pink),var(--pink-l))"></div></div>
+          </div>
+          <div class="kpi-item">
+            <div class="kpi-top"><span class="kpi-name">Cursos atendidos ao menos 1x</span><div class="kpi-vals"><span class="kpi-cur">0</span><span class="kpi-sep">/</span><span class="kpi-tgt" data-sync="hub_t1">80%</span><span class="kpi-pct" style="background:rgba(231,76,60,0.1);color:var(--red)">0%</span></div></div>
+            <div class="kpi-track"><div class="kpi-fill" style="width:0%;background:linear-gradient(90deg,var(--pink),var(--pink-l))"></div></div>
+          </div>
+          <div class="kpi-item">
+            <div class="kpi-top"><span class="kpi-name">Comunicados institucionais/ano</span><div class="kpi-vals"><span class="kpi-cur">0</span><span class="kpi-sep">/</span><span class="kpi-tgt">12</span><span class="kpi-pct" style="background:rgba(231,76,60,0.1);color:var(--red)">0%</span></div></div>
+            <div class="kpi-track"><div class="kpi-fill" style="width:0%;background:linear-gradient(90deg,var(--pink),var(--pink-l))"></div></div>
+          </div>
+          <div class="kpi-item">
+            <div class="kpi-top"><span class="kpi-name">Satisfação dos cursos atendidos</span><div class="kpi-vals"><span class="kpi-cur">0</span><span class="kpi-sep">/</span><span class="kpi-tgt" data-sync="hub_t3">85%</span><span class="kpi-pct" style="background:rgba(231,76,60,0.1);color:var(--red)">0%</span></div></div>
+            <div class="kpi-track"><div class="kpi-fill" style="width:0%;background:linear-gradient(90deg,var(--pink),var(--pink-l))"></div></div>
+          </div>
+          <div style="margin-top:14px;padding:10px 12px;background:rgba(233,30,140,0.06);border:1px solid rgba(233,30,140,0.15);border-radius:10px;font-size:0.75rem;color:var(--text3)">
+            ℹ️ Dados serão preenchidos por Rosimeire via planilha no OneDrive
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Atividades do Setor</div>
+          <table class="act-table">
+            <thead><tr><th>Atividade</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Atendimento a coordenações e NDEs</td><td><span class="status-pill warn">● Andamento</span></td></tr>
+              <tr><td>Gestão de demandas pedagógicas ao CINEA</td><td><span class="status-pill warn">● Andamento</span></td></tr>
+              <tr><td>Fluxo CINEA ↔ COED/CEAD</td><td><span class="status-pill warn">● Andamento</span></td></tr>
+              <tr><td>Divulgação institucional das ações</td><td><span class="status-pill idle">● Pendente</span></td></tr>
+              <tr><td>Relatórios institucionais</td><td><span class="status-pill idle">● Pendente</span></td></tr>
+              <tr><td>Associação de UDAs no SGA</td><td><span class="status-pill warn">● Andamento</span></td></tr>
+              <tr><td>Organização de indicadores do setor</td><td><span class="status-pill warn">● Andamento</span></td></tr>
+              <tr><td>Articulação MEC, INEP, SEMESP, ABMES</td><td><span class="status-pill idle">● Pendente</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════ INOVAÇÃO ═══════════════════════════════ -->
+    <div class="page" id="page-inov">
+      <div class="section-header" style="margin-bottom:20px">
+        <div class="section-sub" style="color:var(--purple-l)">Responsável: Cláudia</div>
+        <div class="avatar purple">CL</div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card purple"><div class="stat-icon">🎓</div><div class="stat-label">Formações/Ano</div><div class="stat-value">20</div><div class="stat-change" style="color:var(--text3)">Meta anual</div></div>
+        <div class="stat-card purple"><div class="stat-icon">👩‍🏫</div><div class="stat-label">Professores Meta</div><div class="stat-value">500</div><div class="stat-change" style="color:var(--text3)">Participantes</div></div>
+        <div class="stat-card purple"><div class="stat-icon">📖</div><div class="stat-label">Cursos Assessorados</div><div class="stat-value">30</div><div class="stat-change" style="color:var(--text3)">Meta anual</div></div>
+        <div class="stat-card purple"><div class="stat-icon">⭐</div><div class="stat-label">Satisfação Meta</div><div class="stat-value">90<span class="stat-unit">%</span></div><div class="stat-change" style="color:var(--text3)">Mínimo</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">KPIs do Setor</div>
+          <div class="kpi-item">
+            <div class="kpi-top"><span class="kpi-name">Formações pedagógicas realizadas</span><div class="kpi-vals"><span class="kpi-cur">0</span><span class="kpi-sep">/</span><span class="kpi-tgt" data-sync="inov_t0">20</span><span class="kpi-pct" style="background:rgba(231,76,60,0.1);color:var(--red)">0%</span></div></div>
+            <div class="kpi-track"><div class="kpi-fill" style="width:0%;background:linear-gradient(90deg,var(--purple),var(--purple-l))"></div></div>
+          </div>
+          <div class="kpi-item">
+            <div class="kpi-top"><span class="kpi-name">Professores participantes</span><div class="kpi-vals"><span class="kpi-cur">0</span><span class="kpi-sep">/</span><span class="kpi-tgt" data-sync="inov_t1">500</span><span class="kpi-pct" style="background:rgba(231,76,60,0.1);color:var(--red)">0%</span></div></div>
+            <div class="kpi-track"><div class="kpi-fill" style="width:0%;background:linear-gradient(90deg,var(--purple),var(--purple-l))"></div></div>
+          </div>
+          <div class="kpi-item">
+            <div class="kpi-top"><span class="kpi-name">Cursos assessorados pedagogicamente</span><div class="kpi-vals"><span class="kpi-cur">0</span><span class="kpi-sep">/</span><span class="kpi-tgt">30</span><span class="kpi-pct" style="background:rgba(231,76,60,0.1);color:var(--red)">0%</span></div></div>
+            <div class="kpi-track"><div class="kpi-fill" style="width:0%;background:linear-gradient(90deg,var(--purple),var(--purple-l))"></div></div>
+          </div>
+          <div class="kpi-item">
+            <div class="kpi-top"><span class="kpi-name">Materiais pedagógicos produzidos</span><div class="kpi-vals"><span class="kpi-cur">0</span><span class="kpi-sep">/</span><span class="kpi-tgt">10</span><span class="kpi-pct" style="background:rgba(231,76,60,0.1);color:var(--red)">0%</span></div></div>
+            <div class="kpi-track"><div class="kpi-fill" style="width:0%;background:linear-gradient(90deg,var(--purple),var(--purple-l))"></div></div>
+          </div>
+          <div style="margin-top:14px;padding:10px 12px;background:rgba(79,45,127,0.1);border:1px solid rgba(79,45,127,0.25);border-radius:10px;font-size:0.75rem;color:var(--text3)">
+            ℹ️ Dados serão preenchidos por Cláudia via planilha no OneDrive
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Atividades do Setor</div>
+          <table class="act-table">
+            <thead><tr><th>Atividade</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Programa Permanente de Formação Docente</td><td><span class="status-pill warn">● Andamento</span></td></tr>
+              <tr><td>Oficinas e workshops pedagógicos</td><td><span class="status-pill warn">● Andamento</span></td></tr>
+              <tr><td>Meetups de boas práticas docentes</td><td><span class="status-pill idle">● Pendente</span></td></tr>
+              <tr><td>Assessoria pedagógica a cursos e NDEs</td><td><span class="status-pill warn">● Andamento</span></td></tr>
+              <tr><td>Apoio à atualização de PPCs</td><td><span class="status-pill warn">● Andamento</span></td></tr>
+              <tr><td>Planejamento pedagógico de UDAs</td><td><span class="status-pill warn">● Andamento</span></td></tr>
+              <tr><td>Cadastro de UDAs no SGA</td><td><span class="status-pill warn">● Andamento</span></td></tr>
+              <tr><td>Materiais pedagógicos – Guia do Professor</td><td><span class="status-pill warn">● Andamento</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════ TECNOLOGIAS ═══════════════════════════════ -->
+    <div class="page" id="page-tec">
+      <div class="section-header" style="margin-bottom:20px">
+        <div class="section-sub" style="color:var(--cyan)">Responsável: Jefferson</div>
+        <div class="avatar cyan">JE</div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card cyan"><div class="stat-icon">💻</div><div class="stat-label">Docentes/Ano</div><div class="stat-value">300</div><div class="stat-change" style="color:var(--text3)">Meta anual</div></div>
+        <div class="stat-card cyan"><div class="stat-icon">🔬</div><div class="stat-label">Tecnologias Testadas</div><div class="stat-value">5</div><div class="stat-change" style="color:var(--text3)">Meta anual</div></div>
+        <div class="stat-card cyan"><div class="stat-icon">🧑‍💼</div><div class="stat-label">Tutores Formados</div><div class="stat-value">100</div><div class="stat-change" style="color:var(--text3)">Meta anual</div></div>
+        <div class="stat-card cyan"><div class="stat-icon">📱</div><div class="stat-label">Acessos Guia</div><div class="stat-value">1K</div><div class="stat-change" style="color:var(--text3)">Meta anual</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">KPIs do Setor</div>
+          <div class="kpi-item">
+            <div class="kpi-top"><span class="kpi-name">Docentes apoiados em tecnologias</span><div class="kpi-vals"><span class="kpi-cur">0</span><span class="kpi-sep">/</span><span class="kpi-tgt" data-sync="tec_t0">300</span><span class="kpi-pct" style="background:rgba(231,76,60,0.1);color:var(--red)">0%</span></div></div>
+            <div class="kpi-track"><div class="kpi-fill" style="width:0%;background:linear-gradient(90deg,var(--cyan),var(--cyan-l))"></div></div>
+          </div>
+          <div class="kpi-item">
+            <div class="kpi-top"><span class="kpi-name">Tecnologias avaliadas/ano</span><div class="kpi-vals"><span class="kpi-cur">0</span><span class="kpi-sep">/</span><span class="kpi-tgt">5</span><span class="kpi-pct" style="background:rgba(231,76,60,0.1);color:var(--red)">0%</span></div></div>
+            <div class="kpi-track"><div class="kpi-fill" style="width:0%;background:linear-gradient(90deg,var(--cyan),var(--cyan-l))"></div></div>
+          </div>
+          <div class="kpi-item">
+            <div class="kpi-top"><span class="kpi-name">Tutores formados/ano</span><div class="kpi-vals"><span class="kpi-cur">0</span><span class="kpi-sep">/</span><span class="kpi-tgt" data-sync="tec_t2">100</span><span class="kpi-pct" style="background:rgba(231,76,60,0.1);color:var(--red)">0%</span></div></div>
+            <div class="kpi-track"><div class="kpi-fill" style="width:0%;background:linear-gradient(90deg,var(--cyan),var(--cyan-l))"></div></div>
+          </div>
+          <div class="kpi-item">
+            <div class="kpi-top"><span class="kpi-name">Acessos ao Guia do Professor</span><div class="kpi-vals"><span class="kpi-cur">0</span><span class="kpi-sep">/</span><span class="kpi-tgt" data-sync="tec_t3">1.000</span><span class="kpi-pct" style="background:rgba(231,76,60,0.1);color:var(--red)">0%</span></div></div>
+            <div class="kpi-track"><div class="kpi-fill" style="width:0%;background:linear-gradient(90deg,var(--cyan),var(--cyan-l))"></div></div>
+          </div>
+          <div style="margin-top:14px;padding:10px 12px;background:rgba(0,180,204,0.06);border:1px solid rgba(0,180,204,0.2);border-radius:10px;font-size:0.75rem;color:var(--text3)">
+            ℹ️ Dados serão preenchidos por Jefferson via planilha no OneDrive
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Atividades do Setor</div>
+          <table class="act-table">
+            <thead><tr><th>Atividade</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Assessoria docente no Canvas (AVA)</td><td><span class="status-pill warn">● Andamento</span></td></tr>
+              <tr><td>Investigação de novas tecnologias educacionais</td><td><span class="status-pill warn">● Andamento</span></td></tr>
+              <tr><td>Estratégias de engajamento discente</td><td><span class="status-pill warn">● Andamento</span></td></tr>
+              <tr><td>Formação de tutores e mediadores</td><td><span class="status-pill warn">● Andamento</span></td></tr>
+              <tr><td>Monitoramento de ambientes digitais (AVA)</td><td><span class="status-pill warn">● Andamento</span></td></tr>
+              <tr><td>Análise de dados educacionais</td><td><span class="status-pill idle">● Pendente</span></td></tr>
+              <tr><td>Apoio à inovação digital nos cursos</td><td><span class="status-pill warn">● Andamento</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════ REUNIÃO ═══════════════════════════════ -->
+    <div class="page" id="page-meeting">
+      <div class="section-header" style="margin-bottom:20px">
+        <div class="section-sub">Gaps · Gargalos · Pessoas-chave · Decisões</div>
+        <div class="live-badge" style="border-radius:20px">
+          <div class="live-dot"></div>
+          Semana atual
+        </div>
+      </div>
+
+      <div class="meeting-grid">
+        <div class="meeting-card" style="border-color:rgba(233,30,140,0.2)">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+            <div class="avatar pink" style="width:32px;height:32px;font-size:0.75rem">RO</div>
+            <div>
+              <div class="meeting-person">Rosimeire</div>
+              <div class="meeting-dept">Hub de Integração e Relacionamento</div>
+            </div>
+          </div>
+          <div class="gap-item"><div class="gap-dot" style="background:var(--green)"></div>Atendimentos realizados na semana</div>
+          <div class="gap-item"><div class="gap-dot" style="background:var(--gold)"></div>Demandas pendentes de coordenações</div>
+          <div class="gap-item"><div class="gap-dot" style="background:var(--gold)"></div>UDAs aguardando associação no SGA</div>
+          <div class="gap-item"><div class="gap-dot" style="background:var(--red)"></div>Gargalos no fluxo CINEA ↔ COED/CEAD</div>
+          <div class="gap-item"><div class="gap-dot" style="background:var(--green)"></div>Comunicados enviados</div>
+        </div>
+
+        <div class="meeting-card" style="border-color:rgba(79,45,127,0.3)">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+            <div class="avatar purple" style="width:32px;height:32px;font-size:0.75rem">CL</div>
+            <div>
+              <div class="meeting-person">Cláudia</div>
+              <div class="meeting-dept">Inovação Pedagógica e Formação Continuada</div>
+            </div>
+          </div>
+          <div class="gap-item"><div class="gap-dot" style="background:var(--green)"></div>Formações realizadas e agendadas</div>
+          <div class="gap-item"><div class="gap-dot" style="background:var(--gold)"></div>Professores sem confirmação de agendamento</div>
+          <div class="gap-item"><div class="gap-dot" style="background:var(--gold)"></div>PPCs em revisão ou atualização</div>
+          <div class="gap-item"><div class="gap-dot" style="background:var(--red)"></div>Gaps identificados nas formações</div>
+          <div class="gap-item"><div class="gap-dot" style="background:var(--green)"></div>UDAs planejadas e cadastradas</div>
+        </div>
+
+        <div class="meeting-card" style="border-color:rgba(0,180,204,0.2)">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+            <div class="avatar cyan" style="width:32px;height:32px;font-size:0.75rem">JE</div>
+            <div>
+              <div class="meeting-person">Jefferson</div>
+              <div class="meeting-dept">Tecnologias e Experiências de Aprendizagem</div>
+            </div>
+          </div>
+          <div class="gap-item"><div class="gap-dot" style="background:var(--green)"></div>Docentes atendidos no Canvas</div>
+          <div class="gap-item"><div class="gap-dot" style="background:var(--gold)"></div>Tecnologias em fase de validação</div>
+          <div class="gap-item"><div class="gap-dot" style="background:var(--gold)"></div>Engajamento discente nos AVAs</div>
+          <div class="gap-item"><div class="gap-dot" style="background:var(--red)"></div>Problemas técnicos nos ambientes digitais</div>
+          <div class="gap-item"><div class="gap-dot" style="background:var(--green)"></div>Tutores formados na semana</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">Legenda de Status</div>
+        <div style="display:flex;gap:32px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--text2)"><div style="width:10px;height:10px;border-radius:50%;background:var(--green)"></div>Concluído / Em dia</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--text2)"><div style="width:10px;height:10px;border-radius:50%;background:var(--gold)"></div>Em andamento / Atenção necessária</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--text2)"><div style="width:10px;height:10px;border-radius:50%;background:var(--red)"></div>Gap identificado / Gargalo crítico</div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════ EQUIPE & TAREFAS ═══════════════════════════════ -->
+    <div class="page" id="page-team">
+      <div class="section-header" style="margin-bottom:20px">
+        <div class="section-sub">Atribuição de atividades por pessoa · Gestão: Diego</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div id="save-notif" class="save-notif">✓ Exportado com sucesso</div>
+          <button class="export-btn" onclick="exportCSV()">⬇ Exportar CSV · OneDrive</button>
+        </div>
+      </div>
+
+      <!-- RESUMO TAREFAS -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 24px;margin-bottom:20px;display:flex;align-items:center;gap:32px">
+        <div style="display:flex;gap:28px;text-align:center">
+          <div><div style="font-size:1.6rem;font-weight:700;color:var(--purple-l)" id="total-tasks-count">28</div><div style="font-size:0.7rem;color:var(--text3)">Tarefas cadastradas</div></div>
+          <div><div style="font-size:1.6rem;font-weight:700;color:var(--gold)" id="shared-tasks-count">11</div><div style="font-size:0.7rem;color:var(--text3)">Compartilhadas</div></div>
+          <div><div style="font-size:1.6rem;font-weight:700;color:var(--text)">7</div><div style="font-size:0.7rem;color:var(--text3)">Pessoas na equipe</div></div>
+        </div>
+        <div style="margin-left:auto;font-size:0.75rem;color:var(--text3);line-height:1.6">
+          Clique em <strong style="color:var(--text2)">Editar</strong> em qualquer tarefa para alterar os responsáveis.<br>
+          Use <strong style="color:var(--text2)">+ Nova tarefa</strong> para adicionar. Alterações salvas automaticamente.
+        </div>
+      </div>
+
+      <!-- TEAM CARDS POR DEPARTAMENTO -->
+      <div class="team-page-grid">
+
+        <!-- HUB -->
+        <div class="team-dept-card hub">
+          <div class="team-dept-title">Hub de Integração</div>
+          <div class="member-row">
+            <div class="avatar pink">RO</div>
+            <div class="member-info">
+              <div class="member-name-lbl">Rosimeire</div>
+              <div class="member-role-lbl">Analista · Gestora</div>
+              <div class="task-chip-wrap" id="ro-chips"></div>
+            </div>
+          </div>
+          <div class="member-row">
+            <div class="avatar pink" style="font-size:0.72rem">AL</div>
+            <div class="member-info">
+              <div class="member-name-lbl">Aline</div>
+              <div class="member-role-lbl">Assistente</div>
+              <div class="task-chip-wrap" id="al-chips"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- INOVAÇÃO -->
+        <div class="team-dept-card inov">
+          <div class="team-dept-title">Inovação Pedagógica</div>
+          <div class="member-row">
+            <div class="avatar purple">CL</div>
+            <div class="member-info">
+              <div class="member-name-lbl">Cláudia</div>
+              <div class="member-role-lbl">Analista · Gestora</div>
+              <div class="task-chip-wrap" id="cl-chips"></div>
+            </div>
+          </div>
+          <div class="member-row">
+            <div class="avatar purple" style="font-size:0.72rem">TH</div>
+            <div class="member-info">
+              <div class="member-name-lbl">Thamires</div>
+              <div class="member-role-lbl">Assistente</div>
+              <div class="task-chip-wrap" id="th-chips"></div>
+            </div>
+          </div>
+          <div class="member-row">
+            <div class="avatar purple" style="font-size:0.72rem">JA</div>
+            <div class="member-info">
+              <div class="member-name-lbl">James</div>
+              <div class="member-role-lbl">Assistente</div>
+              <div class="task-chip-wrap" id="ja-chips"></div>
+            </div>
+          </div>
+          <div class="member-row">
+            <div class="avatar purple" style="font-size:0.72rem">BR</div>
+            <div class="member-info">
+              <div class="member-name-lbl">Bruna</div>
+              <div class="member-role-lbl">Assistente</div>
+              <div class="task-chip-wrap" id="br-chips"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TECNOLOGIAS -->
+        <div class="team-dept-card tec">
+          <div class="team-dept-title">Tecnologias</div>
+          <div class="member-row">
+            <div class="avatar cyan">JE</div>
+            <div class="member-info">
+              <div class="member-name-lbl">Jefferson</div>
+              <div class="member-role-lbl">Analista · Gestor</div>
+              <div class="task-chip-wrap" id="je-chips"></div>
+            </div>
+          </div>
+          <div class="member-row">
+            <div class="avatar cyan" style="font-size:0.72rem">DG</div>
+            <div class="member-info">
+              <div class="member-name-lbl">Diego</div>
+              <div class="member-role-lbl">Analista · Dashboard</div>
+              <div class="task-chip-wrap" id="dg-chips"></div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /team-page-grid -->
+
+      <!-- TABELA COMPLETA DE TAREFAS -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-title">Todas as Tarefas por Departamento <span>Clique no status para alterar</span></div>
+
+        <!-- HUB -->
+        <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--pink);margin-bottom:8px;margin-top:4px">Hub de Integração · Rosimeire</div>
+        <table class="task-full-table" id="table-hub"></table>
+        <div class="add-task-row">
+          <input class="add-task-input" id="hub-input" placeholder="Nova tarefa para o Hub..." />
+          <select class="add-task-select" id="hub-member-sel">
+            <option value="">Responsável...</option>
+            <option value="Rosimeire">Rosimeire</option>
+            <option value="Aline">Aline</option>
+            <option value="Rosimeire,Aline">Rosimeire + Aline</option>
+          </select>
+          <button class="add-task-btn" onclick="addNewTask('hub')">+ Adicionar</button>
+        </div>
+
+        <div style="height:1px;background:var(--border);margin:20px 0"></div>
+
+        <!-- INOVAÇÃO -->
+        <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--purple-l);margin-bottom:8px">Inovação Pedagógica · Cláudia</div>
+        <table class="task-full-table" id="table-inov"></table>
+        <div class="add-task-row">
+          <input class="add-task-input" id="inov-input" placeholder="Nova tarefa para Inovação..." />
+          <select class="add-task-select" id="inov-member-sel">
+            <option value="">Responsável...</option>
+            <option value="Cláudia">Cláudia</option>
+            <option value="Thamires">Thamires</option>
+            <option value="James">James</option>
+            <option value="Bruna">Bruna</option>
+            <option value="Cláudia,Thamires">Cláudia + Thamires</option>
+            <option value="Cláudia,James">Cláudia + James</option>
+            <option value="Thamires,James,Bruna">Thamires + James + Bruna</option>
+          </select>
+          <button class="add-task-btn" onclick="addNewTask('inov')">+ Adicionar</button>
+        </div>
+
+        <div style="height:1px;background:var(--border);margin:20px 0"></div>
+
+        <!-- TECNOLOGIAS -->
+        <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--cyan);margin-bottom:8px">Tecnologias · Jefferson</div>
+        <table class="task-full-table" id="table-tec"></table>
+        <div class="add-task-row">
+          <input class="add-task-input" id="tec-input" placeholder="Nova tarefa para Tecnologias..." />
+          <select class="add-task-select" id="tec-member-sel">
+            <option value="">Responsável...</option>
+            <option value="Jefferson">Jefferson</option>
+            <option value="Diego">Diego</option>
+            <option value="Jefferson,Diego">Jefferson + Diego</option>
+          </select>
+          <button class="add-task-btn" onclick="addNewTask('tec')">+ Adicionar</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+  <!-- MODAL SENHA ADMIN -->
+  <div class="modal-overlay" id="modal-senha">
+    <div class="modal-box">
+      <div class="modal-logo">CINEA</div>
+      <div class="modal-sub">Acesso administrativo</div>
+
+      <!-- Login -->
+      <div id="modal-login-section">
+        <div class="modal-label">Senha de administrador</div>
+        <input class="modal-input" id="modal-pwd-input" type="password"
+          placeholder="••••••••" onkeydown="if(event.key==='Enter')confirmarSenha()" />
+        <div class="modal-error" id="modal-error"></div>
+        <button class="modal-btn" onclick="confirmarSenha()">Entrar no Modo Edição</button>
+        <button class="modal-btn secondary" onclick="fecharModal()">Cancelar</button>
+
+        <div class="modal-divider"></div>
+        <button class="modal-btn secondary" onclick="toggleChangePass()" style="font-size:0.75rem">
+          🔑 Alterar senha admin
+        </button>
+      </div>
+
+      <!-- Alterar senha -->
+      <div class="modal-change-wrap" id="modal-change-section">
+        <div class="modal-change-title">Definir nova senha</div>
+        <div class="modal-label">Senha atual</div>
+        <input class="modal-input" id="chg-current" type="password" placeholder="Senha atual" style="margin-bottom:14px"/>
+        <div class="modal-label">Nova senha</div>
+        <input class="modal-input" id="chg-new" type="password" placeholder="Nova senha (mín. 6 caracteres)" style="margin-bottom:14px"/>
+        <div class="modal-label">Confirmar nova senha</div>
+        <input class="modal-input" id="chg-confirm" type="password" placeholder="Repita a nova senha" />
+        <div class="modal-error" id="chg-error"></div>
+        <button class="modal-btn" onclick="salvarNovaSenha()">Salvar nova senha</button>
+        <button class="modal-btn secondary" onclick="toggleChangePass()">Voltar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="edit-hint-bar">✏️ <strong style="color:var(--purple-l)">Modo Edição ativo</strong> &nbsp;·&nbsp; Clique em qualquer valor ou texto para editar &nbsp;·&nbsp; Clique nos <span style="color:var(--gold)">●</span> status para alternar &nbsp;·&nbsp; Clique nos pontos coloridos da reunião para mudar status &nbsp;·&nbsp; Pressione <kbd style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1px 6px">✓ Salvar</kbd> quando terminar</div>
+</main>
+
+<script>
+// PAGE NAV
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pg = document.getElementById('page-' + id);
+  if (pg) pg.classList.add('active');
+  if (el) el.classList.add('active');
+  const titles = {
+    overview: 'Dashboard Geral',
+    team: 'Equipe & Tarefas',
+    roadmap: 'Roadmap de Implantação BI',
+    ideas: 'Ideias de Implantação',
+    hub: 'Hub de Integração – Rosimeire',
+    inov: 'Inovação Pedagógica – Cláudia',
+    tec: 'Tecnologias – Jefferson',
+    meeting: 'Reunião Semanal de Alinhamento',
+  };
+  document.getElementById('page-title').textContent = titles[id] || '';
+  if (id === 'team') {
+    loadTasksFromStorage();
+    ['hub','inov','tec'].forEach(d => renderTaskTable(d));
+    renderMemberChips();
+  }
+}
+
+// SYNC TIME
+function updateSync() {
+  const now = new Date();
+  document.getElementById('sync-time').textContent =
+    'Última sinc: ' + now.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+}
+updateSync();
+setInterval(updateSync, 60000);
+
+// BAR CHART PRESENCIAL
+const presData = [
+  { label: 'FAPSI', val: 22, color: 'var(--pink)' },
+  { label: 'FMD',   val: 38, color: 'var(--purple-l)' },
+  { label: 'FCA',   val: 18, color: 'var(--cyan)' },
+  { label: 'ICBS',  val: 85, color: 'var(--gold)' },
+  { label: 'IPUC',  val: 24, color: 'var(--pink)' },
+  { label: 'ICS',   val: 14, color: 'var(--purple-l)' },
+  { label: 'ICEG',  val: 52, color: 'var(--cyan)' },
+  { label: 'ICH',   val: 20, color: 'var(--gold)' },
+  { label: 'ICEI',  val: 63, color: 'var(--pink)' },
+];
+// Restaurar presData do localStorage
+(function() {
+  presData.forEach((d, i) => {
+    const saved = localStorage.getItem('cinea_ed_bar_val_' + i);
+    if (saved !== null) d.val = parseInt(saved) || d.val;
+  });
+})();
+
+const bcEl = document.getElementById('bc-presencial');
+const maxV = Math.max(...presData.map(d => d.val), 1);
+presData.forEach((d, i) => {
+  const col = document.createElement('div');
+  col.className = 'bar-col';
+  col.innerHTML = `
+    <div class="bar-val" data-bar-idx="${i}">${d.val}</div>
+    <div class="bar-fill" data-bar-fill="${i}" style="height:${(d.val/maxV)*90}px;background:${d.color};opacity:0.8"></div>
+    <div class="bar-label">${d.label}</div>
+  `;
+  bcEl.appendChild(col);
+});
+
+// Animate gauge arc
+setTimeout(() => {
+  const arc = document.getElementById('gauge-arc');
+  if (arc) arc.style.strokeDashoffset = '157'; // ~50% filled = 33% of 6 phases
+}, 300);
+
+// ═══════════════════════ TEAM & TASKS DATA ═══════════════════════
+const TASKS = {
+  hub: [
+    {name:'Atendimento e orientação a coordenações de curso e NDEs', assignees:['Rosimeire','Aline'], status:'Em andamento'},
+    {name:'Gestão e acompanhamento das demandas pedagógicas enviadas ao CINEA', assignees:['Rosimeire'], status:'Em andamento'},
+    {name:'Organização do fluxo de comunicação entre CINEA, COED e CEAD', assignees:['Rosimeire','Aline'], status:'Em andamento'},
+    {name:'Divulgação institucional das ações do CINEA', assignees:['Aline'], status:'Pendente'},
+    {name:'Elaboração de relatórios institucionais', assignees:['Rosimeire'], status:'Pendente'},
+    {name:'Associação de UDAs às disciplinas no SGA', assignees:['Aline'], status:'Em andamento'},
+    {name:'Organização de indicadores do setor', assignees:['Rosimeire','Aline'], status:'Em andamento'},
+    {name:'Articulação com MEC, INEP, SEMESP, ABMES, ABED', assignees:['Rosimeire'], status:'Pendente'},
+  ],
+  inov: [
+    {name:'Planejamento do Programa Permanente de Formação Docente', assignees:['Cláudia'], status:'Em andamento'},
+    {name:'Realização de oficinas, workshops e formações pedagógicas', assignees:['Cláudia','Thamires','James'], status:'Em andamento'},
+    {name:'Organização de meetups de boas práticas docentes', assignees:['Thamires','Bruna'], status:'Pendente'},
+    {name:'Assessoria pedagógica aos cursos e NDEs', assignees:['Cláudia','James'], status:'Em andamento'},
+    {name:'Apoio à atualização e criação de PPCs', assignees:['Cláudia','Thamires'], status:'Em andamento'},
+    {name:'Planejamento pedagógico de UDAs', assignees:['Cláudia','James','Bruna'], status:'Em andamento'},
+    {name:'Cadastro de UDAs no SGA', assignees:['Thamires','Bruna'], status:'Em andamento'},
+    {name:'Planejamento de microfundamentos', assignees:['Cláudia'], status:'Pendente'},
+    {name:'Planejamento de UCs da graduação EAD', assignees:['Cláudia','James'], status:'Em andamento'},
+    {name:'Produção de materiais pedagógicos (Guia do Professor)', assignees:['Thamires','Bruna'], status:'Em andamento'},
+    {name:'Mapeamento e divulgação de práticas pedagógicas inovadoras', assignees:['James','Bruna'], status:'Pendente'},
+    {name:'Benchmarking com centros de inovação educacional (CREARE PUC Paraná)', assignees:['Cláudia'], status:'Pendente'},
+    {name:'Oferta de cursos e oficinas temáticas (ex: itens modelo INEP)', assignees:['Cláudia','Thamires'], status:'Pendente'},
+  ],
+  tec: [
+    {name:'Assessoria aos docentes no uso pedagógico do Canvas e tecnologias', assignees:['Jefferson','Diego'], status:'Em andamento'},
+    {name:'Investigação e validação de novas tecnologias educacionais', assignees:['Jefferson'], status:'Em andamento'},
+    {name:'Desenvolvimento de estratégias de engajamento discente', assignees:['Jefferson','Diego'], status:'Em andamento'},
+    {name:'Formação de tutores e mediadores pedagógicos', assignees:['Jefferson'], status:'Em andamento'},
+    {name:'Monitoramento do uso de ambientes digitais de aprendizagem', assignees:['Diego'], status:'Em andamento'},
+    {name:'Análise de dados educacionais para melhoria do ensino', assignees:['Diego'], status:'Pendente'},
+    {name:'Apoio à inovação digital nos cursos', assignees:['Jefferson','Diego'], status:'Em andamento'},
+  ]
+};
+
+const PILL_CLASS = { hub:'hub-pill', inov:'inov-pill', tec:'tec-pill' };
+
+const MEMBER_MAP = {
+  'Rosimeire':'ro','Aline':'al','Cláudia':'cl','Thamires':'th',
+  'James':'ja','Bruna':'br','Jefferson':'je','Diego':'dg'
+};
+
+function loadTasksFromStorage() {
+  ['hub','inov','tec'].forEach(d => {
+    try {
+      const s = localStorage.getItem('cinea_tasks_'+d);
+      if(s) TASKS[d] = JSON.parse(s);
+    } catch(e){}
+  });
+}
+
+function saveTasksToStorage() {
+  ['hub','inov','tec'].forEach(d => {
+    try { localStorage.setItem('cinea_tasks_'+d, JSON.stringify(TASKS[d])); } catch(e){}
+  });
+}
+
+const DEPT_MEMBERS = {
+  hub: ['Rosimeire','Aline'],
+  inov: ['Cláudia','Thamires','James','Bruna'],
+  tec: ['Jefferson','Diego']
+};
+
+function renderTaskTable(dept) {
+  const tbl = document.getElementById('table-'+dept);
+  if(!tbl) return;
+  const pillCls = PILL_CLASS[dept];
+  tbl.innerHTML = '<thead><tr><th style="width:38%">Tarefa</th><th>Responsáveis</th><th>Status</th><th style="width:100px">Ações</th></tr></thead>';
+  const tbody = document.createElement('tbody');
+  TASKS[dept].forEach((task, i) => {
+    const shared = task.assignees.length > 1;
+    const statusOpts = ['Em andamento','Concluída','Pendente'].map(s =>
+      `<option${task.status===s?' selected':''}>${s}</option>`).join('');
+    const memberOpts = DEPT_MEMBERS[dept].map(m =>
+      `<option value="${m}"${task.assignees.includes(m)?' selected':''}>${m}</option>`).join('');
+    const row = document.createElement('tr');
+    row.id = `row-${dept}-${i}`;
+    row.innerHTML = `
+      <td>
+        <span class="task-name-view-${dept}-${i}" style="color:var(--text);font-size:0.79rem">${task.name}</span>
+        <input class="task-name-edit-${dept}-${i} add-task-input" style="display:none;width:100%;font-size:0.78rem;padding:4px 8px" value="${task.name.replace(/"/g,'&quot;')}" />
+      </td>
+      <td>
+        <div class="assignees-view-${dept}-${i}">
+          <div class="assignee-pills">${task.assignees.map(a=>`<span class="assignee-pill ${pillCls}">${a}</span>`).join('')}</div>
+          ${shared?'<span class="shared-tag" style="margin-top:4px;display:inline-flex">⟳ Compartilhada</span>':''}
+        </div>
+        <select class="assignees-edit-${dept}-${i} add-task-select" multiple style="display:none;min-height:70px;width:100%">${memberOpts}</select>
+      </td>
+      <td><select onchange="changeTaskStatus('${dept}',${i},this.value)" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.75rem;padding:4px 8px;font-family:'DM Sans',sans-serif">${statusOpts}</select></td>
+      <td style="white-space:nowrap">
+        <button onclick="startEdit('${dept}',${i})" id="btn-edit-${dept}-${i}" style="background:rgba(79,45,127,0.2);border:1px solid rgba(79,45,127,0.3);border-radius:6px;color:var(--purple-l);font-size:0.72rem;padding:3px 10px;cursor:pointer;font-family:'DM Sans',sans-serif">Editar</button>
+        <button onclick="saveEdit('${dept}',${i})" id="btn-save-${dept}-${i}" style="display:none;background:rgba(39,174,96,0.15);border:1px solid rgba(39,174,96,0.3);border-radius:6px;color:var(--green);font-size:0.72rem;padding:3px 10px;cursor:pointer;font-family:'DM Sans',sans-serif">Salvar</button>
+        <button onclick="deleteTask('${dept}',${i})" style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.2);border-radius:6px;color:var(--red);font-size:0.72rem;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-left:3px">✕</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+  tbl.appendChild(tbody);
+}
+
+function startEdit(dept, i) {
+  document.querySelector(`.task-name-view-${dept}-${i}`).style.display = 'none';
+  document.querySelector(`.task-name-edit-${dept}-${i}`).style.display = 'block';
+  document.querySelector(`.assignees-view-${dept}-${i}`).style.display = 'none';
+  document.querySelector(`.assignees-edit-${dept}-${i}`).style.display = 'block';
+  document.getElementById(`btn-edit-${dept}-${i}`).style.display = 'none';
+  document.getElementById(`btn-save-${dept}-${i}`).style.display = 'inline';
+}
+
+function saveEdit(dept, i) {
+  const nameEl = document.querySelector(`.task-name-edit-${dept}-${i}`);
+  const selEl  = document.querySelector(`.assignees-edit-${dept}-${i}`);
+  const newName = nameEl.value.trim();
+  const newAssignees = Array.from(selEl.selectedOptions).map(o => o.value);
+  if (!newName || newAssignees.length === 0) return;
+  TASKS[dept][i].name = newName;
+  TASKS[dept][i].assignees = newAssignees;
+  saveTasksToStorage();
+  renderTaskTable(dept);
+  renderMemberChips();
+}
+
+function deleteTask(dept, i) {
+  if (!confirm('Remover esta tarefa?')) return;
+  TASKS[dept].splice(i, 1);
+  saveTasksToStorage();
+  renderTaskTable(dept);
+  renderMemberChips();
+}
+
+function renderMemberChips() {
+  const byMember = {};
+  Object.values(MEMBER_MAP).forEach(id => byMember[id] = []);
+  ['hub','inov','tec'].forEach(dept => {
+    TASKS[dept].forEach(task => {
+      task.assignees.forEach(name => {
+        const id = MEMBER_MAP[name];
+        if(id) {
+          const shared = task.assignees.length > 1;
+          byMember[id].push({name: task.name.length > 30 ? task.name.substring(0,30)+'…' : task.name, shared});
+        }
+      });
+    });
+  });
+  Object.entries(byMember).forEach(([id, tasks]) => {
+    const el = document.getElementById(id+'-chips');
+    if(!el) return;
+    el.innerHTML = tasks.map(t =>
+      `<span class="${t.shared?'shared-chip':'task-chip'}">${t.name}</span>`
+    ).join('');
+  });
+  updateTaskCounts();
+}
+
+function updateTaskCounts() {
+  let total = 0, shared = 0;
+  ['hub','inov','tec'].forEach(d => {
+    total += TASKS[d].length;
+    shared += TASKS[d].filter(t => t.assignees.length > 1).length;
+  });
+  const tt = document.getElementById('total-tasks-count');
+  const sh = document.getElementById('shared-tasks-count');
+  if(tt) tt.textContent = total;
+  if(sh) sh.textContent = shared;
+}
+
+function changeTaskStatus(dept, idx, val) {
+  TASKS[dept][idx].status = val;
+  saveTasksToStorage();
+}
+
+function addNewTask(dept) {
+  const inp = document.getElementById(dept+'-input');
+  const sel = document.getElementById(dept+'-member-sel');
+  const name = inp.value.trim();
+  const assigneesStr = sel.value;
+  if(!name || !assigneesStr) return;
+  const assignees = assigneesStr.split(',').map(s => s.trim());
+  TASKS[dept].push({name, assignees, status:'Pendente'});
+  inp.value = '';
+  sel.value = '';
+  saveTasksToStorage();
+  renderTaskTable(dept);
+  renderMemberChips();
+}
+
+function exportCSV() {
+  const deptNames = {hub:'Hub de Integração e Relacionamento', inov:'Inovação Pedagógica e Formação Continuada', tec:'Tecnologias e Experiências de Aprendizagem'};
+  let csv = 'Departamento,Tarefa,Responsáveis,Tipo,Status\n';
+  ['hub','inov','tec'].forEach(dept => {
+    TASKS[dept].forEach(t => {
+      const tipo = t.assignees.length > 1 ? 'Compartilhada' : 'Individual';
+      csv += `"${deptNames[dept]}","${t.name}","${t.assignees.join(' + ')}","${tipo}","${t.status}"\n`;
+    });
+  });
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'CINEA_Tarefas_Equipe.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  const notif = document.getElementById('save-notif');
+  if(notif){ notif.style.display='flex'; setTimeout(()=>{ notif.style.display='none'; },3000); }
+}
+
+// Init on load
+loadTasksFromStorage();
+['hub','inov','tec'].forEach(d => renderTaskTable(d));
+renderMemberChips();
+
+// ═══════════════════════ SENHA ADMIN (SHA-256) ═══════════════════════
+// Senha padrão inicial: cinea2026
+// Troque via "Alterar senha" no modal — o hash é salvo no localStorage
+const DEFAULT_HASH = '3c1440513043541bd5b38f2e8c3bde96203ea59ccb174b8a2bc568f7e3bf961e';
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function getSenhaHash() {
+  return localStorage.getItem('cinea_admin_hash') || DEFAULT_HASH;
+}
+
+function abrirModal() {
+  document.getElementById('modal-senha').classList.add('open');
+  document.getElementById('modal-pwd-input').value = '';
+  document.getElementById('modal-error').textContent = '';
+  setTimeout(() => document.getElementById('modal-pwd-input').focus(), 100);
+}
+
+function fecharModal() {
+  document.getElementById('modal-senha').classList.remove('open');
+  // Garante seção de login visível ao fechar
+  document.getElementById('modal-login-section').style.display = 'block';
+  document.getElementById('modal-change-section').classList.remove('visible');
+}
+
+function toggleChangePass() {
+  const chg = document.getElementById('modal-change-section');
+  const login = document.getElementById('modal-login-section');
+  const isVisible = chg.classList.contains('visible');
+  if (isVisible) {
+    chg.classList.remove('visible');
+    login.style.display = 'block';
+  } else {
+    login.style.display = 'none';
+    chg.classList.add('visible');
+    ['chg-current','chg-new','chg-confirm'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('chg-error').textContent = '';
+    document.getElementById('chg-current').focus();
+  }
+}
+
+async function confirmarSenha() {
+  const pwd = document.getElementById('modal-pwd-input').value;
+  const errEl = document.getElementById('modal-error');
+  if (!pwd) { errEl.textContent = 'Digite a senha.'; return; }
+  errEl.textContent = 'Verificando…';
+  const hash = await sha256(pwd);
+  if (hash === getSenhaHash()) {
+    fecharModal();
+    ativarEditMode();
+  } else {
+    errEl.textContent = '❌ Senha incorreta.';
+    document.getElementById('modal-pwd-input').value = '';
+    document.getElementById('modal-pwd-input').focus();
+  }
+}
+
+async function salvarNovaSenha() {
+  const cur    = document.getElementById('chg-current').value;
+  const nova   = document.getElementById('chg-new').value;
+  const conf   = document.getElementById('chg-confirm').value;
+  const errEl  = document.getElementById('chg-error');
+
+  if (!cur || !nova || !conf) { errEl.textContent = 'Preencha todos os campos.'; return; }
+  if (nova.length < 6)        { errEl.textContent = 'Nova senha precisa ter ao menos 6 caracteres.'; return; }
+  if (nova !== conf)          { errEl.textContent = 'As senhas não coincidem.'; return; }
+
+  errEl.textContent = 'Verificando…';
+  const curHash = await sha256(cur);
+  if (curHash !== getSenhaHash()) { errEl.textContent = '❌ Senha atual incorreta.'; return; }
+
+  const novoHash = await sha256(nova);
+  localStorage.setItem('cinea_admin_hash', novoHash);
+  errEl.style.color = 'var(--green)';
+  errEl.textContent = '✓ Senha alterada com sucesso!';
+  setTimeout(() => { errEl.style.color = ''; fecharModal(); }, 1500);
+}
+
+// Fechar modal clicando fora
+document.getElementById('modal-senha').addEventListener('click', function(e) {
+  if (e.target === this) fecharModal();
+});
+
+// ═══════════════════════ EDIT MODE ═══════════════════════
+let editModeActive = false;
+
+const TEXT_ED_SELS = [
+  '.stat-change', '.pkpi-val', '.kpi-cur', '.kpi-tgt', '.section-sub',
+  '.rm-title', '.rm-phase', '.rm-tag', '.idea-title', '.idea-desc', '.idea-tag',
+  '.ck-text', '.gauge-label'
+];
+
+function toggleEditMode() {
+  if (!editModeActive) {
+    // Precisa autenticar antes de ativar
+    abrirModal();
+  } else {
+    // Já está ativo — desativa direto (sem senha necessária para salvar)
+    desativarEditMode();
+  }
+}
+
+function ativarEditMode() {
+  editModeActive = true;
+  const btn = document.getElementById('edit-mode-btn');
+  btn.textContent = '✓ Salvar';
+  btn.classList.add('saving');
+  document.body.classList.add('edit-mode');
+  _aplicarEditMode();
+}
+
+function desativarEditMode() {
+  editModeActive = false;
+  const btn = document.getElementById('edit-mode-btn');
+  btn.textContent = '✏️ Editar';
+  btn.classList.remove('saving');
+  document.body.classList.remove('edit-mode');
+  // Salva e remove contenteditable
+  document.querySelectorAll('[contenteditable]').forEach(el => {
+    if (el.dataset.edKey) localStorage.setItem('cinea_ed_' + el.dataset.edKey, el.textContent.trim());
+    el.removeAttribute('contenteditable');
+    el.classList.remove('ed');
+    el.oninput = null;
+  });
+  document.querySelectorAll('.act-table .status-pill').forEach(p => p.onclick = null);
+  document.querySelectorAll('.gap-dot').forEach(d => d.onclick = null);
+  updateAllKPIs();
+}
+
+function _aplicarEditMode() {
+  // 1. Prepare gap items (wrap text in span for safe editing)
+  prepareGapItems();
+
+  // 2. Simple text fields (com sync cross-page automático)
+  TEXT_ED_SELS.forEach(sel => {
+    document.querySelectorAll(sel).forEach((el, i) => {
+      const key = sel.replace(/[^a-z]/g, '_') + '_' + i;
+      el.contentEditable = 'plaintext-only';
+      el.dataset.edKey = key;
+      el.classList.add('ed');
+      el.oninput = () => {
+        const val = el.textContent.trim();
+        localStorage.setItem('cinea_ed_' + key, val);
+        if (el.classList.contains('kpi-cur')) updateKPIBar(el);
+        if (el.dataset.sync) syncValue(el.dataset.sync, val);
+      };
+    });
+  });
+
+  // 3. Gap texts
+  document.querySelectorAll('.gap-text').forEach((el, i) => {
+    el.contentEditable = 'plaintext-only';
+    el.dataset.edKey = 'gap_text_' + i;
+    el.classList.add('ed');
+    el.oninput = () => localStorage.setItem('cinea_ed_gap_text_' + i, el.textContent.trim());
+  });
+
+  // 4. Stat values (click-to-input para preservar span de unidade)
+  enableStatValEditing();
+
+  // 5. Status pills — click to cycle
+  document.querySelectorAll('.act-table .status-pill').forEach((pill, i) => {
+    pill.dataset.pillIdx = i;
+    pill.onclick = () => { if (editModeActive) cycleStatus(pill, i); };
+  });
+
+  // 6. Gap dots — click to cycle color
+  document.querySelectorAll('.gap-dot').forEach((dot, i) => {
+    dot.onclick = () => { if (editModeActive) cycleGapDot(dot, i); };
+  });
+
+  // 7. Roadmap phase status — click to cycle
+  document.querySelectorAll('.rm-status').forEach((el, i) => {
+    el.onclick = () => { if (editModeActive) cycleRmStatus(el, i); };
+  });
+
+  // 8. Checklist items — click icon to cycle state
+  document.querySelectorAll('.ck-icon').forEach((icon, i) => {
+    icon.onclick = () => { if (editModeActive) cycleChecklistItem(icon, i); };
+  });
+
+  // 9. Ideas effort badge — click to cycle
+  document.querySelectorAll('.idea-effort').forEach((el, i) => {
+    el.onclick = () => { if (editModeActive) cycleIdeaEffort(el, i); };
+  });
+
+  // 10. Bar chart values — editable numbers
+  document.querySelectorAll('.bar-val').forEach((el, i) => {
+    el.contentEditable = 'plaintext-only';
+    el.dataset.edKey = 'bar_val_' + i;
+    el.classList.add('ed');
+    el.oninput = () => {
+      const v = parseInt(el.textContent) || 0;
+      presData[i] && (presData[i].val = v);
+      localStorage.setItem('cinea_ed_bar_val_' + i, v);
+      updateBarHeights();
+    };
+  });
+
+  // 11. Power BI editable fields
+  ['pbi-report-id','pbi-workspace-id'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.contentEditable = 'plaintext-only';
+    el.oninput = () => {
+      localStorage.setItem('cinea_' + id, el.textContent.trim());
+      if (id === 'pbi-report-id') updatePbiEmbed();
+    };
+  });
+}
+
+function prepareGapItems() {
+  document.querySelectorAll('.gap-item').forEach((item, i) => {
+    if (item.dataset.gapPrepared) return;
+    item.dataset.gapPrepared = '1';
+    const dot = item.querySelector('.gap-dot');
+    const text = [...item.childNodes]
+      .filter(n => n.nodeType === Node.TEXT_NODE)
+      .map(n => n.textContent.trim()).join('').trim();
+    item.innerHTML = '';
+    if (dot) item.appendChild(dot);
+    const span = document.createElement('span');
+    span.className = 'gap-text';
+    const saved = localStorage.getItem('cinea_ed_gap_text_' + i);
+    span.textContent = saved || text;
+    item.appendChild(span);
+  });
+}
+
+function enableStatValEditing() {
+  document.querySelectorAll('.stat-value').forEach((el, i) => {
+    if (el.dataset.statEdReady) return;
+    el.dataset.statEdReady = '1';
+    el.title = 'Clique para editar (Modo Edição)';
+    el.addEventListener('click', function () {
+      if (!editModeActive) return;
+      const unitEl = el.querySelector('.stat-unit');
+      const unit = unitEl ? unitEl.textContent : '';
+      const curVal = [...el.childNodes]
+        .filter(n => n.nodeType === Node.TEXT_NODE)
+        .map(n => n.textContent.trim()).join('').trim();
+
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.value = curVal;
+      Object.assign(inp.style, {
+        width: '90px', background: 'var(--card2)',
+        border: '1px solid var(--purple-l)', borderRadius: '6px',
+        color: 'var(--text)', fontSize: '1.8rem', fontWeight: '700',
+        fontFamily: '"DM Sans",sans-serif', padding: '2px 6px', outline: 'none'
+      });
+      el.innerHTML = '';
+      el.appendChild(inp);
+      inp.focus(); inp.select();
+
+      const commit = () => {
+        const v = inp.value.trim() || curVal;
+        el.innerHTML = v;
+        if (unit) {
+          const s = document.createElement('span');
+          s.className = 'stat-unit'; s.textContent = unit;
+          el.appendChild(s);
+        }
+        localStorage.setItem('cinea_statval_' + i, v);
+        if (unit) localStorage.setItem('cinea_statunit_' + i, unit);
+      };
+      inp.addEventListener('blur', commit);
+      inp.addEventListener('keydown', e => { if (e.key === 'Enter') { commit(); inp.blur(); } });
+    });
+  });
+}
+
+// ═══ SYNC CROSS-PAGE ═══
+function syncValue(syncKey, value) {
+  document.querySelectorAll(`[data-sync="${syncKey}"]`).forEach(el => {
+    if (el !== document.activeElement) el.textContent = value;
+  });
+  localStorage.setItem('cinea_sync_' + syncKey, value);
+}
+
+// ═══ ROADMAP ═══
+function cycleRmStatus(el, idx) {
+  const item = el.closest('.rm-item');
+  const dot   = item.querySelector('.rm-dot');
+  const phase = item.querySelector('.rm-phase');
+  const states = [
+    { text:'✓ Concluído', cls:'done',   dot:'var(--green)',    col:'var(--green)' },
+    { text:'▶ Agora',     cls:'now',    dot:'var(--gold)',     col:'var(--gold)' },
+    { text:'→ Próximo',   cls:'next',   dot:'var(--purple-l)', col:'var(--purple-l)' },
+    { text:'Em breve',    cls:'future', dot:'var(--text3)',    col:'var(--text3)' },
+  ];
+  const cur = states.findIndex(s => el.classList.contains(s.cls));
+  const nxt = states[(cur + 1) % states.length];
+  el.textContent = nxt.text;
+  el.className   = 'rm-status ' + nxt.cls;
+  if (dot)   dot.style.background = nxt.dot;
+  if (phase) phase.style.color    = nxt.col;
+  localStorage.setItem('cinea_rm_st_' + idx, JSON.stringify(nxt));
+  updateRoadmapProgress();
+}
+
+function updateRoadmapProgress() {
+  const statuses   = [...document.querySelectorAll('.rm-status')];
+  const total      = statuses.length;
+  const done       = statuses.filter(s => s.classList.contains('done')).length;
+  const pct        = Math.round(done / total * 100);
+  const arc        = document.getElementById('gauge-arc');
+  const gaugeText  = document.querySelector('#page-roadmap svg text');
+  const gaugeLabel = document.querySelector('#page-roadmap .gauge-label');
+  if (arc)        arc.style.strokeDashoffset = String(188 - (188 * pct / 100));
+  if (gaugeText)  gaugeText.textContent = pct + '%';
+  if (gaugeLabel) gaugeLabel.textContent = done + ' de ' + total + ' fases concluídas';
+  localStorage.setItem('cinea_rm_progress', JSON.stringify({ pct, done, total }));
+}
+
+// ═══ CHECKLIST ═══
+function cycleChecklistItem(icon, idx) {
+  const item   = icon.closest('.ck-item');
+  const text   = item.querySelector('.ck-text');
+  const states = [
+    { state:'done',    icon:'✓', iconColor:'var(--green)', textColor:'var(--text2)' },
+    { state:'pending', icon:'○', iconColor:'var(--gold)',  textColor:'var(--text2)' },
+    { state:'open',    icon:'○', iconColor:'var(--text3)', textColor:'var(--text3)' },
+  ];
+  const cur = states.findIndex(s => item.dataset.ckState === s.state);
+  const nxt = states[(cur + 1) % states.length];
+  item.dataset.ckState = nxt.state;
+  icon.textContent     = nxt.icon;
+  icon.style.color     = nxt.iconColor;
+  if (text) text.style.color = nxt.textColor;
+  localStorage.setItem('cinea_ck_' + idx, JSON.stringify(nxt));
+}
+
+// ═══ IDEAS ═══
+function cycleIdeaEffort(el, idx) {
+  const levels = [
+    { text:'Baixo esforço', bg:'rgba(39,174,96,0.15)',  color:'var(--green)' },
+    { text:'Médio esforço', bg:'rgba(245,166,35,0.15)', color:'var(--gold)' },
+    { text:'Alto esforço',  bg:'rgba(231,76,60,0.15)',  color:'var(--red)' },
+  ];
+  const cur = levels.findIndex(l => el.textContent.trim() === l.text);
+  const nxt = levels[(cur + 1) % levels.length];
+  el.textContent    = nxt.text;
+  el.style.background = nxt.bg;
+  el.style.color      = nxt.color;
+  localStorage.setItem('cinea_idea_eff_' + idx, JSON.stringify(nxt));
+}
+
+// ═══ BAR CHART ═══
+function updateBarHeights() {
+  const maxV = Math.max(...presData.map(d => d.val), 1);
+  presData.forEach((d, i) => {
+    const fill = document.querySelector(`[data-bar-fill="${i}"]`);
+    if (fill) fill.style.height = (d.val / maxV * 90) + 'px';
+  });
+}
+
+function cycleStatus(pill, idx) {
+  const states = [
+    { text: '● Andamento', cls: 'warn' },
+    { text: '● Concluído', cls: 'ok'   },
+    { text: '● Pendente',  cls: 'idle' }
+  ];
+  const cur = states.findIndex(s => pill.textContent.includes(s.text.replace('● ', '')));
+  const next = states[(cur + 1) % states.length];
+  pill.textContent = next.text;
+  pill.className = 'status-pill ' + next.cls;
+  localStorage.setItem('cinea_pill_' + idx, next.text + '|' + next.cls);
+}
+
+function cycleGapDot(dot, idx) {
+  const colors = ['var(--green)', 'var(--gold)', 'var(--red)'];
+  const cur = colors.findIndex(c => dot.style.background === c);
+  const next = colors[(cur + 1) % colors.length];
+  dot.style.background = next;
+  localStorage.setItem('cinea_dot_' + idx, next);
+}
+
+function updateKPIBar(curEl) {
+  const item = curEl.closest('.kpi-item');
+  if (!item) return;
+  const tgtEl = item.querySelector('.kpi-tgt');
+  const pctEl = item.querySelector('.kpi-pct');
+  const fillEl = item.querySelector('.kpi-fill');
+  if (!tgtEl || !pctEl || !fillEl) return;
+  const tgt = parseFloat(tgtEl.textContent.replace(/[^0-9.]/g, '')) || 1;
+  const cur = parseFloat(curEl.textContent.replace(/[^0-9.]/g, '')) || 0;
+  const pct = Math.min(100, Math.round(cur / tgt * 100));
+  pctEl.textContent = pct + '%';
+  fillEl.style.width = pct + '%';
+  if (pct >= 80) { pctEl.style.background = 'rgba(39,174,96,0.15)'; pctEl.style.color = 'var(--green)'; }
+  else if (pct >= 40) { pctEl.style.background = 'rgba(245,166,35,0.15)'; pctEl.style.color = 'var(--gold)'; }
+  else { pctEl.style.background = 'rgba(231,76,60,0.1)'; pctEl.style.color = 'var(--red)'; }
+}
+
+function updateAllKPIs() {
+  document.querySelectorAll('.kpi-cur').forEach(updateKPIBar);
+}
+
+// ═══ RESTORE SAVED EDITS ON LOAD ═══
+function loadSavedEdits() {
+  // Text fields
+  TEXT_ED_SELS.forEach(sel => {
+    document.querySelectorAll(sel).forEach((el, i) => {
+      const saved = localStorage.getItem('cinea_ed_' + sel.replace(/[^a-z]/g, '_') + '_' + i);
+      if (saved) el.textContent = saved;
+    });
+  });
+
+  // Stat values
+  document.querySelectorAll('.stat-value').forEach((el, i) => {
+    const savedVal  = localStorage.getItem('cinea_statval_'  + i);
+    const savedUnit = localStorage.getItem('cinea_statunit_' + i);
+    if (!savedVal) return;
+    el.innerHTML = savedVal;
+    if (savedUnit) {
+      const s = document.createElement('span');
+      s.className = 'stat-unit'; s.textContent = savedUnit;
+      el.appendChild(s);
+    }
+  });
+
+  // Status pills
+  document.querySelectorAll('.act-table .status-pill').forEach((pill, i) => {
+    const saved = localStorage.getItem('cinea_pill_' + i);
+    if (!saved) return;
+    const [text, cls] = saved.split('|');
+    pill.textContent = text;
+    pill.className = 'status-pill ' + (cls || 'warn');
+  });
+
+  // Gap dots
+  document.querySelectorAll('.gap-dot').forEach((dot, i) => {
+    const saved = localStorage.getItem('cinea_dot_' + i);
+    if (saved) dot.style.background = saved;
+  });
+
+  // Gap texts (prepare items so span exists)
+  prepareGapItems();
+
+  // KPI bars (recalculate after restoring kpi-cur values)
+  updateAllKPIs();
+
+  // Roadmap phase statuses
+  document.querySelectorAll('.rm-status').forEach((el, i) => {
+    const saved = localStorage.getItem('cinea_rm_st_' + i);
+    if (!saved) return;
+    try {
+      const s = JSON.parse(saved);
+      const item  = el.closest('.rm-item');
+      const dot   = item?.querySelector('.rm-dot');
+      const phase = item?.querySelector('.rm-phase');
+      el.textContent = s.text; el.className = 'rm-status ' + s.cls;
+      if (dot)   dot.style.background = s.dot;
+      if (phase) phase.style.color    = s.col;
+    } catch(e){}
+  });
+  // Restore roadmap gauge
+  const savedProg = localStorage.getItem('cinea_rm_progress');
+  if (savedProg) {
+    try {
+      const { pct, done, total } = JSON.parse(savedProg);
+      const arc  = document.getElementById('gauge-arc');
+      const gTxt = document.querySelector('#page-roadmap svg text');
+      const gLbl = document.querySelector('#page-roadmap .gauge-label');
+      if (arc)  arc.style.strokeDashoffset = String(188 - (188 * pct / 100));
+      if (gTxt) gTxt.textContent = pct + '%';
+      if (gLbl) gLbl.textContent = done + ' de ' + total + ' fases concluídas';
+    } catch(e){}
+  }
+
+  // Checklist items
+  document.querySelectorAll('.ck-icon').forEach((icon, i) => {
+    const saved = localStorage.getItem('cinea_ck_' + i);
+    if (!saved) return;
+    try {
+      const s    = JSON.parse(saved);
+      const item = icon.closest('.ck-item');
+      const text = item?.querySelector('.ck-text');
+      item.dataset.ckState = s.state;
+      icon.textContent = s.icon; icon.style.color = s.iconColor;
+      if (text) text.style.color = s.textColor;
+    } catch(e){}
+  });
+
+  // Ideas effort badges
+  document.querySelectorAll('.idea-effort').forEach((el, i) => {
+    const saved = localStorage.getItem('cinea_idea_eff_' + i);
+    if (!saved) return;
+    try {
+      const s = JSON.parse(saved);
+      el.textContent = s.text; el.style.background = s.bg; el.style.color = s.color;
+    } catch(e){}
+  });
+
+  // Cross-page sync values
+  document.querySelectorAll('[data-sync]').forEach(el => {
+    const saved = localStorage.getItem('cinea_sync_' + el.dataset.sync);
+    if (saved) el.textContent = saved;
+  });
+
+  // Power BI state
+  loadPbiState();
+}
+
+// ═══════════════════════ POWER BI ═══════════════════════
+function pbiToggleStatus() {
+  const isConnected = localStorage.getItem('cinea_pbi_connected') === '1';
+  const newState    = !isConnected;
+  localStorage.setItem('cinea_pbi_connected', newState ? '1' : '0');
+  applyPbiStatus(newState);
+}
+
+function applyPbiStatus(connected) {
+  const lbl = document.getElementById('pbi-status-label');
+  if (!lbl) return;
+  if (connected) {
+    lbl.textContent = '⬤ Conectado';
+    lbl.style.background = 'rgba(39,174,96,0.15)';
+    lbl.style.color = 'var(--green)';
+  } else {
+    lbl.textContent = '⬤ Não conectado';
+    lbl.style.background = 'rgba(231,76,60,0.12)';
+    lbl.style.color = 'var(--red)';
+  }
+}
+
+function pbiRegisterSync() {
+  const now = new Date();
+  const ts  = now.toLocaleDateString('pt-BR') + ' às ' + now.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+  localStorage.setItem('cinea_pbi_sync', ts);
+  localStorage.setItem('cinea_pbi_connected', '1');
+  applyPbiStatus(true);
+  const el = document.getElementById('pbi-last-sync');
+  if (el) el.textContent = ts;
+}
+
+function updatePbiEmbed() {
+  const reportId = (document.getElementById('pbi-report-id')?.textContent || '').trim();
+  const wId      = (document.getElementById('pbi-workspace-id')?.textContent || '').trim();
+  const wrap     = document.getElementById('pbi-embed-wrap');
+  const iframe   = document.getElementById('pbi-iframe');
+  if (!wrap || !iframe) return;
+  if (reportId && reportId !== '—') {
+    const src = wId && wId !== '—'
+      ? `https://app.powerbi.com/reportEmbed?reportId=${reportId}&groupId=${wId}&autoAuth=true&ctid=`
+      : `https://app.powerbi.com/reportEmbed?reportId=${reportId}&autoAuth=true`;
+    iframe.src = src;
+    wrap.style.display = 'block';
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+function loadPbiState() {
+  const connected = localStorage.getItem('cinea_pbi_connected') === '1';
+  applyPbiStatus(connected);
+  const sync = localStorage.getItem('cinea_pbi_sync');
+  const syncEl = document.getElementById('pbi-last-sync');
+  if (sync && syncEl) syncEl.textContent = sync;
+  const rid = localStorage.getItem('cinea_pbi-report-id');
+  const wid = localStorage.getItem('cinea_pbi-workspace-id');
+  const ridEl = document.getElementById('pbi-report-id');
+  const widEl = document.getElementById('pbi-workspace-id');
+  if (rid && ridEl) ridEl.textContent = rid;
+  if (wid && widEl) widEl.textContent = wid;
+  updatePbiEmbed();
+}
+
+loadSavedEdits();
+
+</script>
+</body>
+</html>
