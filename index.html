@@ -8,6 +8,7 @@
 <!-- Firebase SDKs (compat — funciona sem bundler) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <style>
 :root {
   --purple:    #4F2D7F;
@@ -2052,7 +2053,15 @@ const _fbConfig = {
 };
 firebase.initializeApp(_fbConfig);
 const _db    = firebase.database();
+const _auth  = firebase.auth();
 const _CREF  = _db.ref('cinea/v1');   // raiz dos dados do dashboard
+
+// Autenticação anônima — habilita escrita nas regras do Firebase
+// (invisível para o usuário, acontece em background)
+let _fbAuthReady = false;
+_auth.signInAnonymously()
+  .then(() => { _fbAuthReady = true; })
+  .catch(e  => console.warn('[CINEA] Auth anônima falhou:', e));
 
 // Atualiza o badge de status no sidebar
 function setFbStatus(text, color, dotColor) {
@@ -2090,8 +2099,6 @@ function saveToFirebase() {
   for (let i = 0; i < localStorage.length; i++) {
     const lsKey = localStorage.key(i);
     if (!lsKey || !lsKey.startsWith('cinea_')) continue;
-    // Firebase proíbe . # $ [ ] / → traços (-) são permitidos
-    // Mas para segurança extra, escapamos traços em chaves únicas
     const fbKey = lsKey.replace(/-/g, '___DASH___');
     data[fbKey] = localStorage.getItem(lsKey);
   }
@@ -2100,18 +2107,30 @@ function saveToFirebase() {
   const btn = document.getElementById('edit-mode-btn');
   if (btn) btn.textContent = '💾 Salvando...';
 
-  _CREF.set(data)
-    .then(() => {
-      setFbStatus('✅ Salvo na nuvem', 'var(--green)', 'var(--green)');
-      if (btn) btn.textContent = '✏️ Editar';
-      // Volta ao status normal após 4 segundos
-      setTimeout(() => setFbStatus('☁️ Firebase ativo', 'var(--green)', 'var(--green)'), 4000);
-    })
-    .catch(err => {
-      console.error('[CINEA] Erro ao salvar no Firebase:', err);
-      setFbStatus('⚠️ Erro — dados locais OK', 'var(--red)', 'var(--red)');
-      if (btn) btn.textContent = '✏️ Editar';
+  function doSave() {
+    _CREF.set(data)
+      .then(() => {
+        setFbStatus('✅ Salvo na nuvem', 'var(--green)', 'var(--green)');
+        if (btn) btn.textContent = '✏️ Editar';
+        setTimeout(() => setFbStatus('☁️ Firebase ativo', 'var(--green)', 'var(--green)'), 4000);
+      })
+      .catch(err => {
+        console.error('[CINEA] Erro ao salvar:', err);
+        setFbStatus('⚠️ Erro — dados locais OK', 'var(--red)', 'var(--red)');
+        if (btn) btn.textContent = '✏️ Editar';
+      });
+  }
+
+  // Se auth ainda não estiver pronta, aguarda (máx. 5 s)
+  if (_fbAuthReady) {
+    doSave();
+  } else {
+    const unsubscribe = _auth.onAuthStateChanged(user => {
+      unsubscribe();          // para de escutar
+      if (user) { _fbAuthReady = true; doSave(); }
+      else { setFbStatus('⚠️ Sem autenticação', 'var(--red)', 'var(--red)'); if (btn) btn.textContent = '✏️ Editar'; }
     });
+  }
 }
 
 // ═══════════════════════ SEMESTER SWITCH ═══════════════════════
