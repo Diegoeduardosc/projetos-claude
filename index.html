@@ -2936,11 +2936,14 @@ function updateBarHeights() {
 
 function cycleStatus(pill, idx) {
   const states = [
-    { text: '● Andamento', cls: 'warn' },
-    { text: '● Concluído', cls: 'ok'   },
-    { text: '● Pendente',  cls: 'idle' }
+    { text: '● Não iniciada', cls: 'idle' },
+    { text: '● Andamento',    cls: 'warn' },
+    { text: '● Concluído',    cls: 'ok'   },
+    { text: '● Pendente',     cls: 'idle' },
   ];
-  const cur = states.findIndex(s => pill.textContent.includes(s.text.replace('● ', '')));
+  // Normaliza texto atual para comparação (remove plural e bullet)
+  const curText = pill.textContent.replace('● ', '').replace('Não iniciadas', 'Não iniciada').trim();
+  const cur = states.findIndex(s => s.text.replace('● ', '') === curText);
   const next = states[(cur + 1) % states.length];
   pill.textContent = next.text;
   pill.className = 'status-pill ' + next.cls;
