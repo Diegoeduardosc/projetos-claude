@@ -130,6 +130,9 @@ body::before {
 .sidebar-bottom {
   margin-top: auto;
   padding: 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 .live-badge {
   display: flex;
@@ -142,6 +145,16 @@ body::before {
   font-size: 0.75rem;
   color: var(--green);
   font-weight: 600;
+}
+.live-badge.badge-warn {
+  background: rgba(245,166,35,0.1);
+  border-color: rgba(245,166,35,0.25);
+  color: var(--gold);
+}
+.live-badge.badge-off {
+  background: rgba(231,76,60,0.08);
+  border-color: rgba(231,76,60,0.2);
+  color: var(--red);
 }
 .live-dot {
   width: 7px; height: 7px;
@@ -1127,7 +1140,11 @@ body.edit-mode .idea-tag { cursor: text; }
   </div>
 
   <div class="sidebar-bottom">
-    <div class="live-badge">
+    <div class="live-badge" id="pbi-sidebar-badge" style="cursor:pointer" onclick="showPage('powerbi', document.querySelector('.nav-item[onclick*=powerbi]'))" title="Clique para ir à aba Power BI">
+      <div class="live-dot" id="pbi-sidebar-dot" style="background:var(--red);animation:none"></div>
+      <span id="pbi-sidebar-status">Power BI · Não conectado</span>
+    </div>
+    <div class="live-badge" id="fb-badge">
       <div class="live-dot" id="fb-dot"></div>
       <span id="fb-status">Conectando...</span>
     </div>
@@ -3062,16 +3079,41 @@ function pbiToggleStatus() {
 }
 
 function applyPbiStatus(connected) {
+  // Badge no card Power BI
   const lbl = document.getElementById('pbi-status-label');
-  if (!lbl) return;
-  if (connected) {
-    lbl.textContent = '⬤ Conectado';
-    lbl.style.background = 'rgba(39,174,96,0.15)';
-    lbl.style.color = 'var(--green)';
+  if (lbl) {
+    if (connected) {
+      lbl.textContent = '⬤ Conectado';
+      lbl.style.background = 'rgba(39,174,96,0.15)';
+      lbl.style.color = 'var(--green)';
+    } else {
+      lbl.textContent = '⬤ Não conectado';
+      lbl.style.background = 'rgba(231,76,60,0.12)';
+      lbl.style.color = 'var(--red)';
+    }
+  }
+
+  // Badge no sidebar (sempre visível)
+  const badge  = document.getElementById('pbi-sidebar-badge');
+  const dot    = document.getElementById('pbi-sidebar-dot');
+  const status = document.getElementById('pbi-sidebar-status');
+
+  // Verifica se há Report ID preenchido
+  const ridEl = document.getElementById('pbi-report-id');
+  const hasReportId = ridEl && ridEl.textContent.trim() !== '' && ridEl.textContent.trim() !== '—';
+
+  if (connected && hasReportId) {
+    if (badge)  { badge.className = 'live-badge'; }
+    if (dot)    { dot.style.background = 'var(--green)'; dot.style.animation = 'pulse 1.5s infinite'; }
+    if (status) status.textContent = 'Power BI · Conectado';
+  } else if (connected && !hasReportId) {
+    if (badge)  { badge.className = 'live-badge badge-warn'; }
+    if (dot)    { dot.style.background = 'var(--gold)'; dot.style.animation = 'none'; }
+    if (status) status.textContent = 'Power BI · Sem Report ID';
   } else {
-    lbl.textContent = '⬤ Não conectado';
-    lbl.style.background = 'rgba(231,76,60,0.12)';
-    lbl.style.color = 'var(--red)';
+    if (badge)  { badge.className = 'live-badge badge-off'; }
+    if (dot)    { dot.style.background = 'var(--red)'; dot.style.animation = 'none'; }
+    if (status) status.textContent = 'Power BI · Não conectado';
   }
 }
 
@@ -3100,6 +3142,9 @@ function updatePbiEmbed() {
   } else {
     wrap.style.display = 'none';
   }
+  // Atualiza badge do sidebar sempre que o embed é recalculado
+  const connected = localStorage.getItem('cinea_pbi_connected') === '1';
+  applyPbiStatus(connected);
 }
 
 function loadPbiState() {
