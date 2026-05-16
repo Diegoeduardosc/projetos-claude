@@ -1488,6 +1488,7 @@ body.edit-mode .user-mgmt-section { display: block; }
         <div class="user-dropdown" id="user-dropdown">
           <div class="user-dd-item" id="dd-gerenciar" onclick="abrirGerenciarUsuarios()" style="display:none">👥 Gerenciar equipe</div>
           <div class="user-dd-item" id="dd-senha" onclick="abrirModal()" style="display:none">🔑 Alterar senha admin</div>
+          <div class="user-dd-item" id="dd-trocar-senha" onclick="abrirTrocarSenha()">🔑 Trocar minha senha</div>
           <div class="user-dd-item danger" onclick="fazerLogout()">🚪 Sair</div>
         </div>
       </div>
@@ -3694,7 +3695,10 @@ async function carregarListaUsuarios() {
             <div style="font-size:0.68rem;color:var(--text3)">Mat: ${mat} · ${u.role==='admin'?'Admin':'Membro'}</div>
           </div>
         </div>
-        <button onclick="removerUsuario('${mat}')" style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.25);border-radius:8px;padding:5px 10px;font-size:0.72rem;color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif">✕ Remover</button>
+        <div style="display:flex;gap:6px">
+          <button onclick="resetarSenhaUsuario('${mat}','${u.nome||mat}')" style="background:rgba(0,180,204,0.08);border:1px solid rgba(0,180,204,0.25);border-radius:8px;padding:5px 10px;font-size:0.72rem;color:var(--cyan);cursor:pointer;font-family:'DM Sans',sans-serif" title="Resetar senha para a matrícula">🔄 Resetar</button>
+          <button onclick="removerUsuario('${mat}')" style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.25);border-radius:8px;padding:5px 10px;font-size:0.72rem;color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif">✕ Remover</button>
+        </div>
       </div>`).join('');
   } catch(e) {
     container.innerHTML = '<div style="text-align:center;color:var(--red);font-size:0.82rem;padding:20px">Erro ao carregar usuários.</div>';
@@ -3728,6 +3732,59 @@ async function removerUsuario(mat) {
   if (!confirm(`Remover o usuário "${mat}" permanentemente?`)) return;
   await _db.ref('cinea/users/' + mat).remove();
   carregarListaUsuarios();
+}
+
+async function resetarSenhaUsuario(mat, nome) {
+  if (!confirm(`Resetar a senha de "${nome}"?\n\nA nova senha será a própria matrícula: ${mat}`)) return;
+  try {
+    const hash = await sha256(mat); // senha resetada = matrícula
+    await _db.ref('cinea/users/' + mat + '/senha_hash').set(hash);
+    alert(`✅ Senha de "${nome}" resetada!\nNova senha temporária: ${mat}\nOriente o usuário a trocá-la após o login.`);
+  } catch(e) { alert('❌ Erro ao resetar: ' + e.message); }
+}
+
+// ── Trocar minha senha ──
+function abrirTrocarSenha() {
+  fecharUserDropdown();
+  document.getElementById('trocar-senha-modal').style.display = 'flex';
+  document.getElementById('ts-atual').value   = '';
+  document.getElementById('ts-nova').value    = '';
+  document.getElementById('ts-confirma').value = '';
+  document.getElementById('ts-error').textContent = '';
+  setTimeout(() => document.getElementById('ts-atual').focus(), 80);
+}
+function fecharTrocarSenha() {
+  document.getElementById('trocar-senha-modal').style.display = 'none';
+}
+async function salvarNovaSenha() {
+  const atual    = document.getElementById('ts-atual').value;
+  const nova     = document.getElementById('ts-nova').value;
+  const confirma = document.getElementById('ts-confirma').value;
+  const errEl    = document.getElementById('ts-error');
+  if (!atual || !nova || !confirma) { errEl.textContent = 'Preencha todos os campos.'; return; }
+  if (nova.length < 6)              { errEl.textContent = 'Nova senha deve ter ao menos 6 caracteres.'; return; }
+  if (nova !== confirma)            { errEl.textContent = 'A nova senha e a confirmação não coincidem.'; return; }
+  errEl.style.color = 'var(--text3)';
+  errEl.textContent = 'Verificando…';
+  try {
+    const mat       = _currentUser.matricula;
+    const hashAtual = await sha256(atual);
+    const snap      = await _db.ref('cinea/users/' + mat + '/senha_hash').once('value');
+    if (snap.val() !== hashAtual) {
+      errEl.style.color = 'var(--red)';
+      errEl.textContent = '❌ Senha atual incorreta.';
+      document.getElementById('ts-atual').value = '';
+      return;
+    }
+    const hashNova = await sha256(nova);
+    await _db.ref('cinea/users/' + mat + '/senha_hash').set(hashNova);
+    errEl.style.color = 'var(--green)';
+    errEl.textContent = '✅ Senha alterada com sucesso!';
+    setTimeout(fecharTrocarSenha, 1600);
+  } catch(e) {
+    errEl.style.color = 'var(--red)';
+    errEl.textContent = '❌ Erro: ' + e.message;
+  }
 }
 // ═════════════════════════════════════════════════════
 
@@ -4097,6 +4154,25 @@ carregarSemestresFirebase();
     <div style="font-size:0.72rem;color:var(--text3);margin-bottom:16px">Os dados do semestre ficam zerados inicialmente. Edite os valores no Painel após criá-lo.</div>
     <button onclick="criarSemestre()" style="width:100%;padding:12px;background:var(--purple);border:none;border-radius:12px;color:#fff;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Criar Semestre</button>
     <div id="new-sem-error" style="font-size:0.78rem;color:var(--red);margin-top:10px;min-height:18px"></div>
+  </div>
+</div>
+
+<!-- MODAL TROCAR SENHA -->
+<div id="trocar-senha-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:600;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:380px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px">
+      <div style="font-size:1rem;font-weight:700;color:var(--text)">🔑 Trocar minha senha</div>
+      <button onclick="fecharTrocarSenha()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text2);width:32px;height:32px;cursor:pointer">✕</button>
+    </div>
+    <label class="reuniao-label">Senha atual</label>
+    <input id="ts-atual" class="reuniao-input" type="password" placeholder="••••••••" style="margin-bottom:14px">
+    <label class="reuniao-label">Nova senha</label>
+    <input id="ts-nova" class="reuniao-input" type="password" placeholder="Mínimo 6 caracteres" style="margin-bottom:14px">
+    <label class="reuniao-label">Confirmar nova senha</label>
+    <input id="ts-confirma" class="reuniao-input" type="password" placeholder="••••••••" style="margin-bottom:20px"
+           onkeydown="if(event.key==='Enter') salvarNovaSenha()">
+    <button onclick="salvarNovaSenha()" style="width:100%;padding:12px;background:var(--purple);border:none;border-radius:12px;color:#fff;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Salvar nova senha</button>
+    <div id="ts-error" style="font-size:0.78rem;margin-top:10px;min-height:18px;text-align:center"></div>
   </div>
 </div>
 
