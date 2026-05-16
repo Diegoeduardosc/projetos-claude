@@ -1337,6 +1337,79 @@ body.light-mode .notif-bell-btn:hover { background: rgba(79,45,127,0.08); }
 .notif-resolve-btn:hover { background: rgba(79,45,127,0.28); }
 .notif-empty { text-align: center; color: var(--text3); font-size: 0.78rem; padding: 20px 10px; }
 
+/* ═══ SUGESTÕES ═══ */
+.sug-btn {
+  width: 32px; height: 32px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+  display: none;
+  align-items: center; justify-content: center;
+  font-size: 1rem;
+  color: var(--text2);
+  transition: background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.sug-btn:hover { background: rgba(245,166,35,0.12); border-color: rgba(245,166,35,0.35); }
+body.user-logged-in .sug-btn { display: flex; }
+body.light-mode .sug-btn:hover { background: rgba(245,166,35,0.1); }
+
+.lixeira-topbar-btn {
+  width: 32px; height: 32px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+  display: none;
+  align-items: center; justify-content: center;
+  font-size: 1rem;
+  color: var(--text2);
+  transition: background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.lixeira-topbar-btn:hover { background: rgba(231,76,60,0.12); border-color: rgba(231,76,60,0.35); }
+body.user-logged-in .lixeira-topbar-btn { display: flex; }
+body.light-mode .lixeira-topbar-btn:hover { background: rgba(231,76,60,0.09); }
+
+/* Status pills para sugestões */
+.sug-status {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px;
+  text-transform: uppercase; padding: 3px 8px; border-radius: 20px;
+}
+.sug-status.nova       { background: rgba(0,180,204,0.12);  color: var(--cyan);    border: 1px solid rgba(0,180,204,0.3); }
+.sug-status.analise    { background: rgba(245,166,35,0.12); color: var(--gold);    border: 1px solid rgba(245,166,35,0.3); }
+.sug-status.implementada { background: rgba(39,174,96,0.12);  color: var(--green);   border: 1px solid rgba(39,174,96,0.3); }
+.sug-status.descartada { background: rgba(231,76,60,0.08);  color: var(--red);     border: 1px solid rgba(231,76,60,0.2); opacity:0.7; }
+
+.sug-card {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px 16px; margin-bottom: 10px;
+}
+.sug-card:last-child { margin-bottom: 0; }
+.sug-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.sug-card-meta { font-size: 0.68rem; color: var(--text3); margin-bottom: 6px; }
+.sug-card-text { font-size: 0.8rem; color: var(--text); line-height: 1.5; margin-bottom: 10px; }
+.sug-feedback-area {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 0.75rem; padding: 8px 10px; resize: vertical; min-height: 54px;
+  margin-bottom: 8px;
+}
+.sug-feedback-area:focus { outline: none; border-color: var(--purple-l); }
+.sug-action-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.sug-act-btn {
+  padding: 4px 11px; border-radius: 7px; font-size: 0.7rem; font-weight: 600;
+  cursor: pointer; border: 1px solid; font-family: 'DM Sans', sans-serif;
+  transition: background 0.12s;
+}
+.sug-act-btn.analise    { background: rgba(245,166,35,0.1);  color: var(--gold);  border-color: rgba(245,166,35,0.3); }
+.sug-act-btn.implementada { background: rgba(39,174,96,0.1);  color: var(--green); border-color: rgba(39,174,96,0.3); }
+.sug-act-btn.descartada { background: rgba(231,76,60,0.08); color: var(--red);   border-color: rgba(231,76,60,0.2); }
+.sug-act-btn.save-fb    { background: rgba(79,45,127,0.15); color: var(--purple-l); border-color: rgba(79,45,127,0.3); }
+.sug-act-btn:hover { filter: brightness(1.15); }
+
 /* ═══ SEMESTER SELECTOR ═══ */
 .semester-selector-row {
   display: flex;
@@ -1622,6 +1695,10 @@ body.edit-mode .user-mgmt-section { display: block; }
     <div class="topbar-title" id="page-title">Dashboard Geral</div>
     <div class="topbar-right">
       <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Alternar tema claro/escuro">🌙</button>
+      <!-- Sugestões de melhorias (todos os logados) -->
+      <button class="sug-btn" id="sug-btn" onclick="abrirSugestaoModal()" title="Sugestões de melhorias">💡</button>
+      <!-- Lixeira (todos os logados) -->
+      <button class="lixeira-topbar-btn" id="lixeira-topbar-btn" onclick="abrirLixeira()" title="Lixeira">🗑️</button>
       <!-- Sino de notificações (admin) -->
       <div class="notif-bell-wrap" id="notif-bell-wrap" onclick="toggleNotifPanel(event)">
         <button class="notif-bell-btn" title="Notificações">🔔</button>
@@ -1642,8 +1719,8 @@ body.edit-mode .user-mgmt-section { display: block; }
         </div>
         <div class="user-dropdown" id="user-dropdown">
           <div class="user-dd-item" id="dd-gerenciar" onclick="abrirGerenciarUsuarios()" style="display:none">👥 Gerenciar equipe</div>
+          <div class="user-dd-item" id="dd-sugestoes" onclick="abrirSugestoesAdmin()" style="display:none">💡 Sugestões recebidas</div>
           <div class="user-dd-item" id="dd-log" onclick="abrirLog()" style="display:none">📋 Log de atividades</div>
-          <div class="user-dd-item" id="dd-lixeira" onclick="abrirLixeira()" style="display:none">🗑 Lixeira</div>
           <div class="user-dd-item" id="dd-senha" onclick="abrirModal()" style="display:none">🔑 Alterar senha admin</div>
           <div class="user-dd-item" id="dd-trocar-senha" onclick="abrirTrocarSenha()">🔑 Trocar minha senha</div>
           <div class="user-dd-item danger" onclick="fazerLogout()">🚪 Sair</div>
@@ -1781,7 +1858,7 @@ body.edit-mode .user-mgmt-section { display: block; }
               <div class="avatar cyan">JE</div>
               <div>
                 <div class="person-name">Jefferson</div>
-                <div class="person-role">Tecnologias e Experiências de Aprendizagem</div>
+                <div class="person-role">Tecnologias & Aprendizagem</div>
               </div>
             </div>
             <div class="person-kpis">
@@ -2321,7 +2398,7 @@ body.edit-mode .user-mgmt-section { display: block; }
             <div class="avatar cyan" style="width:32px;height:32px;font-size:0.75rem">JE</div>
             <div>
               <div class="meeting-person">Jefferson</div>
-              <div class="meeting-dept">Tecnologias e Experiências de Aprendizagem</div>
+              <div class="meeting-dept">Tecnologias & Aprendizagem</div>
             </div>
           </div>
           <div class="gap-item"><div class="gap-dot" style="background:var(--green)"></div>Docentes atendidos no Canvas</div>
@@ -2510,7 +2587,7 @@ body.edit-mode .user-mgmt-section { display: block; }
         <div class="card-title">Todas as Tarefas por Departamento <span>Clique no status para alterar</span></div>
 
         <!-- HUB -->
-        <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--pink);margin-bottom:8px;margin-top:4px">Hub de Integração · Rosimeire</div>
+        <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--pink);margin-bottom:8px;margin-top:4px">Hub de Integração</div>
         <table class="task-full-table" id="table-hub"></table>
         <div class="add-task-row">
           <input class="add-task-input" id="hub-input" placeholder="Nova tarefa para o Hub..." />
@@ -2527,7 +2604,7 @@ body.edit-mode .user-mgmt-section { display: block; }
         <div style="height:1px;background:var(--border);margin:20px 0"></div>
 
         <!-- INOVAÇÃO -->
-        <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--purple-l);margin-bottom:8px">Inovação Pedagógica · Cláudia</div>
+        <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--purple-l);margin-bottom:8px">Inovação Pedagógica</div>
         <table class="task-full-table" id="table-inov"></table>
         <div class="add-task-row">
           <input class="add-task-input" id="inov-input" placeholder="Nova tarefa para Inovação..." />
@@ -2548,7 +2625,7 @@ body.edit-mode .user-mgmt-section { display: block; }
         <div style="height:1px;background:var(--border);margin:20px 0"></div>
 
         <!-- TECNOLOGIAS -->
-        <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--cyan);margin-bottom:8px">Tecnologias · Jefferson</div>
+        <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--cyan);margin-bottom:8px">Tecnologias & Aprendizagem</div>
         <table class="task-full-table" id="table-tec"></table>
         <div class="add-task-row">
           <input class="add-task-input" id="tec-input" placeholder="Nova tarefa para Tecnologias..." />
@@ -2847,12 +2924,14 @@ function showPage(id, el) {
     team: 'Equipe & Tarefas',
     roadmap: 'Roadmap de Implantação BI',
     ideas: 'Ideias de Implantação',
-    hub: 'Hub de Integração – Rosimeire',
-    inov: 'Inovação Pedagógica – Cláudia',
-    tec: 'Tecnologias – Jefferson',
+    hub: 'Hub de Integração',
+    inov: 'Inovação Pedagógica',
+    tec: 'Tecnologias & Aprendizagem',
     meeting: 'Reunião',
   };
-  document.getElementById('page-title').textContent = titles[id] || '';
+  // Mirror sidebar nav item text to page title; fall back to titles map
+  const navText = el ? el.textContent.trim() : '';
+  document.getElementById('page-title').textContent = navText || titles[id] || '';
   if (id === 'team') {
     loadTasksFromStorage();
     ['hub','inov','tec'].forEach(d => renderTaskTable(d));
@@ -3117,7 +3196,7 @@ function addNewTask(dept) {
 }
 
 function exportCSV() {
-  const deptNames = {hub:'Hub de Integração e Relacionamento', inov:'Inovação Pedagógica e Formação Continuada', tec:'Tecnologias e Experiências de Aprendizagem'};
+  const deptNames = {hub:'Hub de Integração', inov:'Inovação Pedagógica', tec:'Tecnologias & Aprendizagem'};
   let csv = 'Departamento,Tarefa,Responsáveis,Tipo,Status\n';
   ['hub','inov','tec'].forEach(dept => {
     TASKS[dept].forEach(t => {
@@ -3833,9 +3912,9 @@ function atualizarTopbarUser() {
   const nameEl     = document.getElementById('topbar-user-name');
   const roleEl     = document.getElementById('topbar-user-role');
   const ddGer      = document.getElementById('dd-gerenciar');
+  const ddSug      = document.getElementById('dd-sugestoes');
   const ddLog      = document.getElementById('dd-log');
   const ddSenha    = document.getElementById('dd-senha');
-  const ddLixeira  = document.getElementById('dd-lixeira');
   const editBtn    = document.getElementById('edit-mode-btn');
   const bellWrap   = document.getElementById('notif-bell-wrap');
   const isAdmin    = _currentUser && _currentUser.role === 'admin';
@@ -3847,9 +3926,9 @@ function atualizarTopbarUser() {
     if (nameEl)    nameEl.textContent      = _currentUser.nome;
     if (roleEl)    roleEl.textContent      = isAdmin ? 'Admin · CINEA' : 'Equipe CINEA';
     if (ddGer)     ddGer.style.display     = isAdmin ? 'flex' : 'none';
+    if (ddSug)     ddSug.style.display     = isAdmin ? 'flex' : 'none';
     if (ddLog)     ddLog.style.display     = isAdmin ? 'flex' : 'none';
     if (ddSenha)   ddSenha.style.display   = isAdmin ? 'flex' : 'none';
-    if (ddLixeira) ddLixeira.style.display = isAdmin ? 'flex' : 'none';
     if (editBtn)   editBtn.style.display   = 'flex';
     // Sino de notificações: só admin
     if (bellWrap)  bellWrap.classList.toggle('visible', isAdmin);
@@ -4763,6 +4842,186 @@ carregarSemestresFirebase();
   }
 })();
 
+/* ══════════════════════════════════════════
+   SUGESTÕES DE MELHORIAS
+══════════════════════════════════════════ */
+let _sugestoesCache = {}; // key → objeto sugestão
+
+const _CATEGORIAS = {
+  interface:      '🎨 Interface / Visual',
+  funcionalidade: '⚙️ Funcionalidade nova',
+  dados:          '📊 Dados / KPIs',
+  workflow:       '🔄 Workflow / Processo',
+  outro:          '💬 Outro',
+};
+
+const _SUG_STATUS = {
+  nova:          { label: 'Nova',          cls: 'nova' },
+  analise:       { label: 'Em análise',    cls: 'analise' },
+  implementada:  { label: 'Implementada',  cls: 'implementada' },
+  descartada:    { label: 'Descartada',    cls: 'descartada' },
+};
+
+function abrirSugestaoModal() {
+  if (!_currentUser) { abrirLoginModal(); return; }
+  document.getElementById('sug-autor-nome').textContent = _currentUser.nome || _currentUser.matricula;
+  document.getElementById('sug-texto').value = '';
+  document.getElementById('sug-categoria').value = 'interface';
+  const m = document.getElementById('sug-modal');
+  m.style.display = 'flex';
+  requestAnimationFrame(() => document.getElementById('sug-texto').focus());
+}
+
+function fecharSugestaoModal() {
+  document.getElementById('sug-modal').style.display = 'none';
+}
+
+async function enviarSugestao() {
+  if (!_currentUser) return;
+  const categoria = document.getElementById('sug-categoria').value;
+  const texto     = document.getElementById('sug-texto').value.trim();
+  if (!texto) { alert('Por favor descreva sua sugestão antes de enviar.'); return; }
+
+  const btn = document.querySelector('#sug-modal button[onclick="enviarSugestao()"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+
+  try {
+    await _db.ref('cinea/sugestoes').push({
+      autor:      _currentUser.nome || _currentUser.matricula,
+      matricula:  _currentUser.matricula,
+      categoria,
+      texto,
+      ts:         new Date().toISOString(),
+      status:     'nova',
+      feedback:   '',
+    });
+    registrarLog('Enviou sugestão de melhoria · categoria: ' + (_CATEGORIAS[categoria] || categoria));
+    fecharSugestaoModal();
+    mostrarToast('💡 Sugestão enviada!', 'Obrigado pela contribuição. O admin vai analisar em breve.');
+  } catch(e) {
+    alert('Erro ao enviar sugestão. Verifique a conexão e tente novamente.');
+    console.error(e);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Enviar 💡'; }
+  }
+}
+
+// ── Admin: abrir painel ──────────────────
+async function abrirSugestoesAdmin() {
+  if (!_currentUser || _currentUser.role !== 'admin') return;
+  fecharUserDropdown();
+  document.getElementById('sug-admin-modal').style.display = 'flex';
+  document.getElementById('sug-admin-filtro').value = '';
+  await carregarSugestoes();
+}
+
+function fecharSugestoesAdmin() {
+  document.getElementById('sug-admin-modal').style.display = 'none';
+}
+
+async function carregarSugestoes() {
+  const listEl = document.getElementById('sug-admin-list');
+  const countEl = document.getElementById('sug-admin-count');
+  listEl.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:40px">Carregando...</div>';
+  try {
+    const snap = await _db.ref('cinea/sugestoes').once('value');
+    _sugestoesCache = snap.val() || {};
+    filtrarSugestoes();
+  } catch(e) {
+    listEl.innerHTML = '<div style="text-align:center;color:var(--red);font-size:0.82rem;padding:30px">Erro ao carregar sugestões.</div>';
+    console.error(e);
+  }
+}
+
+function filtrarSugestoes() {
+  const filtro = document.getElementById('sug-admin-filtro').value;
+  const listEl = document.getElementById('sug-admin-list');
+  const countEl = document.getElementById('sug-admin-count');
+
+  // Ordena do mais recente para o mais antigo
+  const entradas = Object.entries(_sugestoesCache)
+    .sort((a,b) => (b[1].ts||'').localeCompare(a[1].ts||''))
+    .filter(([,v]) => !filtro || v.status === filtro);
+
+  if (entradas.length === 0) {
+    const total = Object.keys(_sugestoesCache).length;
+    countEl.textContent = total + ' sugestão(ões) no total';
+    listEl.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:40px">Nenhuma sugestão ' + (filtro ? 'com esse status' : 'recebida ainda') + '.</div>';
+    return;
+  }
+
+  const total = Object.keys(_sugestoesCache).length;
+  countEl.textContent = entradas.length + ' exibida(s) · ' + total + ' total';
+
+  listEl.innerHTML = entradas.map(([key, s]) => {
+    const st    = _SUG_STATUS[s.status] || _SUG_STATUS.nova;
+    const catLabel = _CATEGORIAS[s.categoria] || s.categoria || '—';
+    const data  = s.ts ? new Date(s.ts).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+
+    return `<div class="sug-card" id="sugcard-${key}">
+      <div class="sug-card-header">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+            <span class="sug-status ${st.cls}">${st.label}</span>
+            <span style="font-size:0.72rem;color:var(--text3)">${catLabel}</span>
+          </div>
+          <div class="sug-card-meta">👤 ${s.autor || '—'} · ${data}</div>
+        </div>
+      </div>
+      <div class="sug-card-text">${escapeHtml(s.texto || '')}</div>
+      ${s.feedback ? `<div style="background:rgba(79,45,127,0.08);border:1px solid rgba(79,45,127,0.2);border-radius:8px;padding:8px 12px;font-size:0.75rem;color:var(--text2);margin-bottom:10px">
+        <strong style="color:var(--purple-l)">Feedback do admin:</strong><br>${escapeHtml(s.feedback)}
+      </div>` : ''}
+      <textarea class="sug-feedback-area" id="sug-fb-${key}" placeholder="Escreva um feedback para o solicitante (opcional)...">${escapeHtml(s.feedback || '')}</textarea>
+      <div class="sug-action-row">
+        <button class="sug-act-btn analise"     onclick="atualizarSugestao('${key}','analise')">🔍 Em análise</button>
+        <button class="sug-act-btn implementada" onclick="atualizarSugestao('${key}','implementada')">✅ Implementada</button>
+        <button class="sug-act-btn descartada"  onclick="atualizarSugestao('${key}','descartada')">❌ Descartar</button>
+        <button class="sug-act-btn save-fb"     onclick="salvarFeedbackSugestao('${key}')">💾 Salvar feedback</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/\n/g,'<br>');
+}
+
+async function atualizarSugestao(key, novoStatus) {
+  if (!_currentUser || _currentUser.role !== 'admin') return;
+  try {
+    const fb = document.getElementById('sug-fb-' + key)?.value.trim() || '';
+    await _db.ref('cinea/sugestoes/' + key).update({ status: novoStatus, feedback: fb, resolvidoPor: _currentUser.nome, resolvidoEm: new Date().toISOString() });
+    _sugestoesCache[key] = { ..._sugestoesCache[key], status: novoStatus, feedback: fb };
+    registrarLog('Atualizou sugestão para status: ' + (_SUG_STATUS[novoStatus]?.label || novoStatus));
+    filtrarSugestoes(); // re-renderiza
+    mostrarToast('💡 Sugestão atualizada', 'Status: ' + (_SUG_STATUS[novoStatus]?.label || novoStatus));
+  } catch(e) {
+    alert('Erro ao atualizar sugestão.');
+    console.error(e);
+  }
+}
+
+async function salvarFeedbackSugestao(key) {
+  if (!_currentUser || _currentUser.role !== 'admin') return;
+  const fb = document.getElementById('sug-fb-' + key)?.value.trim() || '';
+  try {
+    await _db.ref('cinea/sugestoes/' + key).update({ feedback: fb, resolvidoPor: _currentUser.nome, resolvidoEm: new Date().toISOString() });
+    _sugestoesCache[key] = { ..._sugestoesCache[key], feedback: fb };
+    mostrarToast('💾 Feedback salvo', 'Feedback da sugestão atualizado com sucesso.');
+  } catch(e) {
+    alert('Erro ao salvar feedback.');
+    console.error(e);
+  }
+}
+
+// (fechar sugestão ao clicar fora — via onclick inline nos modais)
+
 </script>
 
 <!-- MODAL NOVO SEMESTRE -->
@@ -4954,6 +5213,66 @@ carregarSemestresFirebase();
     </div>
     <div id="lixeira-content" style="overflow-y:auto;flex:1">
       <div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:30px">Carregando...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ MODAL SUGESTÃO (envio) ═══════════════════ -->
+<div id="sug-modal" onclick="if(event.target===this)fecharSugestaoModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:600;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:480px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <div style="font-size:1.05rem;font-weight:700;color:var(--text)">💡 Sugestão de Melhoria</div>
+        <div style="font-size:0.72rem;color:var(--text3);margin-top:2px">Sua ideia vai direto para o admin</div>
+      </div>
+      <button onclick="fecharSugestaoModal()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text2);width:32px;height:32px;cursor:pointer;font-size:1rem">✕</button>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <label style="font-size:0.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Categoria</label>
+      <select id="sug-categoria" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;padding:10px 12px;appearance:none;cursor:pointer">
+        <option value="interface">🎨 Interface / Visual</option>
+        <option value="funcionalidade">⚙️ Funcionalidade nova</option>
+        <option value="dados">📊 Dados / KPIs</option>
+        <option value="workflow">🔄 Workflow / Processo</option>
+        <option value="outro">💬 Outro</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom:20px">
+      <label style="font-size:0.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Descrição da sugestão</label>
+      <textarea id="sug-texto" placeholder="Descreva sua ideia de melhoria..." style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;padding:12px;resize:vertical;min-height:110px;line-height:1.5"></textarea>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div id="sug-autor-label" style="font-size:0.72rem;color:var(--text3)">Enviando como: <strong id="sug-autor-nome" style="color:var(--text2)">—</strong></div>
+      <button onclick="enviarSugestao()" style="background:linear-gradient(135deg,var(--gold),#e8950f);border:none;border-radius:10px;color:#000;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:700;padding:10px 22px;cursor:pointer;transition:opacity 0.15s">Enviar 💡</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ MODAL SUGESTÕES (admin) ═══════════════════ -->
+<div id="sug-admin-modal" onclick="if(event.target===this)fecharSugestoesAdmin()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:600;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:720px;max-height:88vh;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-shrink:0">
+      <div>
+        <div style="font-size:1.05rem;font-weight:700;color:var(--text)">💡 Sugestões Recebidas</div>
+        <div id="sug-admin-count" style="font-size:0.72rem;color:var(--text3);margin-top:2px">Carregando...</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <!-- Filtro de status -->
+        <select id="sug-admin-filtro" onchange="filtrarSugestoes()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.75rem;padding:5px 10px;cursor:pointer">
+          <option value="">Todos os status</option>
+          <option value="nova">Nova</option>
+          <option value="analise">Em análise</option>
+          <option value="implementada">Implementada</option>
+          <option value="descartada">Descartada</option>
+        </select>
+        <button onclick="fecharSugestoesAdmin()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text2);width:32px;height:32px;cursor:pointer">✕</button>
+      </div>
+    </div>
+    <div id="sug-admin-list" style="overflow-y:auto;flex:1;padding-right:4px">
+      <div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:40px">Carregando sugestões...</div>
     </div>
   </div>
 </div>
