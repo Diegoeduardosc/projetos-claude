@@ -1426,6 +1426,96 @@ body.edit-mode .user-mgmt-section { display: block; }
   padding: 10px 0; border-bottom: 1px solid var(--border); gap: 10px;
 }
 .user-mgmt-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+/* ═══ FILTRO DE ATAS ═══ */
+.reunioes-filtro {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.filtro-input {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 7px 12px;
+  font-size: 0.78rem;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.filtro-input:focus { border-color: var(--purple-l); }
+.filtro-input::placeholder { color: var(--text3); }
+.filtro-input-text { flex: 1; min-width: 180px; }
+.filtro-input-date { width: 140px; }
+.filtro-select {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 7px 10px;
+  font-size: 0.78rem;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+  min-width: 160px;
+}
+.filtro-clear-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 7px 12px;
+  font-size: 0.75rem;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text3);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s;
+}
+.filtro-clear-btn:hover { background: rgba(255,255,255,0.05); color: var(--text2); }
+.filtro-count {
+  font-size: 0.7rem;
+  color: var(--text3);
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+/* ═══ TOAST NOTIFICAÇÃO ═══ */
+.notif-toast {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  background: var(--card);
+  border: 1px solid rgba(79,45,127,0.35);
+  border-left: 4px solid var(--purple);
+  border-radius: 14px;
+  padding: 14px 16px 14px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 280px;
+  max-width: 360px;
+  z-index: 900;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+  transform: translateX(120%);
+  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+.notif-toast.show { transform: translateX(0); }
+.notif-toast-icon { font-size: 1.4rem; flex-shrink: 0; }
+.notif-toast-body { flex: 1; }
+.notif-toast-title { font-size: 0.82rem; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.notif-toast-sub   { font-size: 0.73rem; color: var(--text2); line-height: 1.4; }
+.notif-toast-close {
+  background: transparent; border: none; color: var(--text3);
+  cursor: pointer; font-size: 1rem; padding: 0; line-height: 1;
+  align-self: flex-start; flex-shrink: 0;
+}
+.notif-toast-close:hover { color: var(--text); }
 </style>
 </head>
 <body>
@@ -2269,6 +2359,17 @@ body.edit-mode .user-mgmt-section { display: block; }
 
         <!-- Lista de reuniões (desbloqueada) -->
         <div id="reunioes-list" style="display:none">
+          <!-- Filtros de atas -->
+          <div class="reunioes-filtro">
+            <input class="filtro-input filtro-input-text" id="filtro-texto" type="text" placeholder="🔍 Buscar por palavra-chave..." oninput="filtrarReunioes()">
+            <input class="filtro-input filtro-input-date" id="filtro-de"   type="date" title="Data inicial" onchange="filtrarReunioes()">
+            <input class="filtro-input filtro-input-date" id="filtro-ate"  type="date" title="Data final"   onchange="filtrarReunioes()">
+            <select class="filtro-select" id="filtro-participante" onchange="filtrarReunioes()">
+              <option value="">👥 Todos os participantes</option>
+            </select>
+            <button class="filtro-clear-btn" onclick="limparFiltros()">✕ Limpar</button>
+            <span class="filtro-count" id="filtro-count"></span>
+          </div>
           <div id="reunioes-empty" style="text-align:center;color:var(--text3);font-size:0.82rem;padding:36px;background:var(--card);border:1px solid var(--border);border-radius:16px">
             Nenhuma reunião registrada ainda. Clique em <strong style="color:var(--text2)">+ Nova Reunião</strong> para começar.
           </div>
@@ -3729,11 +3830,13 @@ function atualizarTopbarUser() {
     // Sino de notificações: só admin
     if (bellWrap)  bellWrap.classList.toggle('visible', isAdmin);
     if (isAdmin)   carregarNotificacoes();
+    iniciarListenerMeetings();
   } else {
     if (loginBtn)  loginBtn.style.display = 'flex';
     if (userChip)  userChip.style.display = 'none';
     if (editBtn)   editBtn.style.display  = 'none';
     if (bellWrap)  bellWrap.classList.remove('visible');
+    pararListenerMeetings();
   }
   // Classe no body controla visibilidade de elementos que exigem login
   document.body.classList.toggle('user-logged-in', !!_currentUser);
@@ -4107,34 +4210,89 @@ async function carregarReunioes() {
 
 function renderizarReunioes(data) {
   _meetingsCache = data || {};
-  const list  = document.getElementById('reunioes-list');
-  const empty = document.getElementById('reunioes-empty');
-  if (!list) return;
-  list.querySelectorAll('.reunion-card').forEach(c => c.remove());
-  const entries = Object.entries(data).sort((a,b) => (b[1].data||'').localeCompare(a[1].data||''));
 
   // Atualiza badge "Última reunião"
   const badgeTxt = document.getElementById('ultima-reuniao-txt');
+  const entries  = Object.entries(_meetingsCache).sort((a,b) => (b[1].data||'').localeCompare(a[1].data||''));
   if (badgeTxt) {
     if (entries.length) {
-      const ultima = entries[0][1];
-      const dataFmtU = ultima.data ? ultima.data.split('-').reverse().join('/') : '—';
+      const dataFmtU = entries[0][1].data ? entries[0][1].data.split('-').reverse().join('/') : '—';
       badgeTxt.textContent = 'Última reunião: ' + dataFmtU;
     } else {
       badgeTxt.textContent = 'Sem reuniões';
     }
   }
 
-  if (!entries.length) { if(empty) empty.style.display='block'; return; }
-  if(empty) empty.style.display = 'none';
+  // Popula dropdown de participantes (sem duplicatas)
+  const sel = document.getElementById('filtro-participante');
+  if (sel && sel.options.length === 1) { // só repopula se vazio
+    EQUIPE_CINEA.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.nome; opt.textContent = p.nome;
+      sel.appendChild(opt);
+    });
+  }
+
+  renderizarEntradasFiltradas();
+}
+
+function filtrarReunioes() { renderizarEntradasFiltradas(); }
+
+function limparFiltros() {
+  ['filtro-texto','filtro-de','filtro-ate'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const sel = document.getElementById('filtro-participante');
+  if (sel) sel.value = '';
+  renderizarEntradasFiltradas();
+}
+
+function renderizarEntradasFiltradas() {
+  const list  = document.getElementById('reunioes-list');
+  const empty = document.getElementById('reunioes-empty');
+  if (!list) return;
+
+  // Remove cards antigos
+  list.querySelectorAll('.reunion-card').forEach(c => c.remove());
+
+  // Lê filtros
+  const texto = (document.getElementById('filtro-texto')?.value || '').toLowerCase().trim();
+  const de    =  document.getElementById('filtro-de')?.value   || '';
+  const ate   =  document.getElementById('filtro-ate')?.value  || '';
+  const part  =  document.getElementById('filtro-participante')?.value || '';
+
+  const total   = Object.keys(_meetingsCache).length;
+  const entries = Object.entries(_meetingsCache)
+    .filter(([, m]) => {
+      if (texto && !`${m.pauta||''} ${m.resumo||''} ${m.decisoes||''}`.toLowerCase().includes(texto)) return false;
+      if (de  && (m.data||'') < de)  return false;
+      if (ate && (m.data||'') > ate) return false;
+      if (part && !(m.participantes||[]).includes(part)) return false;
+      return true;
+    })
+    .sort((a,b) => (b[1].data||'').localeCompare(a[1].data||''));
+
+  // Contador
+  const countEl = document.getElementById('filtro-count');
+  if (countEl) {
+    const temFiltro = texto || de || ate || part;
+    countEl.textContent = temFiltro ? `${entries.length} de ${total} ata${total !== 1 ? 's' : ''}` : (total ? `${total} ata${total !== 1 ? 's' : ''}` : '');
+  }
+
+  if (!entries.length) {
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
   entries.forEach(([key, m]) => {
-    const card = document.createElement('div');
+    const card    = document.createElement('div');
     card.className = 'reunion-card';
     const dataFmt = m.data ? m.data.split('-').reverse().join('/') : '—';
     card.innerHTML = `
       <div class="reunion-actions">
-        <button class="reunion-action-btn" onclick="editarReuniao('${key}')">✎ Editar</button>
-        <button class="reunion-action-btn dl"  onclick="downloadReuniao('${key}')">⬇ Word</button>
+        <button class="reunion-action-btn"    onclick="editarReuniao('${key}')">✎ Editar</button>
+        <button class="reunion-action-btn dl" onclick="downloadReuniao('${key}')">⬇ Word</button>
         <button class="reunion-action-btn del" onclick="deletarReuniao('${key}')">✕ Apagar</button>
       </div>
       <div class="reunion-date-badge">📅 ${dataFmt} · ⏰ ${m.horario||'—'}</div>
@@ -4142,7 +4300,7 @@ function renderizarReunioes(data) {
       ${m.pauta    ? `<div class="reunion-section-lbl">Pauta</div><div class="reunion-text">${m.pauta.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>` : ''}
       ${m.resumo   ? `<div class="reunion-section-lbl">Resumo</div><div class="reunion-text">${m.resumo.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>` : ''}
       ${m.decisoes ? `<div class="reunion-section-lbl">Decisões / Próximos passos</div><div class="reunion-text">${m.decisoes.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>` : ''}`;
-    list.insertBefore(card, empty||null);
+    list.insertBefore(card, empty || null);
   });
 }
 
@@ -4355,6 +4513,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // FIREBASE RULES: cinea/users deve ter ".read": "auth != null" e ".write": "auth != null"
 
+// ════════ TOAST + LISTENER DE NOVAS ATAS ════════
+let _meetingsListenerRef = null;
+let _meetingsInitCount   = null;
+let _toastTimer          = null;
+
+function mostrarToast(titulo, sub) {
+  const toast = document.getElementById('notif-toast');
+  if (!toast) return;
+  document.getElementById('toast-title').textContent = titulo;
+  document.getElementById('toast-sub').textContent   = sub;
+  toast.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(fecharToast, 6000);
+}
+
+function fecharToast() {
+  document.getElementById('notif-toast')?.classList.remove('show');
+  clearTimeout(_toastTimer);
+}
+
+function iniciarListenerMeetings() {
+  if (_meetingsListenerRef) return; // já iniciado
+  _meetingsInitCount = null;
+  _meetingsListenerRef = _db.ref('cinea/meetings');
+  _meetingsListenerRef.on('value', snap => {
+    const data  = snap.val() || {};
+    const count = Object.keys(data).length;
+    if (_meetingsInitCount === null) {
+      _meetingsInitCount = count; // primeira leitura: só inicializa
+      return;
+    }
+    if (count > _meetingsInitCount) {
+      // Nova ata detectada — pega a mais recente
+      const entries = Object.values(data).sort((a,b) => (b.criadoEm||'').localeCompare(a.criadoEm||''));
+      const nova    = entries[0];
+      const dataFmt = nova?.data ? nova.data.split('-').reverse().join('/') : '?';
+      const quem    = nova?.participantes?.length ? nova.participantes.slice(0,2).join(', ') + (nova.participantes.length > 2 ? '…' : '') : '—';
+      mostrarToast('📋 Nova ata registrada', `Reunião de ${dataFmt} · ${quem}`);
+      _meetingsInitCount = count;
+      carregarReunioes(); // atualiza a lista
+    }
+  });
+}
+
+function pararListenerMeetings() {
+  if (_meetingsListenerRef) {
+    _meetingsListenerRef.off('value');
+    _meetingsListenerRef = null;
+    _meetingsInitCount   = null;
+  }
+}
+// ════════════════════════════════════════════════
+
 // ☁️ Inicia carregando do Firebase (cai para localStorage se offline)
 loadFromFirebase();
 carregarSemestresFirebase();
@@ -4527,6 +4738,16 @@ carregarSemestresFirebase();
       <button onclick="salvarReuniao()" style="padding:9px 24px;background:linear-gradient(135deg,var(--purple),var(--purple-l));border:none;border-radius:10px;color:white;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer">💾 Salvar Reunião</button>
     </div>
   </div>
+</div>
+
+<!-- TOAST NOVA ATA -->
+<div class="notif-toast" id="notif-toast">
+  <div class="notif-toast-icon">📋</div>
+  <div class="notif-toast-body">
+    <div class="notif-toast-title" id="toast-title">Nova ata registrada</div>
+    <div class="notif-toast-sub"  id="toast-sub">—</div>
+  </div>
+  <button class="notif-toast-close" onclick="fecharToast()">✕</button>
 </div>
 </body>
 </html>
