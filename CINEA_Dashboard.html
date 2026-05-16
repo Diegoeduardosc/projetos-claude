@@ -3787,6 +3787,12 @@ async function fazerLogin() {
       return;
     }
     _currentUser = { matricula: mat, nome: u.nome, sigla: (u.sigla||mat.slice(0,2)).toUpperCase(), role: u.role || 'membro' };
+    // Persiste sessão: sessionStorage sempre (sobrevive F5); localStorage só se "Manter conectado"
+    const _sessJSON = JSON.stringify(_currentUser);
+    const _lembrar  = document.getElementById('login-lembrar')?.checked;
+    sessionStorage.setItem('cinea_session', _sessJSON);
+    if (_lembrar) localStorage.setItem('cinea_session', _sessJSON);
+    else          localStorage.removeItem('cinea_session');
     fecharLoginModal();
     atualizarTopbarUser();
     // Registra acesso no Firebase
@@ -3800,6 +3806,8 @@ async function fazerLogin() {
 function fazerLogout() {
   if (editModeActive) desativarEditMode();
   _currentUser = null;
+  sessionStorage.removeItem('cinea_session');
+  localStorage.removeItem('cinea_session');
   atualizarTopbarUser();
   fecharUserDropdown();
 }
@@ -4570,6 +4578,39 @@ function pararListenerMeetings() {
 loadFromFirebase();
 carregarSemestresFirebase();
 
+// 🔐 Restaura sessão salva (sobrevive F5 e fechamento do browser se "Manter conectado")
+(async function restaurarSessao() {
+  const raw = localStorage.getItem('cinea_session') || sessionStorage.getItem('cinea_session');
+  if (!raw) return;
+  try {
+    const salvo = JSON.parse(raw);
+    if (!salvo?.matricula) return;
+    // Verifica silenciosamente se o usuário ainda existe no Firebase
+    const snap = await _db.ref('cinea/users/' + salvo.matricula).once('value');
+    const u = snap.val();
+    if (!u || !u.ativo) {
+      // Usuário foi removido/desativado pelo admin — limpa sessão
+      sessionStorage.removeItem('cinea_session');
+      localStorage.removeItem('cinea_session');
+      return;
+    }
+    // Restaura com dados atualizados do Firebase (nome/sigla/role podem ter mudado)
+    _currentUser = {
+      matricula: salvo.matricula,
+      nome:  u.nome  || salvo.nome,
+      sigla: u.sigla || salvo.sigla,
+      role:  u.role  || salvo.role
+    };
+    atualizarTopbarUser();
+  } catch(e) {
+    // Se offline, usa os dados salvos sem verificar Firebase
+    try {
+      const salvo = JSON.parse(raw);
+      if (salvo?.matricula) { _currentUser = salvo; atualizarTopbarUser(); }
+    } catch(_) {}
+  }
+})();
+
 </script>
 
 <!-- MODAL NOVO SEMESTRE -->
@@ -4655,7 +4696,11 @@ carregarSemestresFirebase();
            onkeydown="if(event.key==='Enter') fazerLogin()">
     <button onclick="fazerLogin()" style="width:100%;padding:13px;background:var(--purple);border:none;border-radius:12px;color:#fff;font-size:0.92rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Entrar</button>
     <div id="login-error" style="font-size:0.78rem;color:var(--red);margin-top:12px;min-height:18px;text-align:center"></div>
-    <div style="text-align:center;margin-top:16px">
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:14px;user-select:none">
+      <input type="checkbox" id="login-lembrar" style="width:15px;height:15px;accent-color:var(--purple);cursor:pointer">
+      <span style="font-size:0.78rem;color:var(--text2)">Manter conectado neste dispositivo</span>
+    </label>
+    <div style="text-align:center;margin-top:14px">
       <button onclick="abrirSolicitarReset()" style="background:transparent;border:none;color:var(--text3);font-size:0.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline">Esqueci minha senha</button>
       <span style="color:var(--text3);font-size:0.75rem;margin:0 8px">·</span>
       <button onclick="fecharLoginModal()" style="background:transparent;border:none;color:var(--text3);font-size:0.75rem;cursor:pointer;font-family:'DM Sans',sans-serif">Cancelar</button>
