@@ -75,6 +75,10 @@ body::before {
   padding: 24px 20px 20px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
 }
 .sidebar-logo .brand {
   font-family: 'Playfair Display', serif;
@@ -649,11 +653,12 @@ body.edit-mode .sidebar-gestor-role { cursor: text; outline: 1px dashed rgba(255
 /* Logo upload */
 .logo-upload-wrap {
   position: relative;
-  display: inline-block;
-  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  margin-bottom: 10px;
   border-radius: 8px;
-  min-width: 40px;
-  min-height: 10px;
 }
 .logo-upload-hint {
   display: none;
@@ -1116,7 +1121,7 @@ body.edit-mode .idea-tag { cursor: text; }
     <!-- Área da logo — clicável em modo edição -->
     <div class="logo-upload-wrap" id="logo-upload-wrap" onclick="triggerLogoUpload()" title="Clique para trocar a logo">
       <img id="sidebar-logo-img" src="" alt="Logo"
-           style="max-height:32px;max-width:150px;object-fit:contain;display:none;margin-bottom:2px">
+           style="max-height:52px;max-width:160px;width:auto;object-fit:contain;display:none;margin-bottom:0">
       <div id="logo-placeholder" style="display:none;font-size:0.6rem;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">PUC MINAS</div>
       <div class="logo-upload-hint" id="logo-upload-hint">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/></svg>
