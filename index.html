@@ -1138,9 +1138,9 @@ body.edit-mode .idea-tag { cursor: text; }
     </div>
     <div class="topbar-title" id="page-title">Dashboard Geral</div>
     <div class="topbar-right">
-      <div class="filter-pill active">2026/1</div>
-      <div class="filter-pill">2025/2</div>
-      <div class="filter-pill">2025/1</div>
+      <div class="filter-pill active" onclick="switchSemester(this,'2026/1')">2026/1</div>
+      <div class="filter-pill" onclick="switchSemester(this,'2025/2')">2025/2</div>
+      <div class="filter-pill" onclick="switchSemester(this,'2025/1')">2025/1</div>
       <button id="edit-mode-btn" class="edit-btn" onclick="toggleEditMode()">✏️ Editar</button>
       <div class="diego-topbar">
         <div class="diego-topbar-avatar">DG</div>
@@ -1188,7 +1188,7 @@ body.edit-mode .idea-tag { cursor: text; }
       <div class="grid-60-40">
         <!-- PARTICIPANTES POR INSTITUTO -->
         <div class="card">
-          <div class="card-title">Participantes por Instituto <span>Formações para Novo Plano de Ensino 2025</span></div>
+          <div class="card-title">Participantes por Instituto <span id="ov-bar-title">Formações para Novo Plano de Ensino 2025</span></div>
           <div style="display:flex;gap:24px;align-items:flex-end">
             <div style="flex:1">
               <div style="font-size:0.72rem;color:var(--text3);margin-bottom:8px">Presencial</div>
@@ -1196,9 +1196,9 @@ body.edit-mode .idea-tag { cursor: text; }
             </div>
             <div style="display:flex;flex-direction:column;gap:8px;padding:0 0 22px">
               <div style="font-size:0.75rem;font-weight:600;color:var(--text)">Total</div>
-              <div style="font-size:1.8rem;font-weight:700;color:var(--pink)">434</div>
-              <div style="font-size:0.72rem;color:var(--text3)">77.4% presencial</div>
-              <div style="font-size:0.72rem;color:var(--text3)">22.6% remoto</div>
+              <div id="ov-bar-total" style="font-size:1.8rem;font-weight:700;color:var(--pink)">434</div>
+              <div id="ov-bar-pres-pct" style="font-size:0.72rem;color:var(--text3)">77.4% presencial</div>
+              <div id="ov-bar-rem-pct" style="font-size:0.72rem;color:var(--text3)">22.6% remoto</div>
             </div>
           </div>
         </div>
@@ -1470,20 +1470,20 @@ body.edit-mode .idea-tag { cursor: text; }
             <div class="card-title">Responsáveis por Fase</div>
             <div style="display:flex;flex-direction:column;gap:8px">
               <div style="display:flex;justify-content:space-between;font-size:0.78rem">
-                <span style="color:var(--text3)">Upload OneDrive</span>
-                <span style="color:var(--text2)">Rosimeire + Cláudia + Jefferson</span>
+                <span class="rm-resp-label" style="color:var(--text3)">Upload OneDrive</span>
+                <span class="rm-resp-val" style="color:var(--text2)">Rosimeire + Cláudia + Jefferson</span>
               </div>
               <div style="display:flex;justify-content:space-between;font-size:0.78rem">
-                <span style="color:var(--text3)">Conexão Power BI</span>
-                <span style="color:var(--text2)">Gestor do Dashboard</span>
+                <span class="rm-resp-label" style="color:var(--text3)">Conexão Power BI</span>
+                <span class="rm-resp-val" style="color:var(--text2)">Gestor do Dashboard</span>
               </div>
               <div style="display:flex;justify-content:space-between;font-size:0.78rem">
-                <span style="color:var(--text3)">Publicação Service</span>
-                <span style="color:var(--text2)">Gestor do Dashboard</span>
+                <span class="rm-resp-label" style="color:var(--text3)">Publicação Service</span>
+                <span class="rm-resp-val" style="color:var(--text2)">Gestor do Dashboard</span>
               </div>
               <div style="display:flex;justify-content:space-between;font-size:0.78rem">
-                <span style="color:var(--text3)">Atualização semanal</span>
-                <span style="color:var(--text2)">Cada responsável</span>
+                <span class="rm-resp-label" style="color:var(--text3)">Atualização semanal</span>
+                <span class="rm-resp-val" style="color:var(--text2)">Cada responsável</span>
               </div>
             </div>
           </div>
@@ -2038,6 +2038,114 @@ body.edit-mode .idea-tag { cursor: text; }
 
 <script>
 // PAGE NAV
+// ═══════════════════════ SEMESTER SWITCH ═══════════════════════
+const SEMESTER_DATA = {
+  '2026/1': {
+    sub: 'Consolidado dos 3 departamentos · 1º semestre 2026',
+    stats: [
+      { val:'471', unit:'pessoas',    change:'↑ 8.5% vs semestre anterior', up:true },
+      { val:'362', unit:'UDAs',       change:'↑ 281 no 1º/2026',           up:true },
+      { val:'95',  unit:'%',          change:'↑ vs mês anterior',           up:true },
+      { val:'37',  unit:'formações',  change:'↑ 1º/2026 em andamento',      up:true },
+    ],
+    barVals: [22,38,18,85,24,14,52,20,63],
+    barTitle: 'Formações para Novo Plano de Ensino 2025',
+    presencial:336, remoto:98, total:434,
+  },
+  '2025/2': {
+    sub: 'Consolidado dos 3 departamentos · 2º semestre 2025',
+    stats: [
+      { val:'435', unit:'pessoas',    change:'↑ 0.2% vs semestre anterior', up:true },
+      { val:'281', unit:'UDAs',       change:'↑ 101 UDAs no 2º/2025',       up:true },
+      { val:'92',  unit:'%',          change:'Satisfação crescendo',         up:true },
+      { val:'32',  unit:'formações',  change:'2º/2025 encerrado',            up:false },
+    ],
+    barVals: [16,28,13,62,18,10,38,15,45],
+    barTitle: 'Formações Pedagógicas 2025/2',
+    presencial:245, remoto:72, total:317,
+  },
+  '2025/1': {
+    sub: 'Formações para Novo Plano de Ensino 2025 · 1º semestre',
+    stats: [
+      { val:'434', unit:'pessoas',    change:'Novo Plano de Ensino 2025',   up:false },
+      { val:'180', unit:'UDAs',       change:'UDAs em início de produção',  up:false },
+      { val:'89',  unit:'%',          change:'Meta de satisfação atingida', up:true  },
+      { val:'28',  unit:'formações',  change:'1º/2025 encerrado',           up:false },
+    ],
+    barVals: [22,38,18,85,24,14,52,20,63],
+    barTitle: 'Formações para Novo Plano de Ensino 2025',
+    presencial:336, remoto:98, total:434,
+  },
+};
+const BAR_COLORS  = ['var(--pink)','var(--purple-l)','var(--cyan)','var(--gold)','var(--pink)','var(--purple-l)','var(--cyan)','var(--gold)','var(--pink)'];
+const BAR_LABELS  = ['FAPSI','FMD','FCA','ICBS','IPUC','ICS','ICEG','ICH','ICEI'];
+
+function switchSemester(el, sem) {
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  const d = SEMESTER_DATA[sem];
+  if (!d) return;
+
+  // section-sub
+  const subEl = document.querySelector('#page-overview .section-sub');
+  if (subEl) subEl.textContent = d.sub;
+
+  // stat cards
+  const statVals    = document.querySelectorAll('#page-overview .stat-value');
+  const statChanges = document.querySelectorAll('#page-overview .stat-change');
+  d.stats.forEach((s, i) => {
+    if (statVals[i])    statVals[i].innerHTML = s.val + '<span class="stat-unit">' + s.unit + '</span>';
+    if (statChanges[i]) {
+      statChanges[i].textContent = s.change;
+      statChanges[i].className   = 'stat-change' + (s.up ? ' up' : '');
+    }
+  });
+
+  // bar chart
+  const bcEl = document.getElementById('bc-presencial');
+  if (bcEl) {
+    bcEl.innerHTML = '';
+    const maxV = Math.max(...d.barVals, 1);
+    d.barVals.forEach((val, i) => {
+      const col = document.createElement('div');
+      col.className = 'bar-col';
+      col.innerHTML = `
+        <div class="bar-val" data-bar-idx="${i}">${val}</div>
+        <div class="bar-fill" data-bar-fill="${i}" style="height:${(val/maxV)*90}px;background:${BAR_COLORS[i]};opacity:0.8"></div>
+        <div class="bar-label">${BAR_LABELS[i]}</div>`;
+      bcEl.appendChild(col);
+    });
+  }
+
+  // bar chart sidebar totals
+  const titleEl = document.getElementById('ov-bar-title');
+  const totalEl = document.getElementById('ov-bar-total');
+  const presPct  = document.getElementById('ov-bar-pres-pct');
+  const remPct   = document.getElementById('ov-bar-rem-pct');
+  if (titleEl) titleEl.textContent = d.barTitle;
+  if (totalEl) totalEl.textContent = d.total;
+  const pP = ((d.presencial/d.total)*100).toFixed(1);
+  const rP = ((d.remoto/d.total)*100).toFixed(1);
+  if (presPct) presPct.textContent = pP + '% presencial';
+  if (remPct)  remPct.textContent  = rP + '% remoto';
+
+  // donut chart (circumference ≈ 251)
+  const C = 251, OFFSET = 63;
+  const presLen = Math.round((d.presencial / d.total) * C);
+  const remLen  = Math.round((d.remoto     / d.total) * C);
+  const circles = document.querySelectorAll('#page-overview .donut-svg circle');
+  if (circles[1]) circles[1].setAttribute('stroke-dasharray', `${presLen} ${C}`);
+  if (circles[2]) {
+    circles[2].setAttribute('stroke-dasharray', `${remLen} ${C}`);
+    circles[2].setAttribute('stroke-dashoffset', String(-(presLen - OFFSET)));
+  }
+  const svgTexts = document.querySelectorAll('#page-overview .donut-svg text');
+  if (svgTexts[0]) svgTexts[0].textContent = d.total;
+  const legendPcts = document.querySelectorAll('#page-overview .legend-pct');
+  if (legendPcts[0]) legendPcts[0].textContent = d.presencial;
+  if (legendPcts[1]) legendPcts[1].textContent = d.remoto;
+}
+
 /* ─── MOBILE SIDEBAR TOGGLE ─── */
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
@@ -2433,7 +2541,8 @@ let editModeActive = false;
 
 const TEXT_ED_SELS = [
   '.stat-change', '.pkpi-val', '.kpi-cur', '.kpi-tgt', '.section-sub',
-  '.rm-title', '.rm-phase', '.rm-tag', '.idea-title', '.idea-desc', '.idea-tag',
+  '.rm-title', '.rm-phase', '.rm-tag', '.rm-resp-label', '.rm-resp-val',
+  '.idea-title', '.idea-desc', '.idea-tag',
   '.ck-text', '.gauge-label'
 ];
 
