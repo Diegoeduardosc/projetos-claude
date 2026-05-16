@@ -1281,6 +1281,61 @@ body.light-mode [contenteditable].ed { outline-color: rgba(79,45,127,0.35); back
 .theme-toggle-btn:hover { background: rgba(255,255,255,0.06); }
 body.light-mode .theme-toggle-btn:hover { background: rgba(79,45,127,0.08); }
 
+/* ═══ NOTIFICAÇÕES ═══ */
+.notif-bell-wrap {
+  position: relative;
+  display: none; /* visível só para admin logado */
+  flex-shrink: 0;
+}
+.notif-bell-wrap.visible { display: flex; }
+.notif-bell-btn {
+  width: 32px; height: 32px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text2); font-size: 1rem;
+  transition: background 0.15s;
+}
+.notif-bell-btn:hover { background: rgba(255,255,255,0.06); }
+body.light-mode .notif-bell-btn:hover { background: rgba(79,45,127,0.08); }
+.notif-badge {
+  position: absolute; top: -3px; right: -3px;
+  background: var(--red); color: #fff;
+  font-size: 0.52rem; font-weight: 700;
+  min-width: 15px; height: 15px; border-radius: 8px;
+  display: none; align-items: center; justify-content: center;
+  padding: 0 3px;
+}
+.notif-badge.show { display: flex; }
+.notif-dropdown-panel {
+  display: none; position: absolute; top: calc(100% + 8px); right: 0;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 8px;
+  min-width: 290px; max-height: 340px; overflow-y: auto;
+  z-index: 300;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.notif-bell-wrap.open .notif-dropdown-panel { display: block; }
+.notif-item {
+  padding: 10px 12px; border-radius: 10px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+.notif-item:last-child { border-bottom: none; margin-bottom: 0; }
+.notif-item-title { font-size: 0.78rem; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.notif-item-sub   { font-size: 0.68rem; color: var(--text3); margin-bottom: 8px; }
+.notif-resolve-btn {
+  background: rgba(79,45,127,0.15); border: 1px solid rgba(79,45,127,0.3);
+  border-radius: 7px; padding: 4px 10px;
+  font-size: 0.7rem; font-weight: 600; color: var(--purple-l);
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: background 0.12s;
+}
+.notif-resolve-btn:hover { background: rgba(79,45,127,0.28); }
+.notif-empty { text-align: center; color: var(--text3); font-size: 0.78rem; padding: 20px 10px; }
+
 /* ═══ SEMESTER SELECTOR ═══ */
 .semester-selector-row {
   display: flex;
@@ -1476,6 +1531,15 @@ body.edit-mode .user-mgmt-section { display: block; }
     <div class="topbar-title" id="page-title">Dashboard Geral</div>
     <div class="topbar-right">
       <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Alternar tema claro/escuro">🌙</button>
+      <!-- Sino de notificações (admin) -->
+      <div class="notif-bell-wrap" id="notif-bell-wrap" onclick="toggleNotifPanel(event)">
+        <button class="notif-bell-btn" title="Notificações">🔔</button>
+        <div class="notif-badge" id="notif-badge"></div>
+        <div class="notif-dropdown-panel" id="notif-panel">
+          <div style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;padding:4px 4px 10px">Notificações</div>
+          <div id="notif-list"><div class="notif-empty">Sem notificações pendentes</div></div>
+        </div>
+      </div>
       <button id="edit-mode-btn" class="edit-btn" onclick="toggleEditMode()" style="display:none">✏️ Editar</button>
       <!-- Login / User chip -->
       <button class="login-btn" id="topbar-login-btn" onclick="abrirLoginModal()">🔐 Login</button>
@@ -1487,6 +1551,7 @@ body.edit-mode .user-mgmt-section { display: block; }
         </div>
         <div class="user-dropdown" id="user-dropdown">
           <div class="user-dd-item" id="dd-gerenciar" onclick="abrirGerenciarUsuarios()" style="display:none">👥 Gerenciar equipe</div>
+          <div class="user-dd-item" id="dd-log" onclick="abrirLog()" style="display:none">📋 Log de atividades</div>
           <div class="user-dd-item" id="dd-senha" onclick="abrirModal()" style="display:none">🔑 Alterar senha admin</div>
           <div class="user-dd-item" id="dd-trocar-senha" onclick="abrirTrocarSenha()">🔑 Trocar minha senha</div>
           <div class="user-dd-item danger" onclick="fazerLogout()">🚪 Sair</div>
@@ -3058,11 +3123,12 @@ const TEXT_ED_SELS = [
 function toggleEditMode() {
   if (!editModeActive) {
     if (_currentUser && _currentUser.role === 'admin') {
-      ativarEditMode(); // admin já logado — ativa direto
+      ativarEditMode();
     } else if (_currentUser && _currentUser.role === 'membro') {
-      ativarEditModeMembro(); // membro — modo limitado
+      ativarEditModeMembro();
     } else {
-      abrirModal(); // não logado — pede senha admin (retrocompatível)
+      // Não logado: redireciona para login
+      abrirLoginModal();
     }
   } else {
     desativarEditMode();
@@ -3104,6 +3170,8 @@ function desativarEditMode() {
   desativarUIMeetings();
   const addSemBtn = document.getElementById('add-sem-btn');
   if (addSemBtn) addSemBtn.style.display = 'none';
+  // 📋 Registra log de edição
+  registrarLog('Editou o dashboard (modo ' + (_currentUser?.role||'?') + ')');
   // ☁️ Sincroniza tudo com Firebase
   saveToFirebase();
 }
@@ -3630,29 +3698,39 @@ function fazerLogout() {
 }
 
 function atualizarTopbarUser() {
-  const loginBtn  = document.getElementById('topbar-login-btn');
-  const userChip  = document.getElementById('topbar-user-chip');
-  const avatar    = document.getElementById('topbar-user-avatar');
-  const nameEl    = document.getElementById('topbar-user-name');
-  const roleEl    = document.getElementById('topbar-user-role');
-  const ddGer     = document.getElementById('dd-gerenciar');
-  const ddSenha   = document.getElementById('dd-senha');
-  const editBtn   = document.getElementById('edit-mode-btn');
+  const loginBtn   = document.getElementById('topbar-login-btn');
+  const userChip   = document.getElementById('topbar-user-chip');
+  const avatar     = document.getElementById('topbar-user-avatar');
+  const nameEl     = document.getElementById('topbar-user-name');
+  const roleEl     = document.getElementById('topbar-user-role');
+  const ddGer      = document.getElementById('dd-gerenciar');
+  const ddLog      = document.getElementById('dd-log');
+  const ddSenha    = document.getElementById('dd-senha');
+  const editBtn    = document.getElementById('edit-mode-btn');
+  const bellWrap   = document.getElementById('notif-bell-wrap');
+  const isAdmin    = _currentUser && _currentUser.role === 'admin';
 
   if (_currentUser) {
-    if (loginBtn)  loginBtn.style.display  = 'none';
-    if (userChip)  userChip.style.display  = 'flex';
-    if (avatar)    avatar.textContent       = _currentUser.sigla;
-    if (nameEl)    nameEl.textContent       = _currentUser.nome;
-    if (roleEl)    roleEl.textContent       = _currentUser.role === 'admin' ? 'Admin · CINEA' : 'Equipe CINEA';
-    if (ddGer)     ddGer.style.display      = _currentUser.role === 'admin' ? 'flex' : 'none';
-    if (ddSenha)   ddSenha.style.display    = _currentUser.role === 'admin' ? 'flex' : 'none';
-    if (editBtn)   editBtn.style.display    = 'flex';
+    if (loginBtn)  loginBtn.style.display = 'none';
+    if (userChip)  userChip.style.display = 'flex';
+    if (avatar)    avatar.textContent      = _currentUser.sigla;
+    if (nameEl)    nameEl.textContent      = _currentUser.nome;
+    if (roleEl)    roleEl.textContent      = isAdmin ? 'Admin · CINEA' : 'Equipe CINEA';
+    if (ddGer)     ddGer.style.display     = isAdmin ? 'flex' : 'none';
+    if (ddLog)     ddLog.style.display     = isAdmin ? 'flex' : 'none';
+    if (ddSenha)   ddSenha.style.display   = isAdmin ? 'flex' : 'none';
+    if (editBtn)   editBtn.style.display   = 'flex';
+    // Sino de notificações: só admin
+    if (bellWrap)  bellWrap.classList.toggle('visible', isAdmin);
+    if (isAdmin)   carregarNotificacoes();
   } else {
-    if (loginBtn)  loginBtn.style.display  = 'flex';
-    if (userChip)  userChip.style.display  = 'none';
-    if (editBtn)   editBtn.style.display    = 'none';
+    if (loginBtn)  loginBtn.style.display = 'flex';
+    if (userChip)  userChip.style.display = 'none';
+    if (editBtn)   editBtn.style.display  = 'none';
+    if (bellWrap)  bellWrap.classList.remove('visible');
   }
+  // Atualiza visibilidade das atas ao mudar estado de login
+  atualizarVisibilidadeMeetings();
 }
 
 function toggleUserDropdown(e) {
@@ -3737,10 +3815,137 @@ async function removerUsuario(mat) {
 async function resetarSenhaUsuario(mat, nome) {
   if (!confirm(`Resetar a senha de "${nome}"?\n\nA nova senha será a própria matrícula: ${mat}`)) return;
   try {
-    const hash = await sha256(mat); // senha resetada = matrícula
+    const hash = await sha256(mat);
     await _db.ref('cinea/users/' + mat + '/senha_hash').set(hash);
+    registrarLog('Resetou senha de: ' + nome + ' (' + mat + ')');
     alert(`✅ Senha de "${nome}" resetada!\nNova senha temporária: ${mat}\nOriente o usuário a trocá-la após o login.`);
   } catch(e) { alert('❌ Erro ao resetar: ' + e.message); }
+}
+
+// ════════ NOTIFICAÇÕES ════════
+function toggleNotifPanel(e) {
+  e.stopPropagation();
+  document.getElementById('notif-bell-wrap')?.classList.toggle('open');
+}
+document.addEventListener('click', () => {
+  document.getElementById('notif-bell-wrap')?.classList.remove('open');
+});
+
+async function carregarNotificacoes() {
+  try {
+    const snap  = await _db.ref('cinea/notificacoes').orderByChild('lido').equalTo(false).once('value');
+    const data  = snap.val() || {};
+    const items = Object.entries(data).sort((a,b) => (b[1].ts||'').localeCompare(a[1].ts||''));
+    const badge = document.getElementById('notif-badge');
+    const list  = document.getElementById('notif-list');
+    if (!items.length) {
+      if (badge) { badge.textContent = ''; badge.classList.remove('show'); }
+      if (list)  list.innerHTML = '<div class="notif-empty">Sem notificações pendentes 🎉</div>';
+      return;
+    }
+    if (badge) { badge.textContent = items.length; badge.classList.add('show'); }
+    if (list)  list.innerHTML = items.map(([key, n]) => `
+      <div class="notif-item">
+        <div class="notif-item-title">🔑 Solicitação de reset de senha</div>
+        <div class="notif-item-sub">Matrícula: <strong>${n.matricula}</strong> · ${n.nome||'—'} · ${n.ts ? new Date(n.ts).toLocaleString('pt-BR') : '—'}</div>
+        <button class="notif-resolve-btn" onclick="resolverReset('${key}','${n.matricula}','${n.nome||n.matricula}')">✔ Resetar senha agora</button>
+      </div>`).join('');
+  } catch(e) { console.warn('Notificações:', e); }
+}
+
+async function resolverReset(notifKey, mat, nome) {
+  if (!confirm(`Resetar a senha de "${nome}" (matrícula: ${mat})?\nA nova senha será a própria matrícula.`)) return;
+  try {
+    const hash = await sha256(mat);
+    await _db.ref('cinea/users/' + mat + '/senha_hash').set(hash);
+    await _db.ref('cinea/notificacoes/' + notifKey + '/lido').set(true);
+    registrarLog('Resetou senha de: ' + nome + ' (' + mat + ')');
+    await carregarNotificacoes();
+    alert(`✅ Senha de "${nome}" resetada!\nNova senha temporária: ${mat}`);
+  } catch(e) { alert('❌ Erro: ' + e.message); }
+}
+
+// ════════ SOLICITAR RESET (modal do login) ════════
+function abrirSolicitarReset() {
+  fecharLoginModal();
+  document.getElementById('solicitar-reset-modal').style.display = 'flex';
+  document.getElementById('reset-req-mat').value   = '';
+  document.getElementById('reset-req-nome').value  = '';
+  document.getElementById('reset-req-error').textContent = '';
+  setTimeout(() => document.getElementById('reset-req-mat').focus(), 80);
+}
+function fecharSolicitarReset() {
+  document.getElementById('solicitar-reset-modal').style.display = 'none';
+  abrirLoginModal();
+}
+async function enviarSolicitacaoReset() {
+  const mat   = document.getElementById('reset-req-mat').value.trim();
+  const nome  = document.getElementById('reset-req-nome').value.trim();
+  const errEl = document.getElementById('reset-req-error');
+  if (!mat || !nome) { errEl.style.color='var(--red)'; errEl.textContent = 'Preencha matrícula e nome.'; return; }
+  errEl.style.color = 'var(--text3)'; errEl.textContent = 'Enviando...';
+  try {
+    await _db.ref('cinea/notificacoes').push({ matricula: mat, nome, tipo: 'reset_senha', lido: false, ts: new Date().toISOString() });
+    errEl.style.color = 'var(--green)';
+    errEl.textContent = '✅ Solicitação enviada! O administrador irá resetar sua senha em breve.';
+    setTimeout(fecharSolicitarReset, 3000);
+  } catch(e) { errEl.style.color='var(--red)'; errEl.textContent = '❌ Erro: ' + e.message; }
+}
+
+// ════════ LOG DE ATIVIDADES ════════
+async function registrarLog(acao) {
+  if (!_currentUser) return;
+  try {
+    await _db.ref('cinea/auditoria').push({
+      matricula: _currentUser.matricula,
+      nome:      _currentUser.nome,
+      role:      _currentUser.role,
+      acao,
+      ts: new Date().toISOString()
+    });
+  } catch(e) { /* silencioso */ }
+}
+
+function abrirLog() {
+  fecharUserDropdown();
+  document.getElementById('log-modal').style.display = 'flex';
+  carregarLog();
+}
+function fecharLog() {
+  document.getElementById('log-modal').style.display = 'none';
+}
+async function carregarLog() {
+  const list = document.getElementById('log-list');
+  if (!list) return;
+  try {
+    const snap  = await _db.ref('cinea/auditoria').orderByChild('ts').limitToLast(100).once('value');
+    const data  = snap.val() || {};
+    const items = Object.values(data).sort((a,b) => (b.ts||'').localeCompare(a.ts||''));
+    if (!items.length) { list.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:30px">Nenhuma atividade registrada.</div>'; return; }
+    list.innerHTML = `
+      <table style="width:100%;border-collapse:collapse;font-size:0.78rem">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:6px 8px;color:var(--text3);font-weight:600">Usuário</th>
+            <th style="text-align:left;padding:6px 8px;color:var(--text3);font-weight:600">Ação</th>
+            <th style="text-align:left;padding:6px 8px;color:var(--text3);font-weight:600;white-space:nowrap">Data/Hora</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${items.map(i => `
+            <tr style="border-bottom:1px solid var(--border)">
+              <td style="padding:8px;color:var(--text)"><span style="background:rgba(79,45,127,0.15);border-radius:6px;padding:2px 7px;font-weight:600">${i.nome||i.matricula}</span></td>
+              <td style="padding:8px;color:var(--text2)">${i.acao||'—'}</td>
+              <td style="padding:8px;color:var(--text3);white-space:nowrap">${i.ts ? new Date(i.ts).toLocaleString('pt-BR') : '—'}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  } catch(e) { list.innerHTML = '<div style="text-align:center;color:var(--red);font-size:0.82rem;padding:30px">Erro ao carregar log.</div>'; }
+}
+async function limparLog() {
+  if (!confirm('Apagar todo o histórico de atividades permanentemente?')) return;
+  await _db.ref('cinea/auditoria').remove();
+  carregarLog();
 }
 
 // ── Trocar minha senha ──
@@ -3803,34 +4008,39 @@ const EQUIPE_CINEA = [
 let _reuniaoKey = null;
 let _meetingsCache = {};
 
-function ativarUIMeetings() {
-  const btnNovo  = document.getElementById('nova-reuniao-btn');
-  const locked   = document.getElementById('reunioes-locked');
-  const list     = document.getElementById('reunioes-list');
-  const ghSec    = document.getElementById('gh-config-section');
-  if (btnNovo)  btnNovo.style.display  = 'flex';
-  if (locked)   locked.style.display   = 'none';
-  if (list)     list.style.display     = 'block';
-  if (ghSec)    ghSec.style.display    = 'block';
-  const repo = localStorage.getItem('cinea_gh_repo');
-  const pat  = localStorage.getItem('cinea_gh_pat');
-  const repoEl = document.getElementById('gh-repo-input');
-  const patEl  = document.getElementById('gh-pat-input');
-  if (repo && repoEl) repoEl.value = repo;
-  if (pat  && patEl)  patEl.value  = '•'.repeat(Math.min(pat.length, 24));
-  carregarReunioes();
-}
-
-function desativarUIMeetings() {
+function atualizarVisibilidadeMeetings() {
+  // Chamado ao login/logout e ao entrar/sair do edit mode
   const btnNovo = document.getElementById('nova-reuniao-btn');
   const locked  = document.getElementById('reunioes-locked');
   const list    = document.getElementById('reunioes-list');
   const ghSec   = document.getElementById('gh-config-section');
-  if (btnNovo)  btnNovo.style.display  = 'none';
-  if (locked)   locked.style.display   = 'flex';
-  if (list)     list.style.display     = 'none';
-  if (ghSec)    ghSec.style.display    = 'none';
+  if (_currentUser) {
+    // Logado: sempre mostra a lista (modo leitura ou edição)
+    if (locked) locked.style.display = 'none';
+    if (list)   list.style.display   = 'block';
+    // Botão nova reunião + config GitHub: só em edit mode
+    if (btnNovo) btnNovo.style.display = editModeActive ? 'flex' : 'none';
+    if (ghSec)   ghSec.style.display   = editModeActive ? 'block' : 'none';
+    if (editModeActive) {
+      const repo  = localStorage.getItem('cinea_gh_repo');
+      const pat   = localStorage.getItem('cinea_gh_pat');
+      const repoEl = document.getElementById('gh-repo-input');
+      const patEl  = document.getElementById('gh-pat-input');
+      if (repo && repoEl) repoEl.value = repo;
+      if (pat  && patEl)  patEl.value  = '•'.repeat(Math.min(pat.length, 24));
+    }
+    carregarReunioes();
+  } else {
+    // Não logado: bloqueia tudo
+    if (locked)   locked.style.display   = 'flex';
+    if (list)     list.style.display     = 'none';
+    if (btnNovo)  btnNovo.style.display  = 'none';
+    if (ghSec)    ghSec.style.display    = 'none';
+  }
 }
+
+function ativarUIMeetings()   { atualizarVisibilidadeMeetings(); }
+function desativarUIMeetings() { atualizarVisibilidadeMeetings(); }
 
 function abrirFormReuniao(key) {
   _reuniaoKey = key || null;
@@ -3874,6 +4084,7 @@ async function salvarReuniao() {
   try {
     await _db.ref('cinea/meetings/' + key).set(meeting);
     salvarNoGitHub(meeting, key).catch(e => console.warn('[GitHub backup]', e));
+    registrarLog('Registrou/editou reunião: ' + (meeting.data||'?').split('-').reverse().join('/'));
     fecharFormReuniao();
     carregarReunioes();
   } catch(e) { alert('Erro ao salvar: ' + e.message); }
@@ -4157,6 +4368,41 @@ carregarSemestresFirebase();
   </div>
 </div>
 
+<!-- MODAL SOLICITAR RESET DE SENHA -->
+<div id="solicitar-reset-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:700;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:360px">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:1.8rem;margin-bottom:8px">🔑</div>
+      <div style="font-size:1rem;font-weight:700;color:var(--text)">Esqueci minha senha</div>
+      <div style="font-size:0.78rem;color:var(--text3);margin-top:6px">Informe sua matrícula. O administrador receberá a solicitação e fará o reset.</div>
+    </div>
+    <label class="reuniao-label">Sua matrícula</label>
+    <input id="reset-req-mat" class="reuniao-input" type="text" placeholder="Ex: 12345678" style="margin-bottom:8px">
+    <label class="reuniao-label">Seu nome (para identificação)</label>
+    <input id="reset-req-nome" class="reuniao-input" type="text" placeholder="Ex: Rosimeire" style="margin-bottom:20px"
+           onkeydown="if(event.key==='Enter') enviarSolicitacaoReset()">
+    <button onclick="enviarSolicitacaoReset()" style="width:100%;padding:12px;background:var(--purple);border:none;border-radius:12px;color:#fff;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Enviar solicitação</button>
+    <div id="reset-req-error" style="font-size:0.78rem;margin-top:10px;min-height:18px;text-align:center"></div>
+    <button onclick="fecharSolicitarReset()" style="margin-top:12px;width:100%;background:transparent;border:none;color:var(--text3);font-size:0.77rem;cursor:pointer;font-family:'DM Sans',sans-serif">Voltar ao login</button>
+  </div>
+</div>
+
+<!-- MODAL LOG DE ATIVIDADES -->
+<div id="log-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:600;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:680px;max-height:85vh;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-shrink:0">
+      <div style="font-size:1rem;font-weight:700;color:var(--text)">📋 Log de Atividades</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="limparLog()" style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:8px;padding:5px 12px;font-size:0.72rem;color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif">🗑 Limpar log</button>
+        <button onclick="fecharLog()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text2);width:32px;height:32px;cursor:pointer">✕</button>
+      </div>
+    </div>
+    <div id="log-list" style="overflow-y:auto;flex:1">
+      <div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:30px">Carregando...</div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL TROCAR SENHA -->
 <div id="trocar-senha-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:600;align-items:center;justify-content:center;padding:20px">
   <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:380px">
@@ -4190,7 +4436,11 @@ carregarSemestresFirebase();
            onkeydown="if(event.key==='Enter') fazerLogin()">
     <button onclick="fazerLogin()" style="width:100%;padding:13px;background:var(--purple);border:none;border-radius:12px;color:#fff;font-size:0.92rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Entrar</button>
     <div id="login-error" style="font-size:0.78rem;color:var(--red);margin-top:12px;min-height:18px;text-align:center"></div>
-    <button onclick="fecharLoginModal()" style="margin-top:14px;width:100%;background:transparent;border:none;color:var(--text3);font-size:0.77rem;cursor:pointer;font-family:'DM Sans',sans-serif">Cancelar</button>
+    <div style="text-align:center;margin-top:16px">
+      <button onclick="abrirSolicitarReset()" style="background:transparent;border:none;color:var(--text3);font-size:0.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline">Esqueci minha senha</button>
+      <span style="color:var(--text3);font-size:0.75rem;margin:0 8px">·</span>
+      <button onclick="fecharLoginModal()" style="background:transparent;border:none;color:var(--text3);font-size:0.75rem;cursor:pointer;font-family:'DM Sans',sans-serif">Cancelar</button>
+    </div>
   </div>
 </div>
 
