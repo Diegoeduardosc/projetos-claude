@@ -645,6 +645,33 @@ body.edit-mode .sidebar-gestor-label,
 body.edit-mode .sidebar-gestor-avatar,
 body.edit-mode .sidebar-gestor-name,
 body.edit-mode .sidebar-gestor-role { cursor: text; outline: 1px dashed rgba(255,255,255,0.25); border-radius: 4px; }
+
+/* Logo upload */
+.logo-upload-wrap {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  min-width: 40px;
+  min-height: 10px;
+}
+.logo-upload-hint {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.65rem;
+  color: var(--text3);
+  cursor: pointer;
+  padding: 4px 6px;
+  border: 1px dashed rgba(255,255,255,0.2);
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+.logo-upload-hint:hover { border-color: var(--purple-l); color: var(--purple-l); }
+body.edit-mode .logo-upload-wrap { cursor: pointer; }
+body.edit-mode .logo-upload-hint { display: flex; }
+body.edit-mode .logo-upload-wrap:hover #sidebar-logo-img { opacity: 0.5; }
+body.edit-mode #logo-placeholder { display: none !important; }
 body.edit-mode .idea-tag { cursor: text; }
 
 /* Gauge label editable */
@@ -1086,11 +1113,17 @@ body.edit-mode .idea-tag { cursor: text; }
 <aside class="sidebar" id="sidebar">
   <button class="sidebar-close-btn" onclick="toggleSidebar()" aria-label="Fechar menu">✕</button>
   <div class="sidebar-logo">
-    <img id="sidebar-logo-img"
-         src="https://www.pucminas.br/imageserver/FileDB/conteudo/usuarios_69/imagens/logo-puc-minas-branca.png"
-         alt="PUC Minas"
-         style="max-height:28px;max-width:140px;object-fit:contain;margin-bottom:8px;display:block"
-         onerror="this.style.display='none'">
+    <!-- Área da logo — clicável em modo edição -->
+    <div class="logo-upload-wrap" id="logo-upload-wrap" onclick="triggerLogoUpload()" title="Clique para trocar a logo">
+      <img id="sidebar-logo-img" src="" alt="Logo"
+           style="max-height:32px;max-width:150px;object-fit:contain;display:none;margin-bottom:2px">
+      <div id="logo-placeholder" style="display:none;font-size:0.6rem;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">PUC MINAS</div>
+      <div class="logo-upload-hint" id="logo-upload-hint">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/></svg>
+        Upload logo
+      </div>
+    </div>
+    <input type="file" id="logo-file-input" accept="image/*" style="display:none" onchange="handleLogoUpload(event)">
     <div class="brand sidebar-brand">CINEA</div>
     <div class="sub sidebar-sub">NED · PUC Minas · 2026</div>
   </div>
@@ -2144,9 +2177,17 @@ async function loadFromFirebase() {
       });
     }
     setFbStatus('☁️ Firebase ativo', 'var(--green)', 'var(--green)');
-    // Restaura timestamp do último save (vem do Firebase dentro do snap.val())
     const fbTs = localStorage.getItem('cinea_fb_last_sync');
     if (fbTs) _showTs('fb-sidebar-ts', fbTs);
+    // Carrega logo do nó separado
+    try {
+      const logoSnap = await _db.ref('cinea/logo').once('value');
+      const logoB64  = logoSnap.val();
+      if (logoB64) {
+        localStorage.setItem('cinea_logo_img', logoB64);
+        applyLogoImg(logoB64);
+      }
+    } catch (_) { /* logo fica como localStorage */ }
   } catch (e) {
     console.warn('[CINEA] Firebase indisponível — usando localStorage local.', e);
     setFbStatus('⚠️ Modo offline', 'var(--gold)', 'var(--gold)');
@@ -2171,7 +2212,13 @@ function saveToFirebase() {
   if (btn) btn.textContent = '💾 Salvando...';
 
   function doSave() {
-    _CREF.set(data)
+    // Logo (base64) vai num nó separado para não pesar o nó principal
+    const logoB64 = localStorage.getItem('cinea_logo_img');
+    const saveLogoPromise = logoB64
+      ? _db.ref('cinea/logo').set(logoB64)
+      : Promise.resolve();
+
+    Promise.all([_CREF.set(data), saveLogoPromise])
       .then(() => {
         const ts = _nowTs();
         localStorage.setItem('cinea_fb_last_sync', ts);
@@ -2199,6 +2246,54 @@ function saveToFirebase() {
     });
   }
 }
+
+// ═══════════════════════ LOGO UPLOAD ═══════════════════════
+function triggerLogoUpload() {
+  if (!editModeActive) return;
+  document.getElementById('logo-file-input').click();
+}
+
+function handleLogoUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) {
+    alert('Imagem muito grande. Use uma imagem menor que 2MB.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const base64 = e.target.result;
+    applyLogoImg(base64);
+    localStorage.setItem('cinea_logo_img', base64);
+  };
+  reader.readAsDataURL(file);
+  // Limpa o input para permitir re-upload do mesmo arquivo
+  event.target.value = '';
+}
+
+function applyLogoImg(base64) {
+  const img = document.getElementById('sidebar-logo-img');
+  const placeholder = document.getElementById('logo-placeholder');
+  if (!img) return;
+  if (base64) {
+    img.src = base64;
+    img.style.display = 'block';
+    if (placeholder) placeholder.style.display = 'none';
+  } else {
+    img.style.display = 'none';
+    if (placeholder) placeholder.style.display = 'block';
+  }
+}
+
+// Restaura logo salva
+(function() {
+  const saved = localStorage.getItem('cinea_logo_img');
+  if (saved) applyLogoImg(saved);
+  else {
+    const placeholder = document.getElementById('logo-placeholder');
+    if (placeholder) placeholder.style.display = 'block';
+  }
+})();
 
 // ═══════════════════════ SEMESTER SWITCH ═══════════════════════
 const SEMESTER_DATA = {
