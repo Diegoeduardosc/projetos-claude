@@ -4028,7 +4028,7 @@ function atualizarVisibilidadeMeetings() {
     if (list)   list.style.display   = 'block';
     // Botão nova reunião + config GitHub: só em edit mode
     if (btnNovo) btnNovo.style.display = editModeActive ? 'flex' : 'none';
-    if (ghSec)   ghSec.style.display   = editModeActive ? 'block' : 'none';
+    if (ghSec)   ghSec.style.display   = (editModeActive && _currentUser?.role === 'admin') ? 'block' : 'none';
     if (editModeActive) {
       const repo  = localStorage.getItem('cinea_gh_repo');
       const pat   = localStorage.getItem('cinea_gh_pat');
