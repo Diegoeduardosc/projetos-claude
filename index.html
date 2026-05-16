@@ -639,6 +639,12 @@ body.edit-mode .bar-val { cursor: text; }
 body.edit-mode .pbi-editable { outline: 1px dashed rgba(79,45,127,0.5); border-radius: 3px; padding: 1px 4px; cursor: text; }
 body.edit-mode .pbi-editable:hover { outline-color: var(--purple-l); background: rgba(79,45,127,0.08); }
 body.edit-mode .rm-tag { cursor: text; }
+body.edit-mode .sidebar-brand,
+body.edit-mode .sidebar-sub,
+body.edit-mode .sidebar-gestor-label,
+body.edit-mode .sidebar-gestor-avatar,
+body.edit-mode .sidebar-gestor-name,
+body.edit-mode .sidebar-gestor-role { cursor: text; outline: 1px dashed rgba(255,255,255,0.25); border-radius: 4px; }
 body.edit-mode .idea-tag { cursor: text; }
 
 /* Gauge label editable */
@@ -1080,18 +1086,22 @@ body.edit-mode .idea-tag { cursor: text; }
 <aside class="sidebar" id="sidebar">
   <button class="sidebar-close-btn" onclick="toggleSidebar()" aria-label="Fechar menu">✕</button>
   <div class="sidebar-logo">
-    <div class="brand">CINEA</div>
-    <div class="sub">NED · PUC Minas · 2026</div>
+    <img id="sidebar-logo-img"
+         src="https://www.pucminas.br/imageserver/FileDB/conteudo/usuarios_69/imagens/logo-puc-minas-branca.png"
+         alt="PUC Minas"
+         style="max-height:28px;max-width:140px;object-fit:contain;margin-bottom:8px;display:block"
+         onerror="this.style.display='none'">
+    <div class="brand sidebar-brand">CINEA</div>
+    <div class="sub sidebar-sub">NED · PUC Minas · 2026</div>
   </div>
 
-
   <div class="gestor-geral-card">
-    <div class="gestor-geral-label">Gestor do CINEA</div>
+    <div class="gestor-geral-label sidebar-gestor-label">Gestor do CINEA</div>
     <div class="gestor-geral-row">
-      <div class="gestor-geral-avatar">JC</div>
+      <div class="gestor-geral-avatar sidebar-gestor-avatar">JC</div>
       <div>
-        <div class="gestor-geral-name">Prof. João Carlos<br>Oliveira Caetano</div>
-        <div class="gestor-geral-role">Gestor Geral · CINEA / NED</div>
+        <div class="gestor-geral-name sidebar-gestor-name">Prof. João Carlos Oliveira Caetano</div>
+        <div class="gestor-geral-role sidebar-gestor-role">Gestor Geral · CINEA / NED</div>
       </div>
     </div>
   </div>
@@ -2691,7 +2701,9 @@ const TEXT_ED_SELS = [
   '.stat-change', '.pkpi-val', '.kpi-cur', '.kpi-tgt', '.section-sub',
   '.rm-title', '.rm-phase', '.rm-tag', '.rm-resp-label', '.rm-resp-val',
   '.idea-title', '.idea-desc', '.idea-tag',
-  '.ck-text', '.gauge-label'
+  '.ck-text', '.gauge-label',
+  '.sidebar-brand', '.sidebar-sub',
+  '.sidebar-gestor-label', '.sidebar-gestor-avatar', '.sidebar-gestor-name', '.sidebar-gestor-role'
 ];
 
 function toggleEditMode() {
