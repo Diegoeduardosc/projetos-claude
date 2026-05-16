@@ -989,6 +989,7 @@ body.edit-mode .idea-tag { cursor: text; }
 }
 
 /* ADD TASK ROW */
+body:not(.user-logged-in) .add-task-row { display: none !important; }
 .add-task-row {
   display: flex;
   gap: 10px;
@@ -2910,6 +2911,7 @@ function renderTaskTable(dept) {
 }
 
 function startEdit(dept, i) {
+  if (!_currentUser) { abrirLoginModal(); return; }
   document.querySelector(`.task-name-view-${dept}-${i}`).style.display = 'none';
   document.querySelector(`.task-name-edit-${dept}-${i}`).style.display = 'block';
   document.querySelector(`.assignees-view-${dept}-${i}`).style.display = 'none';
@@ -2932,6 +2934,7 @@ function saveEdit(dept, i) {
 }
 
 function deleteTask(dept, i) {
+  if (!_currentUser) { abrirLoginModal(); return; }
   if (!confirm('Remover esta tarefa?')) return;
   TASKS[dept].splice(i, 1);
   saveTasksToStorage();
@@ -2976,11 +2979,13 @@ function updateTaskCounts() {
 }
 
 function changeTaskStatus(dept, idx, val) {
+  if (!_currentUser) { abrirLoginModal(); return; }
   TASKS[dept][idx].status = val;
   saveTasksToStorage();
 }
 
 function addNewTask(dept) {
+  if (!_currentUser) { abrirLoginModal(); return; }
   const inp = document.getElementById(dept+'-input');
   const sel = document.getElementById(dept+'-member-sel');
   const name = inp.value.trim();
@@ -2991,6 +2996,7 @@ function addNewTask(dept) {
   inp.value = '';
   sel.value = '';
   saveTasksToStorage();
+  registrarLog('Adicionou tarefa em ' + dept + ': ' + name);
   renderTaskTable(dept);
   renderMemberChips();
 }
@@ -3729,6 +3735,8 @@ function atualizarTopbarUser() {
     if (editBtn)   editBtn.style.display  = 'none';
     if (bellWrap)  bellWrap.classList.remove('visible');
   }
+  // Classe no body controla visibilidade de elementos que exigem login
+  document.body.classList.toggle('user-logged-in', !!_currentUser);
   // Atualiza visibilidade das atas ao mudar estado de login
   atualizarVisibilidadeMeetings();
 }
