@@ -1223,6 +1223,153 @@ body.edit-mode .reunion-actions { display: flex; }
   border-radius: 50%;
   flex-shrink: 0;
 }
+
+/* ═══ LIGHT MODE ═══ */
+body.light-mode {
+  --bg:    #F4F1FB;
+  --bg2:   #EDE8F8;
+  --bg3:   #E3DCF5;
+  --card:  #FFFFFF;
+  --card2: #F5F1FE;
+  --border: rgba(79,45,127,0.13);
+  --text:   #1A0F35;
+  --text2:  #5A4880;
+  --text3:  #8B7AAA;
+}
+body.light-mode::before {
+  background-image:
+    radial-gradient(ellipse 80% 60% at 10% 20%, rgba(79,45,127,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 80%, rgba(233,30,140,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(0,180,204,0.03) 0%, transparent 60%);
+}
+body.light-mode .sidebar   { background: #FFFFFF; }
+body.light-mode .topbar    { background: rgba(244,241,251,0.95); border-bottom-color: rgba(79,45,127,0.1); }
+body.light-mode .card      { background: #FFFFFF; }
+body.light-mode .stat-card { color: var(--text); }
+body.light-mode .reuniao-input,
+body.light-mode .reuniao-textarea { background: var(--card2); color: var(--text); border-color: var(--border); }
+body.light-mode .modal-box,
+body.light-mode #reuniao-modal > div { background: #FFFFFF; }
+body.light-mode .edit-btn  { background: rgba(79,45,127,0.12); border-color: rgba(79,45,127,0.3); color: var(--purple); }
+body.light-mode .edit-btn.saving { background: rgba(39,174,96,0.12); border-color: rgba(39,174,96,0.35); color: var(--green); }
+body.light-mode .nav-item  { color: var(--text2); }
+body.light-mode .nav-item.active,
+body.light-mode .nav-item:hover { background: rgba(79,45,127,0.1); color: var(--purple); }
+body.light-mode .filter-pill     { background: var(--card2); border-color: var(--border); color: var(--text2); }
+body.light-mode .filter-pill.active { background: var(--purple); border-color: var(--purple); color: #fff; }
+body.light-mode .act-table th,
+body.light-mode .act-table td  { border-color: var(--border); }
+body.light-mode .act-table th  { background: var(--card2); color: var(--text2); }
+body.light-mode .reunion-card  { background: var(--card); }
+body.light-mode .live-badge    { background: rgba(79,45,127,0.07); border-color: rgba(79,45,127,0.18); color: var(--purple); }
+body.light-mode .sidebar-bottom .live-badge { background: rgba(79,45,127,0.06); }
+body.light-mode [contenteditable].ed { outline-color: rgba(79,45,127,0.35); background: rgba(79,45,127,0.05); }
+
+/* theme toggle button */
+.theme-toggle-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 32px; height: 32px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text2);
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.theme-toggle-btn:hover { background: rgba(255,255,255,0.06); }
+body.light-mode .theme-toggle-btn:hover { background: rgba(79,45,127,0.08); }
+
+/* ═══ SEMESTER SELECTOR ═══ */
+.semester-selector-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.sem-pills-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.add-sem-btn {
+  background: transparent;
+  border: 1px dashed rgba(79,45,127,0.4);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 0.75rem;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--purple-l);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.add-sem-btn:hover { background: rgba(79,45,127,0.1); }
+
+/* ═══ LOGIN / USER ═══ */
+.login-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(79,45,127,0.15);
+  border: 1px solid rgba(79,45,127,0.3);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 0.75rem; font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--purple-l);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.login-btn:hover { background: rgba(79,45,127,0.25); }
+.user-chip {
+  display: none; align-items: center; gap: 7px;
+  background: rgba(79,45,127,0.12);
+  border: 1px solid rgba(79,45,127,0.25);
+  border-radius: 20px;
+  padding: 4px 10px 4px 4px;
+  cursor: pointer;
+  position: relative;
+}
+.user-chip:hover { background: rgba(79,45,127,0.2); }
+.user-chip-avatar {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple), var(--purple-l));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+.user-chip-name { font-size: 0.72rem; font-weight: 600; color: var(--text); }
+.user-chip-role { font-size: 0.62rem; color: var(--text3); }
+.user-dropdown {
+  display: none; position: absolute; top: calc(100% + 8px); right: 0;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 6px;
+  min-width: 170px; z-index: 200;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+}
+.user-chip.open .user-dropdown { display: block; }
+.user-dd-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: 8px;
+  font-size: 0.77rem; color: var(--text2); cursor: pointer;
+  transition: background 0.12s;
+}
+.user-dd-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+.user-dd-item.danger { color: var(--red); }
+.user-dd-item.danger:hover { background: rgba(231,76,60,0.08); }
+/* User management section */
+.user-mgmt-section {
+  display: none;
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 16px; padding: 20px; margin-top: 20px;
+}
+body.edit-mode .user-mgmt-section { display: block; }
+.user-mgmt-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px solid var(--border); gap: 10px;
+}
+.user-mgmt-row:last-child { border-bottom: none; padding-bottom: 0; }
 </style>
 </head>
 <body>
@@ -1328,13 +1475,21 @@ body.edit-mode .reunion-actions { display: flex; }
     </div>
     <div class="topbar-title" id="page-title">Dashboard Geral</div>
     <div class="topbar-right">
-      <div class="filter-pill active" onclick="switchSemester(this,'2026/1')">2026/1</div>
-      <div class="filter-pill" onclick="switchSemester(this,'2025/2')">2025/2</div>
-      <div class="filter-pill" onclick="switchSemester(this,'2025/1')">2025/1</div>
-      <button id="edit-mode-btn" class="edit-btn" onclick="toggleEditMode()">✏️ Editar</button>
-      <div class="diego-topbar">
-        <div class="diego-topbar-avatar">DG</div>
-        <div class="diego-topbar-info"><strong>Diego</strong> · Dashboard</div>
+      <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Alternar tema claro/escuro">🌙</button>
+      <button id="edit-mode-btn" class="edit-btn" onclick="toggleEditMode()" style="display:none">✏️ Editar</button>
+      <!-- Login / User chip -->
+      <button class="login-btn" id="topbar-login-btn" onclick="abrirLoginModal()">🔐 Login</button>
+      <div class="user-chip" id="topbar-user-chip" onclick="toggleUserDropdown(event)">
+        <div class="user-chip-avatar" id="topbar-user-avatar">--</div>
+        <div>
+          <div class="user-chip-name" id="topbar-user-name">—</div>
+          <div class="user-chip-role" id="topbar-user-role">—</div>
+        </div>
+        <div class="user-dropdown" id="user-dropdown">
+          <div class="user-dd-item" id="dd-gerenciar" onclick="abrirGerenciarUsuarios()" style="display:none">👥 Gerenciar equipe</div>
+          <div class="user-dd-item" id="dd-senha" onclick="abrirModal()" style="display:none">🔑 Alterar senha admin</div>
+          <div class="user-dd-item danger" onclick="fazerLogout()">🚪 Sair</div>
+        </div>
       </div>
     </div>
   </div>
@@ -1343,6 +1498,15 @@ body.edit-mode .reunion-actions { display: flex; }
 
     <!-- ═══════════════════════════════ OVERVIEW ═══════════════════════════════ -->
     <div class="page active" id="page-overview">
+      <!-- Seletor de Semestre -->
+      <div class="semester-selector-row" id="semester-selector-row">
+        <div class="sem-pills-group" id="sem-pills-group">
+          <div class="filter-pill active" id="sem-pill-2026-1" onclick="switchSemester(this,'2026/1')">2026/1</div>
+          <div class="filter-pill" id="sem-pill-2025-2" onclick="switchSemester(this,'2025/2')">2025/2</div>
+          <div class="filter-pill" id="sem-pill-2025-1" onclick="switchSemester(this,'2025/1')">2025/1</div>
+        </div>
+        <button id="add-sem-btn" class="add-sem-btn" onclick="abrirModalSemestre()" style="display:none" title="Adicionar novo semestre">+ Semestre</button>
+      </div>
       <div style="margin-bottom:20px">
         <div class="section-sub">Consolidado dos 3 departamentos · 1º semestre 2026</div>
       </div>
@@ -2892,12 +3056,23 @@ const TEXT_ED_SELS = [
 
 function toggleEditMode() {
   if (!editModeActive) {
-    // Precisa autenticar antes de ativar
-    abrirModal();
+    if (_currentUser && _currentUser.role === 'admin') {
+      ativarEditMode(); // admin já logado — ativa direto
+    } else if (_currentUser && _currentUser.role === 'membro') {
+      ativarEditModeMembro(); // membro — modo limitado
+    } else {
+      abrirModal(); // não logado — pede senha admin (retrocompatível)
+    }
   } else {
-    // Já está ativo — desativa direto (sem senha necessária para salvar)
     desativarEditMode();
   }
+}
+
+function ativarEditModeMembro() {
+  editModeActive = true;
+  const btn = document.getElementById('edit-mode-btn');
+  if (btn) { btn.textContent = '✓ Salvar'; btn.classList.add('saving'); }
+  ativarUIMeetings();
 }
 
 function ativarEditMode() {
@@ -2908,6 +3083,8 @@ function ativarEditMode() {
   document.body.classList.add('edit-mode');
   _aplicarEditMode();
   ativarUIMeetings();
+  const addSemBtn = document.getElementById('add-sem-btn');
+  if (addSemBtn) addSemBtn.style.display = 'flex';
 }
 
 function desativarEditMode() {
@@ -2924,6 +3101,8 @@ function desativarEditMode() {
   document.querySelectorAll('.gap-dot').forEach(d => d.onclick = null);
   updateAllKPIs();
   desativarUIMeetings();
+  const addSemBtn = document.getElementById('add-sem-btn');
+  if (addSemBtn) addSemBtn.style.display = 'none';
   // ☁️ Sincroniza tudo com Firebase
   saveToFirebase();
 }
@@ -3402,6 +3581,156 @@ function loadPbiState() {
   updatePbiEmbed();
 }
 
+// ════════════════ SISTEMA DE USUÁRIOS ════════════════
+let _currentUser = null; // { matricula, nome, sigla, role }
+
+function abrirLoginModal() {
+  document.getElementById('login-modal').style.display = 'flex';
+  document.getElementById('login-matricula').value = '';
+  document.getElementById('login-senha').value = '';
+  document.getElementById('login-error').textContent = '';
+  setTimeout(() => document.getElementById('login-matricula').focus(), 80);
+}
+function fecharLoginModal() {
+  document.getElementById('login-modal').style.display = 'none';
+}
+
+async function fazerLogin() {
+  const mat   = document.getElementById('login-matricula').value.trim();
+  const senha = document.getElementById('login-senha').value;
+  const errEl = document.getElementById('login-error');
+  if (!mat || !senha) { errEl.textContent = 'Preencha matrícula e senha.'; return; }
+  errEl.textContent = 'Verificando…';
+  try {
+    const hash = await sha256(senha);
+    const snap = await _db.ref('cinea/users/' + mat).once('value');
+    const u = snap.val();
+    if (!u || u.senha_hash !== hash) {
+      errEl.textContent = '❌ Matrícula ou senha incorretos.';
+      document.getElementById('login-senha').value = '';
+      return;
+    }
+    _currentUser = { matricula: mat, nome: u.nome, sigla: (u.sigla||mat.slice(0,2)).toUpperCase(), role: u.role || 'membro' };
+    fecharLoginModal();
+    atualizarTopbarUser();
+    // Registra acesso no Firebase
+    _db.ref('cinea/acessos').push({ matricula: mat, nome: u.nome, role: u.role, ts: new Date().toISOString() }).catch(()=>{});
+  } catch(e) {
+    errEl.textContent = '❌ Erro de conexão. Tente novamente.';
+    console.warn('Login error:', e);
+  }
+}
+
+function fazerLogout() {
+  if (editModeActive) desativarEditMode();
+  _currentUser = null;
+  atualizarTopbarUser();
+  fecharUserDropdown();
+}
+
+function atualizarTopbarUser() {
+  const loginBtn  = document.getElementById('topbar-login-btn');
+  const userChip  = document.getElementById('topbar-user-chip');
+  const avatar    = document.getElementById('topbar-user-avatar');
+  const nameEl    = document.getElementById('topbar-user-name');
+  const roleEl    = document.getElementById('topbar-user-role');
+  const ddGer     = document.getElementById('dd-gerenciar');
+  const ddSenha   = document.getElementById('dd-senha');
+  const editBtn   = document.getElementById('edit-mode-btn');
+
+  if (_currentUser) {
+    if (loginBtn)  loginBtn.style.display  = 'none';
+    if (userChip)  userChip.style.display  = 'flex';
+    if (avatar)    avatar.textContent       = _currentUser.sigla;
+    if (nameEl)    nameEl.textContent       = _currentUser.nome;
+    if (roleEl)    roleEl.textContent       = _currentUser.role === 'admin' ? 'Admin · CINEA' : 'Equipe CINEA';
+    if (ddGer)     ddGer.style.display      = _currentUser.role === 'admin' ? 'flex' : 'none';
+    if (ddSenha)   ddSenha.style.display    = _currentUser.role === 'admin' ? 'flex' : 'none';
+    if (editBtn)   editBtn.style.display    = 'flex';
+  } else {
+    if (loginBtn)  loginBtn.style.display  = 'flex';
+    if (userChip)  userChip.style.display  = 'none';
+    if (editBtn)   editBtn.style.display    = 'none';
+  }
+}
+
+function toggleUserDropdown(e) {
+  e.stopPropagation();
+  document.getElementById('topbar-user-chip')?.classList.toggle('open');
+}
+function fecharUserDropdown() {
+  document.getElementById('topbar-user-chip')?.classList.remove('open');
+}
+document.addEventListener('click', () => fecharUserDropdown());
+
+// Gerenciar usuários
+function abrirGerenciarUsuarios() {
+  fecharUserDropdown();
+  document.getElementById('users-modal').style.display = 'flex';
+  document.getElementById('new-user-error').textContent = '';
+  carregarListaUsuarios();
+}
+function fecharGerenciarUsuarios() {
+  document.getElementById('users-modal').style.display = 'none';
+}
+
+async function carregarListaUsuarios() {
+  const container = document.getElementById('users-list-container');
+  if (!container) return;
+  try {
+    const snap = await _db.ref('cinea/users').once('value');
+    const users = snap.val() || {};
+    const entries = Object.entries(users);
+    if (!entries.length) {
+      container.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:20px">Nenhum membro cadastrado.</div>';
+      return;
+    }
+    container.innerHTML = entries.map(([mat, u]) => `
+      <div class="user-mgmt-row">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--purple-l));display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;color:#fff;flex-shrink:0">${(u.sigla||mat.slice(0,2)).toUpperCase()}</div>
+          <div>
+            <div style="font-size:0.82rem;font-weight:600;color:var(--text)">${u.nome||mat}</div>
+            <div style="font-size:0.68rem;color:var(--text3)">Mat: ${mat} · ${u.role==='admin'?'Admin':'Membro'}</div>
+          </div>
+        </div>
+        <button onclick="removerUsuario('${mat}')" style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.25);border-radius:8px;padding:5px 10px;font-size:0.72rem;color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif">✕ Remover</button>
+      </div>`).join('');
+  } catch(e) {
+    container.innerHTML = '<div style="text-align:center;color:var(--red);font-size:0.82rem;padding:20px">Erro ao carregar usuários.</div>';
+  }
+}
+
+async function adicionarUsuario() {
+  const nome  = document.getElementById('new-user-nome').value.trim();
+  const mat   = document.getElementById('new-user-mat').value.trim();
+  const sigla = document.getElementById('new-user-sigla').value.trim().toUpperCase();
+  const senha = document.getElementById('new-user-senha').value;
+  const errEl = document.getElementById('new-user-error');
+  if (!nome || !mat || !senha) { errEl.textContent = 'Preencha nome, matrícula e senha.'; return; }
+  if (sigla.length < 2) { errEl.textContent = 'Sigla deve ter 2 letras.'; return; }
+  errEl.textContent = 'Salvando…';
+  try {
+    const hash = await sha256(senha);
+    await _db.ref('cinea/users/' + mat).set({ nome, sigla, senha_hash: hash, role: 'membro', ativo: true, criadoEm: new Date().toISOString() });
+    errEl.style.color = 'var(--green)';
+    errEl.textContent = '✅ Membro adicionado!';
+    document.getElementById('new-user-nome').value = '';
+    document.getElementById('new-user-mat').value  = '';
+    document.getElementById('new-user-sigla').value = '';
+    document.getElementById('new-user-senha').value = '';
+    setTimeout(() => { errEl.textContent = ''; errEl.style.color = 'var(--red)'; }, 2500);
+    carregarListaUsuarios();
+  } catch(e) { errEl.textContent = '❌ Erro: ' + e.message; }
+}
+
+async function removerUsuario(mat) {
+  if (!confirm(`Remover o usuário "${mat}" permanentemente?`)) return;
+  await _db.ref('cinea/users/' + mat).remove();
+  carregarListaUsuarios();
+}
+// ═════════════════════════════════════════════════════
+
 // ═══════════════════════ REUNIÕES ═══════════════════════
 const EQUIPE_CINEA = [
   { id:'ro', nome:'Rosimeire',  sigla:'RO', color:'var(--pink)'     },
@@ -3662,10 +3991,171 @@ function salvarConfigGH() {
 }
 // ════════════════════════════════════════════════════════
 
+// ════════ SEMESTRES DINÂMICOS ════════
+function abrirModalSemestre() {
+  document.getElementById('sem-modal').style.display = 'flex';
+  document.getElementById('new-sem-nome').value = '';
+  document.getElementById('new-sem-error').textContent = '';
+}
+function fecharModalSemestre() {
+  document.getElementById('sem-modal').style.display = 'none';
+}
+async function criarSemestre() {
+  const nome = document.getElementById('new-sem-nome').value.trim();
+  const errEl = document.getElementById('new-sem-error');
+  if (!nome || !/^\d{4}\/[12]$/.test(nome)) {
+    errEl.textContent = 'Use o formato AAAA/N (ex: 2027/1)'; return;
+  }
+  if (SEMESTER_DATA[nome]) { errEl.textContent = 'Semestre já existe.'; return; }
+  // Cria entrada local
+  SEMESTER_DATA[nome] = {
+    sub: `Consolidado dos 3 departamentos · ${nome.split('/')[1] === '1' ? '1º' : '2º'} semestre ${nome.split('/')[0]}`,
+    stats: [
+      { val:'0', unit:'pessoas',   change:'—', up:true },
+      { val:'0', unit:'UDAs',      change:'—', up:true },
+      { val:'0', unit:'%',         change:'—', up:true },
+      { val:'0', unit:'formações', change:'—', up:true },
+    ],
+    barVals: [0,0,0,0,0,0,0,0,0],
+    barTitle: `Formações ${nome}`,
+    presencial:0, remoto:0, total:0,
+  };
+  // Salva no Firebase
+  try {
+    await _db.ref('cinea/semestres/' + nome.replace('/','_')).set(SEMESTER_DATA[nome]);
+  } catch(e) { console.warn('Semestre Firebase:', e); }
+  // Adiciona pílula na UI
+  adicionarPilulaSemestre(nome);
+  fecharModalSemestre();
+  // Seleciona o novo semestre
+  const pill = document.getElementById('sem-pill-' + nome.replace('/','-'));
+  if (pill) switchSemester(pill, nome);
+}
+function adicionarPilulaSemestre(nome) {
+  const group = document.getElementById('sem-pills-group');
+  if (!group) return;
+  const id = 'sem-pill-' + nome.replace('/','-');
+  if (document.getElementById(id)) return; // já existe
+  const div = document.createElement('div');
+  div.className = 'filter-pill';
+  div.id = id;
+  div.textContent = nome;
+  div.onclick = () => switchSemester(div, nome);
+  group.appendChild(div);
+}
+// Carrega semestres customizados do Firebase ao iniciar
+async function carregarSemestresFirebase() {
+  try {
+    const snap = await _db.ref('cinea/semestres').once('value');
+    const data = snap.val() || {};
+    Object.entries(data).forEach(([key, val]) => {
+      const nome = key.replace('_','/');
+      if (!SEMESTER_DATA[nome]) {
+        SEMESTER_DATA[nome] = val;
+        adicionarPilulaSemestre(nome);
+      }
+    });
+  } catch(e) { /* offline */ }
+}
+
+// ════════ TEMA CLARO / ESCURO ════════
+function toggleTheme() {
+  const light = document.body.classList.toggle('light-mode');
+  localStorage.setItem('cinea_theme', light ? 'light' : 'dark');
+  const btn = document.getElementById('theme-toggle-btn');
+  if (btn) btn.textContent = light ? '☀️' : '🌙';
+}
+// Aplicar tema salvo ao carregar
+(function() {
+  if (localStorage.getItem('cinea_theme') === 'light') {
+    document.body.classList.add('light-mode');
+    // btn ainda não existe aqui; será corrigido no DOMContentLoaded abaixo
+  }
+})();
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('theme-toggle-btn');
+  if (btn && document.body.classList.contains('light-mode')) btn.textContent = '☀️';
+});
+
+// FIREBASE RULES: cinea/users deve ter ".read": "auth != null" e ".write": "auth != null"
+
 // ☁️ Inicia carregando do Firebase (cai para localStorage se offline)
 loadFromFirebase();
+carregarSemestresFirebase();
 
 </script>
+
+<!-- MODAL NOVO SEMESTRE -->
+<div id="sem-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:500;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:420px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div style="font-size:1rem;font-weight:700;color:var(--text)">➕ Novo Semestre</div>
+      <button onclick="fecharModalSemestre()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text2);width:32px;height:32px;cursor:pointer">✕</button>
+    </div>
+    <label class="reuniao-label">Nome do semestre (ex: 2027/1)</label>
+    <input id="new-sem-nome" class="reuniao-input" placeholder="2027/1" maxlength="8" style="margin-bottom:16px">
+    <div style="font-size:0.72rem;color:var(--text3);margin-bottom:16px">Os dados do semestre ficam zerados inicialmente. Edite os valores no Painel após criá-lo.</div>
+    <button onclick="criarSemestre()" style="width:100%;padding:12px;background:var(--purple);border:none;border-radius:12px;color:#fff;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Criar Semestre</button>
+    <div id="new-sem-error" style="font-size:0.78rem;color:var(--red);margin-top:10px;min-height:18px"></div>
+  </div>
+</div>
+
+<!-- MODAL LOGIN -->
+<div id="login-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:600;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;width:100%;max-width:380px">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--purple);font-weight:700">CINEA</div>
+      <div style="font-size:0.78rem;color:var(--text3);margin-top:4px">NED · PUC Minas</div>
+    </div>
+    <label class="reuniao-label">Matrícula</label>
+    <input id="login-matricula" class="reuniao-input" type="text" placeholder="Ex: 12345678" autocomplete="username" style="margin-bottom:14px">
+    <label class="reuniao-label">Senha</label>
+    <input id="login-senha" class="reuniao-input" type="password" placeholder="••••••••" autocomplete="current-password" style="margin-bottom:20px"
+           onkeydown="if(event.key==='Enter') fazerLogin()">
+    <button onclick="fazerLogin()" style="width:100%;padding:13px;background:var(--purple);border:none;border-radius:12px;color:#fff;font-size:0.92rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Entrar</button>
+    <div id="login-error" style="font-size:0.78rem;color:var(--red);margin-top:12px;min-height:18px;text-align:center"></div>
+    <button onclick="fecharLoginModal()" style="margin-top:14px;width:100%;background:transparent;border:none;color:var(--text3);font-size:0.77rem;cursor:pointer;font-family:'DM Sans',sans-serif">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL GERENCIAR USUÁRIOS -->
+<div id="users-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:600;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:520px;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px">
+      <div style="font-size:1rem;font-weight:700;color:var(--text)">👥 Gerenciar Equipe</div>
+      <button onclick="fecharGerenciarUsuarios()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text2);width:32px;height:32px;cursor:pointer">✕</button>
+    </div>
+    <!-- Formulário adicionar usuário -->
+    <div style="background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:20px">
+      <div style="font-size:0.78rem;font-weight:600;color:var(--text2);margin-bottom:14px;text-transform:uppercase;letter-spacing:1px">Adicionar membro</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div>
+          <label class="reuniao-label">Nome completo</label>
+          <input id="new-user-nome" class="reuniao-input" placeholder="Ex: Rosimeire" style="margin:0">
+        </div>
+        <div>
+          <label class="reuniao-label">Matrícula</label>
+          <input id="new-user-mat" class="reuniao-input" placeholder="Ex: 12345678" style="margin:0">
+        </div>
+        <div>
+          <label class="reuniao-label">Sigla (2 letras)</label>
+          <input id="new-user-sigla" class="reuniao-input" placeholder="Ex: RO" maxlength="3" style="margin:0">
+        </div>
+        <div>
+          <label class="reuniao-label">Senha inicial</label>
+          <input id="new-user-senha" class="reuniao-input" type="password" placeholder="••••••••" style="margin:0">
+        </div>
+      </div>
+      <button onclick="adicionarUsuario()" style="width:100%;padding:10px;background:var(--purple);border:none;border-radius:10px;color:#fff;font-size:0.82rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">➕ Adicionar</button>
+      <div id="new-user-error" style="font-size:0.75rem;color:var(--red);margin-top:8px;min-height:16px"></div>
+    </div>
+    <!-- Lista de usuários -->
+    <div style="font-size:0.78rem;font-weight:600;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">Membros cadastrados</div>
+    <div id="users-list-container">
+      <div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:20px">Carregando...</div>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL REUNIÃO -->
 <div id="reuniao-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:500;align-items:center;justify-content:center;padding:20px">
