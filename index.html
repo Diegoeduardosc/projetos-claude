@@ -1141,10 +1141,22 @@ body.edit-mode .idea-tag { cursor: text; }
 
   <div class="sidebar-bottom">
     <div class="live-badge" id="pbi-sidebar-badge" style="cursor:pointer" onclick="showPage('powerbi', document.querySelector('.nav-item[onclick*=powerbi]'))" title="Clique para ir à aba Power BI">
+      <!-- Ícone Power BI (3 barras em amarelo) -->
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0">
+        <rect x="1"  y="8"  width="3.5" height="7" rx="1" fill="#F5A623" opacity="0.6"/>
+        <rect x="6"  y="4"  width="3.5" height="11" rx="1" fill="#F5A623" opacity="0.85"/>
+        <rect x="11" y="1"  width="3.5" height="14" rx="1" fill="#F5A623"/>
+      </svg>
       <div class="live-dot" id="pbi-sidebar-dot" style="background:var(--red);animation:none"></div>
       <span id="pbi-sidebar-status">Power BI · Não conectado</span>
     </div>
     <div class="live-badge" id="fb-badge">
+      <!-- Ícone Firebase (chama) -->
+      <svg width="13" height="16" viewBox="0 0 192 256" fill="none" style="flex-shrink:0">
+        <path d="M30 222L88 64l30 60-20 36 62-160 32 222-96 40-96-42z" fill="#FFA000" opacity="0.9"/>
+        <path d="M30 222l62-34 34 14-96 20z" fill="#FF6F00"/>
+        <path d="M160 64l32 158-34 14-62-34 46-90 18-48z" fill="#FFCA28" opacity="0.85"/>
+      </svg>
       <div class="live-dot" id="fb-dot"></div>
       <span id="fb-status">Conectando...</span>
     </div>
