@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CINEA · BI Dashboard · PUC Minas</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<!-- Firebase SDKs (compat — funciona sem bundler) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
 :root {
   --purple:    #4F2D7F;
@@ -1124,8 +1127,8 @@ body.edit-mode .idea-tag { cursor: text; }
 
   <div class="sidebar-bottom">
     <div class="live-badge">
-      <div class="live-dot"></div>
-      Dados simulados — OneDrive
+      <div class="live-dot" id="fb-dot"></div>
+      <span id="fb-status">Conectando...</span>
     </div>
   </div>
 </aside>
@@ -2037,7 +2040,80 @@ body.edit-mode .idea-tag { cursor: text; }
 </main>
 
 <script>
-// PAGE NAV
+// ═══════════════════════ FIREBASE INTEGRATION ═══════════════════════
+const _fbConfig = {
+  apiKey:            "AIzaSyAc-9SP5Vf6Y2FU34XJLH_iPWhPU5cxwNM",
+  authDomain:        "cinea-dashboard.firebaseapp.com",
+  databaseURL:       "https://cinea-dashboard-default-rtdb.firebaseio.com",
+  projectId:         "cinea-dashboard",
+  storageBucket:     "cinea-dashboard.firebasestorage.app",
+  messagingSenderId: "702888574293",
+  appId:             "1:702888574293:web:a334ce45fdb6cad06303dc"
+};
+firebase.initializeApp(_fbConfig);
+const _db    = firebase.database();
+const _CREF  = _db.ref('cinea/v1');   // raiz dos dados do dashboard
+
+// Atualiza o badge de status no sidebar
+function setFbStatus(text, color, dotColor) {
+  const st = document.getElementById('fb-status');
+  const dt = document.getElementById('fb-dot');
+  if (st) { st.textContent = text; st.style.color = color || 'inherit'; }
+  if (dt) dt.style.background = dotColor || color || 'var(--green)';
+}
+
+// Carrega do Firebase → popula localStorage → roda loadSavedEdits
+async function loadFromFirebase() {
+  setFbStatus('⏳ Carregando...', 'var(--gold)', 'var(--gold)');
+  try {
+    const snap = await _CREF.once('value');
+    const data = snap.val();
+    if (data && typeof data === 'object') {
+      // Restaura cada chave no localStorage
+      Object.entries(data).forEach(([k, v]) => {
+        // Re-mapeia chave Firebase → chave localStorage (pbi-report-id usa traço)
+        const lsKey = k.replace(/___DASH___/g, '-');
+        localStorage.setItem(lsKey, String(v));
+      });
+    }
+    setFbStatus('☁️ Firebase ativo', 'var(--green)', 'var(--green)');
+  } catch (e) {
+    console.warn('[CINEA] Firebase indisponível — usando localStorage local.', e);
+    setFbStatus('⚠️ Modo offline', 'var(--gold)', 'var(--gold)');
+  }
+  loadSavedEdits();   // executa após ter os dados (Firebase ou localStorage)
+}
+
+// Coleta todo localStorage "cinea_*" e salva no Firebase
+function saveToFirebase() {
+  const data = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const lsKey = localStorage.key(i);
+    if (!lsKey || !lsKey.startsWith('cinea_')) continue;
+    // Firebase proíbe . # $ [ ] / → traços (-) são permitidos
+    // Mas para segurança extra, escapamos traços em chaves únicas
+    const fbKey = lsKey.replace(/-/g, '___DASH___');
+    data[fbKey] = localStorage.getItem(lsKey);
+  }
+
+  setFbStatus('💾 Salvando...', 'var(--gold)', 'var(--gold)');
+  const btn = document.getElementById('edit-mode-btn');
+  if (btn) btn.textContent = '💾 Salvando...';
+
+  _CREF.set(data)
+    .then(() => {
+      setFbStatus('✅ Salvo na nuvem', 'var(--green)', 'var(--green)');
+      if (btn) btn.textContent = '✏️ Editar';
+      // Volta ao status normal após 4 segundos
+      setTimeout(() => setFbStatus('☁️ Firebase ativo', 'var(--green)', 'var(--green)'), 4000);
+    })
+    .catch(err => {
+      console.error('[CINEA] Erro ao salvar no Firebase:', err);
+      setFbStatus('⚠️ Erro — dados locais OK', 'var(--red)', 'var(--red)');
+      if (btn) btn.textContent = '✏️ Editar';
+    });
+}
+
 // ═══════════════════════ SEMESTER SWITCH ═══════════════════════
 const SEMESTER_DATA = {
   '2026/1': {
@@ -2567,9 +2643,6 @@ function ativarEditMode() {
 
 function desativarEditMode() {
   editModeActive = false;
-  const btn = document.getElementById('edit-mode-btn');
-  btn.textContent = '✏️ Editar';
-  btn.classList.remove('saving');
   document.body.classList.remove('edit-mode');
   // Salva e remove contenteditable
   document.querySelectorAll('[contenteditable]').forEach(el => {
@@ -2581,6 +2654,8 @@ function desativarEditMode() {
   document.querySelectorAll('.act-table .status-pill').forEach(p => p.onclick = null);
   document.querySelectorAll('.gap-dot').forEach(d => d.onclick = null);
   updateAllKPIs();
+  // ☁️ Sincroniza tudo com Firebase
+  saveToFirebase();
 }
 
 function _aplicarEditMode() {
@@ -3023,7 +3098,8 @@ function loadPbiState() {
   updatePbiEmbed();
 }
 
-loadSavedEdits();
+// ☁️ Inicia carregando do Firebase (cai para localStorage se offline)
+loadFromFirebase();
 
 </script>
 </body>
