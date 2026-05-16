@@ -1140,25 +1140,31 @@ body.edit-mode .idea-tag { cursor: text; }
   </div>
 
   <div class="sidebar-bottom">
-    <div class="live-badge" id="pbi-sidebar-badge" style="cursor:pointer" onclick="showPage('powerbi', document.querySelector('.nav-item[onclick*=powerbi]'))" title="Clique para ir à aba Power BI">
-      <!-- Ícone Power BI (3 barras em amarelo) -->
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0">
-        <rect x="1"  y="8"  width="3.5" height="7" rx="1" fill="#F5A623" opacity="0.6"/>
-        <rect x="6"  y="4"  width="3.5" height="11" rx="1" fill="#F5A623" opacity="0.85"/>
-        <rect x="11" y="1"  width="3.5" height="14" rx="1" fill="#F5A623"/>
-      </svg>
-      <div class="live-dot" id="pbi-sidebar-dot" style="background:var(--red);animation:none"></div>
-      <span id="pbi-sidebar-status">Power BI · Não conectado</span>
+    <div class="live-badge" id="pbi-sidebar-badge" style="cursor:pointer;flex-direction:column;align-items:flex-start;gap:4px" onclick="showPage('powerbi', document.querySelector('.nav-item[onclick*=powerbi]'))" title="Clique para ir à aba Power BI">
+      <div style="display:flex;align-items:center;gap:8px;width:100%">
+        <!-- Ícone Power BI (3 barras em amarelo) -->
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0">
+          <rect x="1"  y="8"  width="3.5" height="7" rx="1" fill="#F5A623" opacity="0.6"/>
+          <rect x="6"  y="4"  width="3.5" height="11" rx="1" fill="#F5A623" opacity="0.85"/>
+          <rect x="11" y="1"  width="3.5" height="14" rx="1" fill="#F5A623"/>
+        </svg>
+        <div class="live-dot" id="pbi-sidebar-dot" style="background:var(--red);animation:none"></div>
+        <span id="pbi-sidebar-status">Power BI · Não conectado</span>
+      </div>
+      <div id="pbi-sidebar-ts" style="font-size:0.6rem;font-weight:400;color:inherit;opacity:0.6;padding-left:2px;display:none">—</div>
     </div>
-    <div class="live-badge" id="fb-badge">
-      <!-- Ícone Firebase (chama) -->
-      <svg width="13" height="16" viewBox="0 0 192 256" fill="none" style="flex-shrink:0">
-        <path d="M30 222L88 64l30 60-20 36 62-160 32 222-96 40-96-42z" fill="#FFA000" opacity="0.9"/>
-        <path d="M30 222l62-34 34 14-96 20z" fill="#FF6F00"/>
-        <path d="M160 64l32 158-34 14-62-34 46-90 18-48z" fill="#FFCA28" opacity="0.85"/>
-      </svg>
-      <div class="live-dot" id="fb-dot"></div>
-      <span id="fb-status">Conectando...</span>
+    <div class="live-badge" id="fb-badge" style="flex-direction:column;align-items:flex-start;gap:4px">
+      <div style="display:flex;align-items:center;gap:8px;width:100%">
+        <!-- Ícone Firebase (chama) -->
+        <svg width="13" height="16" viewBox="0 0 192 256" fill="none" style="flex-shrink:0">
+          <path d="M30 222L88 64l30 60-20 36 62-160 32 222-96 40-96-42z" fill="#FFA000" opacity="0.9"/>
+          <path d="M30 222l62-34 34 14-96 20z" fill="#FF6F00"/>
+          <path d="M160 64l32 158-34 14-62-34 46-90 18-48z" fill="#FFCA28" opacity="0.85"/>
+        </svg>
+        <div class="live-dot" id="fb-dot"></div>
+        <span id="fb-status">Conectando...</span>
+      </div>
+      <div id="fb-sidebar-ts" style="font-size:0.6rem;font-weight:400;color:inherit;opacity:0.6;padding-left:2px;display:none">—</div>
     </div>
   </div>
 </aside>
@@ -2092,6 +2098,20 @@ _auth.signInAnonymously()
   .then(() => { _fbAuthReady = true; })
   .catch(e  => console.warn('[CINEA] Auth anônima falhou:', e));
 
+// Formata data/hora atual como "16/05/2026 às 14:32"
+function _nowTs() {
+  const n = new Date();
+  return n.toLocaleDateString('pt-BR') + ' às ' + n.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+}
+
+// Exibe timestamp num elemento de badge
+function _showTs(elId, ts) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.textContent = 'Sinc: ' + ts;
+  el.style.display = 'block';
+}
+
 // Atualiza o badge de status no sidebar
 function setFbStatus(text, color, dotColor) {
   const st = document.getElementById('fb-status');
@@ -2115,9 +2135,14 @@ async function loadFromFirebase() {
       });
     }
     setFbStatus('☁️ Firebase ativo', 'var(--green)', 'var(--green)');
+    // Restaura timestamp do último save (vem do Firebase dentro do snap.val())
+    const fbTs = localStorage.getItem('cinea_fb_last_sync');
+    if (fbTs) _showTs('fb-sidebar-ts', fbTs);
   } catch (e) {
     console.warn('[CINEA] Firebase indisponível — usando localStorage local.', e);
     setFbStatus('⚠️ Modo offline', 'var(--gold)', 'var(--gold)');
+    const fbTs = localStorage.getItem('cinea_fb_last_sync');
+    if (fbTs) _showTs('fb-sidebar-ts', fbTs);
   }
   loadSavedEdits();   // executa após ter os dados (Firebase ou localStorage)
 }
@@ -2139,7 +2164,10 @@ function saveToFirebase() {
   function doSave() {
     _CREF.set(data)
       .then(() => {
+        const ts = _nowTs();
+        localStorage.setItem('cinea_fb_last_sync', ts);
         setFbStatus('✅ Salvo na nuvem', 'var(--green)', 'var(--green)');
+        _showTs('fb-sidebar-ts', ts);
         if (btn) btn.textContent = '✏️ Editar';
         setTimeout(() => setFbStatus('☁️ Firebase ativo', 'var(--green)', 'var(--green)'), 4000);
       })
@@ -3133,13 +3161,13 @@ function applyPbiStatus(connected) {
 }
 
 function pbiRegisterSync() {
-  const now = new Date();
-  const ts  = now.toLocaleDateString('pt-BR') + ' às ' + now.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+  const ts = _nowTs();
   localStorage.setItem('cinea_pbi_sync', ts);
   localStorage.setItem('cinea_pbi_connected', '1');
   applyPbiStatus(true);
   const el = document.getElementById('pbi-last-sync');
   if (el) el.textContent = ts;
+  _showTs('pbi-sidebar-ts', ts);
 }
 
 function updatePbiEmbed() {
@@ -3168,6 +3196,8 @@ function loadPbiState() {
   const sync = localStorage.getItem('cinea_pbi_sync');
   const syncEl = document.getElementById('pbi-last-sync');
   if (sync && syncEl) syncEl.textContent = sync;
+  // Restaura timestamp no badge do sidebar
+  if (sync) _showTs('pbi-sidebar-ts', sync);
   const rid = localStorage.getItem('cinea_pbi-report-id');
   const wid = localStorage.getItem('cinea_pbi-workspace-id');
   const ridEl = document.getElementById('pbi-report-id');
