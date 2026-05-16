@@ -1185,7 +1185,10 @@ body.edit-mode .idea-tag { cursor: text; }
         <div class="diego-topbar-avatar">DG</div>
         <div class="diego-topbar-info"><strong>Diego</strong> · Dashboard</div>
       </div>
-      <div class="sync-time" id="sync-time">Última sinc: --:--</div>
+      <div class="sync-time" id="sync-time" style="display:flex;flex-direction:column;gap:2px;text-align:right">
+        <span id="st-firebase" style="white-space:nowrap">☁️ Firebase: —</span>
+        <span id="st-powerbi"  style="white-space:nowrap">📊 Power BI: —</span>
+      </div>
     </div>
   </div>
 
@@ -2168,6 +2171,7 @@ function saveToFirebase() {
         localStorage.setItem('cinea_fb_last_sync', ts);
         setFbStatus('✅ Salvo na nuvem', 'var(--green)', 'var(--green)');
         _showTs('fb-sidebar-ts', ts);
+        updateSyncBar();
         if (btn) btn.textContent = '✏️ Editar';
         setTimeout(() => setFbStatus('☁️ Firebase ativo', 'var(--green)', 'var(--green)'), 4000);
       })
@@ -2338,13 +2342,15 @@ function showPage(id, el) {
 }
 
 // SYNC TIME
-function updateSync() {
-  const now = new Date();
-  document.getElementById('sync-time').textContent =
-    'Última sinc: ' + now.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+function updateSyncBar() {
+  const fbTs  = localStorage.getItem('cinea_fb_last_sync');
+  const pbiTs = localStorage.getItem('cinea_pbi_sync');
+  const fbEl  = document.getElementById('st-firebase');
+  const pbiEl = document.getElementById('st-powerbi');
+  if (fbEl)  fbEl.textContent  = '☁️ Firebase: '  + (fbTs  || '—');
+  if (pbiEl) pbiEl.textContent = '📊 Power BI: ' + (pbiTs || '—');
 }
-updateSync();
-setInterval(updateSync, 60000);
+updateSyncBar();
 
 // BAR CHART PRESENCIAL
 const presData = [
@@ -3168,6 +3174,7 @@ function pbiRegisterSync() {
   const el = document.getElementById('pbi-last-sync');
   if (el) el.textContent = ts;
   _showTs('pbi-sidebar-ts', ts);
+  updateSyncBar();
 }
 
 function updatePbiEmbed() {
