@@ -1152,6 +1152,8 @@ body.edit-mode .reunion-actions { display: flex; }
 .reunion-action-btn:hover { background: rgba(255,255,255,0.06); }
 .reunion-action-btn.del { color: var(--red); border-color: rgba(231,76,60,0.3); }
 .reunion-action-btn.del:hover { background: rgba(231,76,60,0.08); }
+.reunion-action-btn.dl  { color: var(--cyan); border-color: rgba(0,180,204,0.3); }
+.reunion-action-btn.dl:hover  { background: rgba(0,180,204,0.08); }
 .reuniao-locked {
   display: flex;
   flex-direction: column;
@@ -1955,9 +1957,9 @@ body.edit-mode .reunion-actions { display: flex; }
     <div class="page" id="page-meeting">
       <div class="section-header" style="margin-bottom:20px">
         <div class="section-sub">Gaps · Gargalos · Pessoas-chave · Decisões</div>
-        <div class="live-badge" style="border-radius:20px">
-          <div class="live-dot"></div>
-          Semana atual
+        <div class="live-badge" id="ultima-reuniao-badge" style="border-radius:20px;gap:6px">
+          <span style="font-size:0.85rem">📋</span>
+          <span id="ultima-reuniao-txt">Sem reuniões</span>
         </div>
       </div>
 
@@ -3413,6 +3415,7 @@ const EQUIPE_CINEA = [
   { id:'jc', nome:'Prof. João Carlos', sigla:'JC', color:'var(--gold)' },
 ];
 let _reuniaoKey = null;
+let _meetingsCache = {};
 
 function ativarUIMeetings() {
   const btnNovo  = document.getElementById('nova-reuniao-btn');
@@ -3498,11 +3501,25 @@ async function carregarReunioes() {
 }
 
 function renderizarReunioes(data) {
+  _meetingsCache = data || {};
   const list  = document.getElementById('reunioes-list');
   const empty = document.getElementById('reunioes-empty');
   if (!list) return;
   list.querySelectorAll('.reunion-card').forEach(c => c.remove());
   const entries = Object.entries(data).sort((a,b) => (b[1].data||'').localeCompare(a[1].data||''));
+
+  // Atualiza badge "Última reunião"
+  const badgeTxt = document.getElementById('ultima-reuniao-txt');
+  if (badgeTxt) {
+    if (entries.length) {
+      const ultima = entries[0][1];
+      const dataFmtU = ultima.data ? ultima.data.split('-').reverse().join('/') : '—';
+      badgeTxt.textContent = 'Última reunião: ' + dataFmtU;
+    } else {
+      badgeTxt.textContent = 'Sem reuniões';
+    }
+  }
+
   if (!entries.length) { if(empty) empty.style.display='block'; return; }
   if(empty) empty.style.display = 'none';
   entries.forEach(([key, m]) => {
@@ -3512,6 +3529,7 @@ function renderizarReunioes(data) {
     card.innerHTML = `
       <div class="reunion-actions">
         <button class="reunion-action-btn" onclick="editarReuniao('${key}')">✎ Editar</button>
+        <button class="reunion-action-btn dl"  onclick="downloadReuniao('${key}')">⬇ Word</button>
         <button class="reunion-action-btn del" onclick="deletarReuniao('${key}')">✕ Apagar</button>
       </div>
       <div class="reunion-date-badge">📅 ${dataFmt} · ⏰ ${m.horario||'—'}</div>
@@ -3569,6 +3587,65 @@ async function salvarNoGitHub(meeting, key) {
   const ghStatus = document.getElementById('gh-status');
   if (res.ok) { if(ghStatus) ghStatus.textContent = '✅ Backup GitHub: ' + _nowTs(); }
   else { const err = await res.json(); throw new Error(err.message); }
+}
+
+function downloadReuniao(key) {
+  const m = _meetingsCache[key];
+  if (!m) { alert('Reunião não encontrada.'); return; }
+  const dataFmt       = m.data ? m.data.split('-').reverse().join('/') : '—';
+  const participantes = (m.participantes||[]).join(' · ') || '—';
+  const esc = t => (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+
+  const html = `<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="UTF-8">
+<title>Ata de Reunião CINEA</title>
+<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->
+<style>
+  @page { size: A4; margin: 2.5cm; }
+  body  { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #2c2c2c; line-height: 1.5; }
+  h1    { font-size: 16pt; color: #4F2D7F; border-bottom: 2pt solid #4F2D7F; padding-bottom: 6pt; margin-bottom: 4pt; }
+  .meta { font-size: 9pt; color: #888888; margin-bottom: 20pt; }
+  h2    { font-size: 10pt; color: #4F2D7F; text-transform: uppercase;
+          letter-spacing: 1pt; border-left: 4pt solid #E91E8C;
+          padding-left: 6pt; margin: 16pt 0 4pt; }
+  p     { font-size: 11pt; white-space: pre-wrap; margin: 0 0 4pt; }
+  .participants { font-size: 10.5pt; }
+  .footer { margin-top: 28pt; font-size: 8pt; color: #aaaaaa;
+            border-top: 1pt solid #eeeeee; padding-top: 8pt; }
+</style>
+</head>
+<body>
+<h1>Ata de Reunião · CINEA / NED · PUC Minas</h1>
+<div class="meta">
+  <strong>Data:</strong> ${dataFmt} &nbsp;&nbsp;
+  <strong>Horário:</strong> ${m.horario||'—'} &nbsp;&nbsp;
+  <strong>Gerado em:</strong> ${new Date().toLocaleString('pt-BR')}
+</div>
+
+<h2>Participantes</h2>
+<p class="participants">${esc(participantes)}</p>
+
+${m.pauta    ? `<h2>Pauta</h2><p>${esc(m.pauta)}</p>`    : ''}
+${m.resumo   ? `<h2>Resumo da Reunião</h2><p>${esc(m.resumo)}</p>` : ''}
+${m.decisoes ? `<h2>Decisões / Próximos Passos</h2><p>${esc(m.decisoes)}</p>` : ''}
+
+<div class="footer">CINEA · NED · PUC Minas &nbsp;|&nbsp; Documento gerado automaticamente pelo Dashboard CINEA</div>
+</body>
+</html>`;
+
+  const blob = new Blob(['﻿', html], { type: 'application/msword' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `Ata_CINEA_${(m.data||'sem_data').replace(/-/g,'')}.doc`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function salvarConfigGH() {
