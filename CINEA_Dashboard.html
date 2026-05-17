@@ -1389,6 +1389,65 @@ body.light-mode .sug-btn:hover { background: rgba(245,166,35,0.1); }
   border-radius: 8px; padding: 8px 12px; font-size: 0.75rem;
   color: var(--text2); margin-top: 8px; line-height: 1.5;
 }
+.ticket-code {
+  font-family: 'DM Mono', monospace; font-size: 0.68rem; font-weight: 700;
+  background: rgba(0,180,204,0.1); color: var(--cyan);
+  border: 1px solid rgba(0,180,204,0.25); border-radius: 6px;
+  padding: 2px 7px; letter-spacing: 0.5px;
+}
+
+/* ═══ CHANGELOG ═══ */
+.cl-btn-wrap {
+  position: relative; display: none; flex-shrink: 0;
+}
+body.user-logged-in .cl-btn-wrap { display: flex; }
+.cl-btn {
+  width: 32px; height: 32px; background: transparent;
+  border: 1px solid var(--border); border-radius: 50%;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; color: var(--text2);
+  transition: background 0.15s, border-color 0.15s;
+}
+.cl-btn:hover { background: rgba(39,174,96,0.12); border-color: rgba(39,174,96,0.35); }
+body.light-mode .cl-btn:hover { background: rgba(39,174,96,0.09); }
+.cl-badge {
+  position: absolute; top: -3px; right: -3px;
+  background: var(--green); color: #fff;
+  font-size: 0.52rem; font-weight: 700;
+  min-width: 15px; height: 15px; border-radius: 8px;
+  display: none; align-items: center; justify-content: center; padding: 0 3px;
+}
+.cl-badge.show { display: flex; }
+
+/* Cards do changelog */
+.cl-card {
+  border: 1px solid var(--border); border-radius: 14px;
+  padding: 16px 18px; margin-bottom: 12px; position: relative;
+  background: var(--card2);
+}
+.cl-card:last-child { margin-bottom: 0; }
+.cl-card-header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.cl-versao {
+  font-family: 'DM Mono', monospace; font-size: 0.75rem; font-weight: 700;
+  color: var(--purple-l); background: rgba(79,45,127,0.12);
+  border: 1px solid rgba(79,45,127,0.25); border-radius: 6px; padding: 2px 8px;
+}
+.cl-tipo-badge {
+  font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; padding: 2px 8px; border-radius: 20px;
+}
+.cl-tipo-badge.melhoria    { background: rgba(79,45,127,0.12); color: var(--purple-l); border: 1px solid rgba(79,45,127,0.25); }
+.cl-tipo-badge.novidade    { background: rgba(0,180,204,0.12);  color: var(--cyan);     border: 1px solid rgba(0,180,204,0.25); }
+.cl-tipo-badge.correcao    { background: rgba(231,76,60,0.08);  color: var(--red);      border: 1px solid rgba(231,76,60,0.2); }
+.cl-tipo-badge.performance { background: rgba(245,166,35,0.12); color: var(--gold);     border: 1px solid rgba(245,166,35,0.25); }
+.cl-titulo { font-size: 0.92rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.cl-itens { font-size: 0.78rem; color: var(--text2); line-height: 1.8; white-space: pre-wrap; }
+.cl-footer { font-size: 0.65rem; color: var(--text3); margin-top: 10px; }
+.cl-novo-badge {
+  position: absolute; top: 12px; right: 14px;
+  background: var(--green); color: #fff; font-size: 0.58rem; font-weight: 700;
+  padding: 2px 7px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px;
+}
 
 .lixeira-topbar-btn {
   width: 32px; height: 32px;
@@ -1737,6 +1796,11 @@ body.edit-mode .user-mgmt-section { display: block; }
       </div>
       <!-- Lixeira (todos os logados) -->
       <button class="lixeira-topbar-btn" id="lixeira-topbar-btn" onclick="abrirLixeira()" title="Lixeira">🗑️</button>
+      <!-- Changelog (todos os logados) -->
+      <div class="cl-btn-wrap" id="cl-btn-wrap">
+        <button class="cl-btn" onclick="abrirChangelog()" title="Melhorias & Versões">🚀</button>
+        <div class="cl-badge" id="cl-badge"></div>
+      </div>
       <!-- Sino de notificações (admin) -->
       <div class="notif-bell-wrap" id="notif-bell-wrap" onclick="toggleNotifPanel(event)">
         <button class="notif-bell-btn" title="Notificações">🔔</button>
@@ -4035,6 +4099,7 @@ function atualizarTopbarUser() {
     if (bellWrap)  bellWrap.classList.toggle('visible', isAdmin);
     if (isAdmin) { carregarNotificacoes(); iniciarListenerSugestoes(); }
     iniciarListenerMeetings();
+    atualizarBadgeChangelog();
   } else {
     if (loginBtn)  loginBtn.style.display = 'flex';
     if (userChip)  userChip.style.display = 'none';
@@ -4164,7 +4229,7 @@ async function carregarNotificacoes() {
       const data_fmt = n.ts ? new Date(n.ts).toLocaleString('pt-BR') : '—';
       if (n.tipo === 'sugestao') {
         return `<div class="notif-item">
-          <div class="notif-item-title">💡 Nova sugestão de melhoria</div>
+          <div class="notif-item-title">💡 ${n.ticket ? `<span class="ticket-code" style="font-size:0.62rem">${n.ticket}</span> ` : ''}Nova sugestão</div>
           <div class="notif-item-sub">De: <strong>${n.autor||n.matricula||'—'}</strong> · ${data_fmt}</div>
           <div class="notif-item-sub" style="margin-top:3px;font-style:italic">"${(n.preview||'').substring(0,80)}${(n.preview||'').length>80?'…':''}"</div>
           <button class="notif-resolve-btn" onclick="verSugestaoNotif('${key}')">👁 Ver sugestão</button>
@@ -5021,9 +5086,12 @@ async function carregarMinhasSugestoes() {
       const cat    = _CATEGORIAS[s.categoria] || s.categoria || '—';
       const data_f = s.ts ? new Date(s.ts).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
       return `<div class="minha-sug-card">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
-          <span class="sug-status ${st.cls}">${st.label}</span>
-          <span style="font-size:0.68rem;color:var(--text3)">${cat} · ${data_f}</span>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            ${s.ticket ? `<span class="ticket-code">${s.ticket}</span>` : ''}
+            <span class="sug-status ${st.cls}">${st.label}</span>
+          </div>
+          <span style="font-size:0.65rem;color:var(--text3)">${cat} · ${data_f}</span>
         </div>
         <div style="font-size:0.8rem;color:var(--text);line-height:1.5;margin-bottom:${s.feedback?'8px':'0'}">${escapeHtml(s.texto||'')}</div>
         ${s.feedback ? `<div class="minha-sug-feedback"><strong style="color:var(--purple-l)">💬 Feedback do admin:</strong><br>${escapeHtml(s.feedback)}</div>` : ''}
@@ -5034,6 +5102,18 @@ async function carregarMinhasSugestoes() {
   }
 }
 
+async function gerarTicketSugestao() {
+  try {
+    const seqSnap = await _db.ref('cinea/config/sug_seq').once('value');
+    const seq = (seqSnap.val() || 0) + 1;
+    await _db.ref('cinea/config/sug_seq').set(seq);
+    return `SUG-${new Date().getFullYear()}-${String(seq).padStart(3,'0')}`;
+  } catch(e) {
+    // Fallback: usa timestamp se Firebase falhar
+    return `SUG-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;
+  }
+}
+
 async function enviarSugestao() {
   if (!_currentUser) return;
   const categoria = document.getElementById('sug-categoria').value;
@@ -5041,10 +5121,13 @@ async function enviarSugestao() {
   if (!texto) { alert('Por favor descreva sua sugestão antes de enviar.'); return; }
 
   const btn = document.querySelector('#sug-modal button[onclick="enviarSugestao()"]');
-  if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Gerando ticket...'; }
 
   try {
+    const ticket = await gerarTicketSugestao();
+
     await _db.ref('cinea/sugestoes').push({
+      ticket,
       autor:     _currentUser.nome || _currentUser.matricula,
       matricula: _currentUser.matricula,
       categoria,
@@ -5056,6 +5139,7 @@ async function enviarSugestao() {
     // Notifica admin via sino 🔔
     await _db.ref('cinea/notificacoes').push({
       tipo:      'sugestao',
+      ticket,
       autor:     _currentUser.nome || _currentUser.matricula,
       matricula: _currentUser.matricula,
       preview:   texto.substring(0, 120),
@@ -5063,16 +5147,141 @@ async function enviarSugestao() {
       lido:      false,
     }).catch(() => {});
 
-    registrarLog('Enviou sugestão de melhoria · categoria: ' + (_CATEGORIAS[categoria] || categoria));
+    registrarLog(`Abriu ticket ${ticket} · ${_CATEGORIAS[categoria] || categoria}`);
     document.getElementById('sug-texto').value = '';
-    mostrarToast('💡 Sugestão enviada!', 'Obrigado! Clique em "Minhas sugestões" para acompanhar o status.');
-    mudarTabSug('minhas'); // leva o usuário para ver o que enviou
+    mostrarToast(`🎫 Ticket ${ticket} aberto!`, 'Clique em "Minhas sugestões" para acompanhar.');
+    mudarTabSug('minhas');
   } catch(e) {
     alert('Erro ao enviar sugestão. Verifique a conexão e tente novamente.');
     console.error(e);
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = 'Enviar 💡'; }
   }
+}
+
+/* ══════════════════════════════════════════
+   CHANGELOG / MELHORIAS & VERSÕES
+══════════════════════════════════════════ */
+const _CL_TIPOS = {
+  novidade:    { label:'🌟 Novidade',    cls:'novidade' },
+  melhoria:    { label:'⚡ Melhoria',    cls:'melhoria' },
+  correcao:    { label:'🔧 Correção',    cls:'correcao' },
+  performance: { label:'🏎️ Performance', cls:'performance' },
+};
+
+let _clFormVisible = false;
+
+function abrirChangelog() {
+  if (!_currentUser) { abrirLoginModal(); return; }
+  const modal = document.getElementById('changelog-modal');
+  modal.style.display = 'flex';
+  // Mostra botão "Nova versão" apenas para admin
+  const addBtn = document.getElementById('cl-add-btn');
+  if (addBtn) addBtn.style.display = (_currentUser?.role === 'admin') ? 'flex' : 'none';
+  // Marca como visto agora
+  localStorage.setItem('cinea_changelog_seen', Date.now().toString());
+  const badge = document.getElementById('cl-badge');
+  if (badge) { badge.textContent = ''; badge.classList.remove('show'); }
+  carregarChangelog();
+}
+
+function fecharChangelog() {
+  document.getElementById('changelog-modal').style.display = 'none';
+  if (_clFormVisible) toggleFormChangelog();
+}
+
+function toggleFormChangelog() {
+  _clFormVisible = !_clFormVisible;
+  const form = document.getElementById('cl-form');
+  if (form) form.style.display = _clFormVisible ? 'block' : 'none';
+  if (_clFormVisible) {
+    document.getElementById('cl-versao').value = '';
+    document.getElementById('cl-titulo-input').value = '';
+    document.getElementById('cl-itens').value = '';
+    document.getElementById('cl-tipo').value = 'novidade';
+    setTimeout(() => document.getElementById('cl-versao').focus(), 80);
+  }
+}
+
+async function salvarVersao() {
+  if (!_currentUser || _currentUser.role !== 'admin') return;
+  const versao = document.getElementById('cl-versao').value.trim();
+  const titulo = document.getElementById('cl-titulo-input').value.trim();
+  const tipo   = document.getElementById('cl-tipo').value;
+  const itens  = document.getElementById('cl-itens').value.trim();
+  if (!versao || !titulo || !itens) { alert('Preencha versão, título e os itens.'); return; }
+
+  try {
+    await _db.ref('cinea/changelog').push({
+      versao, titulo, tipo, itens,
+      ts:    new Date().toISOString(),
+      autor: _currentUser.nome || _currentUser.matricula,
+    });
+    registrarLog(`Publicou versão ${versao}: ${titulo}`);
+    toggleFormChangelog();
+    carregarChangelog();
+    mostrarToast(`🚀 Versão ${versao} publicada!`, titulo);
+  } catch(e) {
+    alert('Erro ao publicar versão.'); console.error(e);
+  }
+}
+
+async function carregarChangelog() {
+  const listEl = document.getElementById('cl-list');
+  if (!listEl) return;
+  listEl.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:40px">Carregando...</div>';
+  try {
+    const snap = await _db.ref('cinea/changelog').once('value');
+    const data = snap.val() || {};
+    const entradas = Object.entries(data).sort((a,b) => (b[1].ts||'').localeCompare(a[1].ts||''));
+    const lastSeen = parseInt(localStorage.getItem('cinea_changelog_seen') || '0');
+
+    if (!entradas.length) {
+      listEl.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:40px">Nenhuma versão publicada ainda.</div>';
+      return;
+    }
+    listEl.innerHTML = entradas.map(([key, e]) => {
+      const tipo  = _CL_TIPOS[e.tipo] || _CL_TIPOS.melhoria;
+      const data_f = e.ts ? new Date(e.ts).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+      const isNovo = e.ts && new Date(e.ts).getTime() > lastSeen;
+      const deleteBtn = (_currentUser?.role === 'admin')
+        ? `<button onclick="deletarVersao('${key}')" style="position:absolute;bottom:12px;right:14px;background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:6px;color:var(--red);font-size:0.65rem;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif">🗑 Remover</button>` : '';
+      return `<div class="cl-card">
+        ${isNovo ? '<div class="cl-novo-badge">Novo</div>' : ''}
+        <div class="cl-card-header">
+          <span class="cl-versao">${escapeHtml(e.versao)}</span>
+          <span class="cl-tipo-badge ${tipo.cls}">${tipo.label}</span>
+          <span style="font-size:0.65rem;color:var(--text3);margin-left:auto">${data_f}</span>
+        </div>
+        <div class="cl-titulo">${escapeHtml(e.titulo)}</div>
+        <div class="cl-itens">${escapeHtml(e.itens)}</div>
+        <div class="cl-footer">📝 por ${escapeHtml(e.autor||'—')}</div>
+        ${deleteBtn}
+      </div>`;
+    }).join('');
+  } catch(e) {
+    listEl.innerHTML = '<div style="text-align:center;color:var(--red);font-size:0.82rem;padding:30px">Erro ao carregar.</div>';
+  }
+}
+
+async function deletarVersao(key) {
+  if (!_currentUser || _currentUser.role !== 'admin') return;
+  if (!confirm('Remover esta entrada do changelog?')) return;
+  await _db.ref('cinea/changelog/' + key).remove().catch(()=>{});
+  carregarChangelog();
+}
+
+function atualizarBadgeChangelog() {
+  if (!_currentUser) return;
+  const lastSeen = parseInt(localStorage.getItem('cinea_changelog_seen') || '0');
+  _db.ref('cinea/changelog').once('value').then(snap => {
+    const data = snap.val() || {};
+    const novas = Object.values(data).filter(e => e.ts && new Date(e.ts).getTime() > lastSeen).length;
+    const badge = document.getElementById('cl-badge');
+    if (!badge) return;
+    if (novas > 0) { badge.textContent = novas; badge.classList.add('show'); }
+    else           { badge.textContent = '';    badge.classList.remove('show'); }
+  }).catch(()=>{});
 }
 
 // Badge no 💡 para admin: conta sugestões "nova" em tempo real
@@ -5151,6 +5360,7 @@ function filtrarSugestoes() {
       <div class="sug-card-header">
         <div style="flex:1">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+            ${s.ticket ? `<span class="ticket-code">${s.ticket}</span>` : ''}
             <span class="sug-status ${st.cls}">${st.label}</span>
             <span style="font-size:0.72rem;color:var(--text3)">${catLabel}</span>
           </div>
@@ -5515,6 +5725,61 @@ async function salvarFeedbackSugestao(key) {
     <div id="sug-admin-list" style="overflow-y:auto;flex:1;padding-right:4px">
       <div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:40px">Carregando sugestões...</div>
     </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ MODAL CHANGELOG ═══════════════════ -->
+<div id="changelog-modal" onclick="if(event.target===this)fecharChangelog()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:600;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:640px;max-height:88vh;display:flex;flex-direction:column">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-shrink:0">
+      <div>
+        <div style="font-size:1.05rem;font-weight:700;color:var(--text)">🚀 Melhorias &amp; Versões</div>
+        <div style="font-size:0.72rem;color:var(--text3);margin-top:2px">Histórico de implementações e correções do sistema</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="cl-add-btn" onclick="toggleFormChangelog()" style="display:none;align-items:center;gap:5px;padding:6px 13px;background:rgba(39,174,96,0.15);border:1px solid rgba(39,174,96,0.3);border-radius:8px;color:var(--green);font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer">+ Nova versão</button>
+        <button onclick="fecharChangelog()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text2);width:32px;height:32px;cursor:pointer">✕</button>
+      </div>
+    </div>
+
+    <!-- Formulário (admin) -->
+    <div id="cl-form" style="display:none;background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:16px;flex-shrink:0">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div>
+          <label style="font-size:0.68rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Versão</label>
+          <input id="cl-versao" placeholder="ex: v1.4" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.82rem;padding:8px 10px">
+        </div>
+        <div>
+          <label style="font-size:0.68rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Tipo</label>
+          <select id="cl-tipo" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.82rem;padding:8px 10px;appearance:none;cursor:pointer">
+            <option value="novidade">🌟 Novidade</option>
+            <option value="melhoria">⚡ Melhoria</option>
+            <option value="correcao">🔧 Correção</option>
+            <option value="performance">🏎️ Performance</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="font-size:0.68rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Título</label>
+        <input id="cl-titulo-input" placeholder="ex: Sugestões com código de ticket" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.82rem;padding:8px 10px">
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:0.68rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">O que mudou (uma linha por item)</label>
+        <textarea id="cl-itens" placeholder="- Geração automática de código SUG-2026-001&#10;- Aba 'Minhas sugestões' com acompanhamento&#10;- Badge de novidades no 🚀" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.82rem;padding:8px 10px;resize:vertical;min-height:90px;line-height:1.6"></textarea>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px">
+        <button onclick="toggleFormChangelog()" style="padding:7px 14px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.78rem;cursor:pointer">Cancelar</button>
+        <button onclick="salvarVersao()" style="padding:7px 18px;background:var(--green);border:none;border-radius:8px;color:#fff;font-family:'DM Sans',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer">✅ Publicar versão</button>
+      </div>
+    </div>
+
+    <!-- Lista de entradas -->
+    <div id="cl-list" style="overflow-y:auto;flex:1;padding-right:2px">
+      <div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:40px">Carregando...</div>
+    </div>
+
   </div>
 </div>
 
