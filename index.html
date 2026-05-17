@@ -3407,9 +3407,33 @@ function exportCSV() {
   if(notif){ notif.style.display='flex'; setTimeout(()=>{ notif.style.display='none'; },3000); }
 }
 
-// Globais declaradas antes do init para evitar Temporal Dead Zone
+// ── Globais declaradas antes do init block para evitar Temporal Dead Zone ──
 let _currentUser   = null;  // { matricula, nome, sigla, role }
 let editModeActive = false;
+
+// Dados de Ideias de Implantação (precisam estar antes do init)
+const IDEAS_DEFAULT = [
+  { esforco:'Baixo', titulo:'Forms automáticos de pesquisa de satisfação',   desc:'Substituir coleta manual por Microsoft Forms enviado automaticamente após cada formação. Os dados chegam direto numa planilha Excel no OneDrive e alimentam o Power BI sem intervenção humana.', tags:['Microsoft Forms','OneDrive','Automático'], cor:'pink' },
+  { esforco:'Médio', titulo:'Power Automate para alertas de gargalos',        desc:'Criar fluxos no Power Automate que detectam quando uma atividade fica "Pendente" por mais de 7 dias ou quando uma meta está abaixo de 60% e disparam um e-mail automático para o responsável.', tags:['Power Automate','Alertas por e-mail','Monitoramento'], cor:'purple' },
+  { esforco:'Médio', titulo:'Dashboard no Teams para as reuniões semanais',   desc:'Incorporar o relatório do Power BI como uma aba fixa no canal do CINEA no Microsoft Teams. Durante a reunião semanal, todos acessam os dados em tempo real diretamente no Teams, sem precisar abrir outro sistema.', tags:['Microsoft Teams','Integração nativa','Zero cliques extras'], cor:'cyan' },
+  { esforco:'Baixo', titulo:'Template de ata digital integrado às planilhas', desc:'Criar uma aba "Atas" nas planilhas com campos padronizados: data, gap relatado, decisão, prazo, responsável e status. O Power BI consolida todas as atas em uma visão histórica de gargalos resolvidos vs. pendentes.', tags:['Excel','Histórico','Rastreabilidade'], cor:'gold' },
+  { esforco:'Alto',  titulo:'Painel de acompanhamento de UDAs por autor',     desc:'Criar uma planilha mestra de UDAs com colunas: autor, instituto, status, data de entrega prevista e real. O Power BI gera um mapa de calor por instituto e identifica automaticamente autores com UDAs atrasadas.', tags:['Mapa de calor','Atrasos automáticos','Por instituto'], cor:'pink' },
+  { esforco:'Alto',  titulo:'Score de engajamento docente por instituto',      desc:'Cruzar dados de participação nas formações, produção de UDAs e uso do Canvas AVA para gerar um "score de engajamento" por docente e por instituto. O Power BI exibe um ranking e identifica onde focar os esforços do CINEA.', tags:['Score composto','Ranking institutos','Canvas API'], cor:'purple' },
+  { esforco:'Baixo', titulo:'Relatório mensal automático em PDF',              desc:'Configurar o Power BI para gerar e enviar por e-mail um relatório PDF consolidado todo início de mês para a equipe CINEA e para a PROGRAD, com os principais indicadores do mês anterior e comparativo histórico.', tags:['Power BI Service','E-mail automático','Para PROGRAD'], cor:'cyan' },
+  { esforco:'Médio', titulo:'Página pública de transparência CINEA',           desc:'Publicar uma versão simplificada e pública do dashboard (sem dados sensíveis) no site da PUC Minas ou no Guia do Professor, mostrando indicadores de formação e satisfação para toda a comunidade acadêmica.', tags:['Publicação web','Transparência','Comunidade'], cor:'gold' },
+];
+let IDEAS_DATA = null;
+const IDEA_COLORS = {
+  pink:   { glow:'rgba(233,30,140,0.1)',  tagBorder:'rgba(233,30,140,0.3)',  tagColor:'var(--pink)',     tagBg:'rgba(233,30,140,0.08)' },
+  purple: { glow:'rgba(79,45,127,0.1)',   tagBorder:'rgba(79,45,127,0.4)',   tagColor:'var(--purple-l)', tagBg:'rgba(79,45,127,0.1)'  },
+  cyan:   { glow:'rgba(0,180,204,0.08)',  tagBorder:'rgba(0,180,204,0.3)',   tagColor:'var(--cyan)',     tagBg:'rgba(0,180,204,0.08)' },
+  gold:   { glow:'rgba(245,166,35,0.08)', tagBorder:'rgba(245,166,35,0.3)', tagColor:'var(--gold)',     tagBg:'rgba(245,166,35,0.08)' },
+};
+const IDEA_EFFORT_CFG = {
+  'Baixo': { bg:'rgba(39,174,96,0.15)',  color:'var(--green)' },
+  'Médio': { bg:'rgba(245,166,35,0.15)', color:'var(--gold)' },
+  'Alto':  { bg:'rgba(231,76,60,0.15)',  color:'var(--red)' },
+};
 
 // Init on load
 loadDeptMembers();
@@ -3795,30 +3819,7 @@ function cycleChecklistItem(icon, idx) {
 
 // ═══ IDEAS — dados + renderização dinâmica ═══════════════════
 
-const IDEAS_DEFAULT = [
-  { esforco:'Baixo', titulo:'Forms automáticos de pesquisa de satisfação',   desc:'Substituir coleta manual por Microsoft Forms enviado automaticamente após cada formação. Os dados chegam direto numa planilha Excel no OneDrive e alimentam o Power BI sem intervenção humana.', tags:['Microsoft Forms','OneDrive','Automático'], cor:'pink' },
-  { esforco:'Médio', titulo:'Power Automate para alertas de gargalos',        desc:'Criar fluxos no Power Automate que detectam quando uma atividade fica "Pendente" por mais de 7 dias ou quando uma meta está abaixo de 60% e disparam um e-mail automático para o responsável.', tags:['Power Automate','Alertas por e-mail','Monitoramento'], cor:'purple' },
-  { esforco:'Médio', titulo:'Dashboard no Teams para as reuniões semanais',   desc:'Incorporar o relatório do Power BI como uma aba fixa no canal do CINEA no Microsoft Teams. Durante a reunião semanal, todos acessam os dados em tempo real diretamente no Teams, sem precisar abrir outro sistema.', tags:['Microsoft Teams','Integração nativa','Zero cliques extras'], cor:'cyan' },
-  { esforco:'Baixo', titulo:'Template de ata digital integrado às planilhas', desc:'Criar uma aba "Atas" nas planilhas com campos padronizados: data, gap relatado, decisão, prazo, responsável e status. O Power BI consolida todas as atas em uma visão histórica de gargalos resolvidos vs. pendentes.', tags:['Excel','Histórico','Rastreabilidade'], cor:'gold' },
-  { esforco:'Alto',  titulo:'Painel de acompanhamento de UDAs por autor',     desc:'Criar uma planilha mestra de UDAs com colunas: autor, instituto, status, data de entrega prevista e real. O Power BI gera um mapa de calor por instituto e identifica automaticamente autores com UDAs atrasadas.', tags:['Mapa de calor','Atrasos automáticos','Por instituto'], cor:'pink' },
-  { esforco:'Alto',  titulo:'Score de engajamento docente por instituto',      desc:'Cruzar dados de participação nas formações, produção de UDAs e uso do Canvas AVA para gerar um "score de engajamento" por docente e por instituto. O Power BI exibe um ranking e identifica onde focar os esforços do CINEA.', tags:['Score composto','Ranking institutos','Canvas API'], cor:'purple' },
-  { esforco:'Baixo', titulo:'Relatório mensal automático em PDF',              desc:'Configurar o Power BI para gerar e enviar por e-mail um relatório PDF consolidado todo início de mês para a equipe CINEA e para a PROGRAD, com os principais indicadores do mês anterior e comparativo histórico.', tags:['Power BI Service','E-mail automático','Para PROGRAD'], cor:'cyan' },
-  { esforco:'Médio', titulo:'Página pública de transparência CINEA',           desc:'Publicar uma versão simplificada e pública do dashboard (sem dados sensíveis) no site da PUC Minas ou no Guia do Professor, mostrando indicadores de formação e satisfação para toda a comunidade acadêmica.', tags:['Publicação web','Transparência','Comunidade'], cor:'gold' },
-];
-
-let IDEAS_DATA = null;
-
-const IDEA_COLORS = {
-  pink:   { glow:'rgba(233,30,140,0.1)',  tagBorder:'rgba(233,30,140,0.3)',  tagColor:'var(--pink)',     tagBg:'rgba(233,30,140,0.08)' },
-  purple: { glow:'rgba(79,45,127,0.1)',   tagBorder:'rgba(79,45,127,0.4)',   tagColor:'var(--purple-l)', tagBg:'rgba(79,45,127,0.1)'  },
-  cyan:   { glow:'rgba(0,180,204,0.08)',  tagBorder:'rgba(0,180,204,0.3)',   tagColor:'var(--cyan)',     tagBg:'rgba(0,180,204,0.08)' },
-  gold:   { glow:'rgba(245,166,35,0.08)', tagBorder:'rgba(245,166,35,0.3)', tagColor:'var(--gold)',     tagBg:'rgba(245,166,35,0.08)' },
-};
-const IDEA_EFFORT_CFG = {
-  'Baixo': { bg:'rgba(39,174,96,0.15)',  color:'var(--green)' },
-  'Médio': { bg:'rgba(245,166,35,0.15)', color:'var(--gold)' },
-  'Alto':  { bg:'rgba(231,76,60,0.15)',  color:'var(--red)' },
-};
+// IDEAS_DEFAULT, IDEAS_DATA, IDEA_COLORS, IDEA_EFFORT_CFG declarados antes do init block
 
 function renderIdeas() {
   const grid = document.getElementById('ideas-grid');
