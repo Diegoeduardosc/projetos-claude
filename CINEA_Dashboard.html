@@ -1947,7 +1947,7 @@ body.edit-mode .user-mgmt-section { display: block; }
         <div class="card-title">Responsáveis por Departamento</div>
         <div class="person-cards">
           <div class="person-card">
-            <div class="person-header">
+            <div class="person-header" id="home-hdr-hub">
               <div class="avatar pink">RO</div>
               <div>
                 <div class="person-name">Rosimeire</div>
@@ -1961,7 +1961,7 @@ body.edit-mode .user-mgmt-section { display: block; }
             </div>
           </div>
           <div class="person-card">
-            <div class="person-header">
+            <div class="person-header" id="home-hdr-inov">
               <div class="avatar purple">CL</div>
               <div>
                 <div class="person-name">Cláudia</div>
@@ -1975,11 +1975,11 @@ body.edit-mode .user-mgmt-section { display: block; }
             </div>
           </div>
           <div class="person-card">
-            <div class="person-header">
+            <div class="person-header" id="home-hdr-tec">
               <div class="avatar cyan">JE</div>
               <div>
                 <div class="person-name">Jefferson</div>
-                <div class="person-role">Tecnologias & Aprendizagem</div>
+                <div class="person-role">Tecnologias &amp; Aprendizagem</div>
               </div>
             </div>
             <div class="person-kpis">
@@ -3278,6 +3278,50 @@ function getDeptResp(dept) {
   return 'Em definição';
 }
 
+// Rótulos longos para a tela inicial (person cards)
+const HOME_DEPT_ROLE = {
+  hub:  'Hub de Integração e Relacionamento',
+  inov: 'Inovação Pedagógica e Formação Continuada',
+  tec:  'Tecnologias & Aprendizagem',
+};
+
+function renderHomeDeptResp(dept) {
+  const el = document.getElementById('home-hdr-' + dept);
+  if (!el) return;
+  const color    = DEPT_COLORS[dept];          // 'pink' | 'purple' | 'cyan'
+  const colorVar = DEPT_COLOR_VAR[dept];
+  const members  = DEPT_MEMBERS[dept].filter(m => m !== 'A definir');
+  const resp     = getDeptResp(dept);
+  const info     = MEMBER_INFO[resp] || { sigla: '—' };
+  const logado   = !!_currentUser;
+  const vazio    = resp === 'Em definição';
+
+  const opts = ['Em definição', ...members]
+    .map(m => `<option value="${m}"${m === resp ? ' selected' : ''}>${m}</option>`)
+    .join('');
+
+  const nomeEl = logado
+    ? `<select onchange="setDeptResp('${dept}',this.value)"
+         style="background:transparent;border:none;border-bottom:1px solid var(--border);
+                color:${vazio ? 'var(--text3)' : colorVar};font-family:'DM Sans',sans-serif;
+                font-size:0.88rem;font-weight:600;cursor:pointer;appearance:none;outline:none;
+                padding:0 4px 1px 0;max-width:140px">
+         ${opts}
+       </select>`
+    : `<div class="person-name" style="color:${vazio ? 'var(--text3)' : ''}">${escapeHtml(resp)}</div>`;
+
+  el.innerHTML = `
+    <div class="avatar ${color}" style="${vazio ? 'opacity:0.4' : ''}">${escapeHtml(info.sigla)}</div>
+    <div>
+      ${nomeEl}
+      <div class="person-role">${HOME_DEPT_ROLE[dept]}</div>
+    </div>`;
+}
+
+function renderAllHomeDeptResp() {
+  ['hub','inov','tec'].forEach(renderHomeDeptResp);
+}
+
 function setDeptResp(dept, nome) {
   localStorage.setItem('cinea_resp_' + dept, nome);
   // Auto-salva no Firebase imediatamente (não depende do botão Salvar)
@@ -3296,6 +3340,7 @@ function setDeptResp(dept, nome) {
     })();
   }
   renderDeptHeader(dept);
+  renderHomeDeptResp(dept);   // atualiza tela inicial
   renderMeetingCards();
 }
 
@@ -3317,11 +3362,12 @@ async function loadDeptRespFromFirebase() {
         if (resp[d]) localStorage.setItem('cinea_resp_' + d, resp[d]);
       });
       renderAllDeptHeaders();
+      renderAllHomeDeptResp();  // atualiza tela inicial com dados do Firebase
       renderMeetingCards();
     }
     const repo = repoSnap.val();
     if (repo && !localStorage.getItem('cinea_gh_repo')) {
-      localStorage.setItem('cinea_gh_repo', repo); // preenche se não havia local
+      localStorage.setItem('cinea_gh_repo', repo);
     }
   } catch(e) { console.warn('[CINEA] loadDeptRespFromFirebase falhou:', e.message); }
 }
@@ -3647,6 +3693,7 @@ loadIdeasFromFirebase();         // atualiza ideias assincronamente do Firebase
 loadTasksFromFirebase();         // atualiza tarefas assincronamente do Firebase
 loadDeptMembersFromFirebase();   // atualiza membros assincronamente do Firebase
 loadDeptRespFromFirebase();      // atualiza responsáveis por setor do Firebase
+renderAllHomeDeptResp();         // renderiza person cards da tela inicial
 
 // ═══════════════════════ SENHA ADMIN (SHA-256) ═══════════════════════
 // Senha padrão inicial: cinea2026
@@ -4353,8 +4400,9 @@ function loadSavedEdits() {
     renderAtividadesSetor(d);
   });
   renderAllDeptHeaders();
+  renderAllHomeDeptResp();   // atualiza person cards da tela inicial
   renderMeetingCards();
-  renderIdeas();   // garante ideias do Firebase (loadIdeasFromFirebase é async separado)
+  renderIdeas();
 }
 
 // ═══════════════════════ POWER BI ═══════════════════════
@@ -4548,9 +4596,12 @@ function atualizarTopbarUser() {
   document.body.classList.toggle('user-logged-in', !!_currentUser);
   // Atualiza visibilidade das atas ao mudar estado de login
   atualizarVisibilidadeMeetings();
-  // Re-renderiza cabeçalhos de depto (seletor aparece/some conforme login)
+  // Re-renderiza todas as telas que exibem responsáveis (seletor aparece/some conforme login)
   renderAllDeptHeaders();
+  renderAllHomeDeptResp();
   renderMeetingCards();
+  // Re-renderiza tabelas de tarefas (pill clicável aparece/some conforme login)
+  ['hub','inov','tec'].forEach(d => { renderTaskTable(d); renderAtividadesSetor(d); });
 }
 
 function toggleUserDropdown(e) {
