@@ -1808,9 +1808,13 @@ body.edit-mode .user-mgmt-section { display: block; }
 
   <div class="nav-group">
     <div class="nav-label">Operacional</div>
-    <div class="nav-item" onclick="showPage('team',this)">
-      <div class="nav-dot" style="background:var(--purple-l)"></div>
-      Equipe & Tarefas
+    <div class="nav-item" onclick="showPage('equipe',this)">
+      <div class="nav-dot" style="background:var(--pink-l)"></div>
+      Equipe
+    </div>
+    <div class="nav-item" onclick="showPage('tarefas',this)">
+      <div class="nav-dot" style="background:var(--gold)"></div>
+      Tarefas
     </div>
     <div class="nav-item" onclick="showPage('meeting',this)">
       <div class="nav-dot" style="background:var(--green)"></div>
@@ -2486,36 +2490,43 @@ body.edit-mode .user-mgmt-section { display: block; }
     </div>
 
 
-    <!-- ═══════════════════════════════ EQUIPE & TAREFAS ═══════════════════════════════ -->
-    <div class="page" id="page-team">
+    <!-- ═══════════════════════════════ EQUIPE ═══════════════════════════════ -->
+    <div class="page" id="page-equipe">
       <div class="section-header" style="margin-bottom:20px">
-        <div class="section-sub">Atribuição de atividades por pessoa · Gestão: Diego</div>
+        <div class="section-sub">Atribuições por pessoa · Quem está fazendo o quê</div>
+        <button id="mover-membro-btn" onclick="abrirMoverMembro()" style="display:none;align-items:center;gap:6px;padding:7px 14px;background:rgba(79,45,127,0.2);border:1px solid rgba(79,45,127,0.4);border-radius:10px;color:var(--purple-l);font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s">👥 Mover membro</button>
+      </div>
+
+      <!-- Cards de membro por departamento -->
+      <div class="team-page-grid">
+        <div class="team-dept-card hub"  id="team-dept-hub"></div>
+        <div class="team-dept-card inov" id="team-dept-inov"></div>
+        <div class="team-dept-card tec"  id="team-dept-tec"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════ TAREFAS ═══════════════════════════════ -->
+    <div class="page" id="page-tarefas">
+      <div class="section-header" style="margin-bottom:20px">
+        <div class="section-sub">Gestão de tarefas · Todos os departamentos</div>
         <div style="display:flex;align-items:center;gap:10px">
           <div id="save-notif" class="save-notif">✓ Exportado com sucesso</div>
-          <button id="mover-membro-btn" onclick="abrirMoverMembro()" style="display:none;align-items:center;gap:6px;padding:7px 14px;background:rgba(79,45,127,0.2);border:1px solid rgba(79,45,127,0.4);border-radius:10px;color:var(--purple-l);font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s">👥 Mover membro</button>
           <button class="export-btn" onclick="exportCSV()">⬇ Exportar CSV · OneDrive</button>
         </div>
       </div>
 
       <!-- RESUMO TAREFAS -->
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 24px;margin-bottom:20px;display:flex;align-items:center;gap:32px">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 24px;margin-bottom:20px;display:flex;align-items:center;gap:32px;flex-wrap:wrap">
         <div style="display:flex;gap:28px;text-align:center">
-          <div><div style="font-size:1.6rem;font-weight:700;color:var(--purple-l)" id="total-tasks-count">28</div><div style="font-size:0.7rem;color:var(--text3)">Tarefas cadastradas</div></div>
-          <div><div style="font-size:1.6rem;font-weight:700;color:var(--gold)" id="shared-tasks-count">11</div><div style="font-size:0.7rem;color:var(--text3)">Compartilhadas</div></div>
-          <div><div style="font-size:1.6rem;font-weight:700;color:var(--text)">7</div><div style="font-size:0.7rem;color:var(--text3)">Pessoas na equipe</div></div>
+          <div><div style="font-size:1.6rem;font-weight:700;color:var(--purple-l)" id="total-tasks-count">—</div><div style="font-size:0.7rem;color:var(--text3)">Tarefas cadastradas</div></div>
+          <div><div style="font-size:1.6rem;font-weight:700;color:var(--gold)" id="shared-tasks-count">—</div><div style="font-size:0.7rem;color:var(--text3)">Compartilhadas</div></div>
+          <div><div style="font-size:1.6rem;font-weight:700;color:var(--text)" id="team-members-count">—</div><div style="font-size:0.7rem;color:var(--text3)">Pessoas na equipe</div></div>
         </div>
         <div style="margin-left:auto;font-size:0.75rem;color:var(--text3);line-height:1.6">
           Clique em <strong style="color:var(--text2)">Editar</strong> em qualquer tarefa para alterar os responsáveis.<br>
           Use <strong style="color:var(--text2)">+ Nova tarefa</strong> para adicionar. Alterações salvas automaticamente.
         </div>
       </div>
-
-      <!-- TEAM CARDS POR DEPARTAMENTO — renderizados dinamicamente por renderTeamCards() -->
-      <div class="team-page-grid">
-        <div class="team-dept-card hub"  id="team-dept-hub"></div>
-        <div class="team-dept-card inov" id="team-dept-inov"></div>
-        <div class="team-dept-card tec"  id="team-dept-tec"></div>
-      </div><!-- /team-page-grid -->
 
       <!-- TABELA COMPLETA DE TAREFAS -->
       <div class="card" style="margin-bottom:20px">
@@ -2842,22 +2853,37 @@ function showPage(id, el) {
   if (pg) pg.classList.add('active');
   if (el) el.classList.add('active');
   const titles = {
-    overview: 'Dashboard Geral',
-    team: 'Equipe & Tarefas',
-    roadmap: 'Roadmap de Implantação BI',
-    ideas: 'Ideias de Implantação',
-    hub: 'Hub de Integração',
-    inov: 'Inovação Pedagógica',
-    tec: 'Tecnologias & Aprendizagem',
-    meeting: 'Reuniões',
+    overview:  'Dashboard Geral',
+    equipe:    'Equipe',
+    tarefas:   'Tarefas',
+    roadmap:   'Roadmap de Implantação BI',
+    ideas:     'Ideias de Implantação',
+    hub:       'Hub de Integração',
+    inov:      'Inovação Pedagógica',
+    tec:       'Tecnologias & Aprendizagem',
+    meeting:   'Reuniões',
   };
   // Mirror sidebar nav item text to page title; fall back to titles map
   const navText = el ? el.textContent.trim() : '';
   document.getElementById('page-title').textContent = navText || titles[id] || '';
-  if (id === 'team') {
+  if (id === 'equipe') {
+    renderTeamCards();
+    renderMemberChips();
+  }
+  if (id === 'tarefas') {
     loadTasksFromStorage();
     ['hub','inov','tec'].forEach(d => renderTaskTable(d));
     renderMemberChips();
+    // Atualiza resumo
+    const total  = ['hub','inov','tec'].reduce((s,d) => s + (TASKS[d]?.length||0), 0);
+    const shared = ['hub','inov','tec'].reduce((s,d) => s + (TASKS[d]?.filter(t=>t.assignees.length>1).length||0), 0);
+    const pessoas = getAllMembersForTask().length;
+    const elT = document.getElementById('total-tasks-count');
+    const elS = document.getElementById('shared-tasks-count');
+    const elP = document.getElementById('team-members-count');
+    if (elT) elT.textContent = total;
+    if (elS) elS.textContent = shared;
+    if (elP) elP.textContent = pessoas;
   }
   if (['hub','inov','tec'].includes(id)) {
     renderAtividadesSetor(id);
