@@ -1091,6 +1091,41 @@ body:not(.user-logged-in) .add-task-row { display: none !important; }
   font-size: 0.59rem; color: var(--text3);
   text-transform: uppercase; letter-spacing: 1.5px; padding: 5px 10px 2px;
 }
+/* ─── Tipo de tarefa toggle ─── */
+.tipo-btn {
+  padding: 5px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 600;
+  cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap;
+  background: none; border: 1px dashed var(--text3); color: var(--text3);
+  transition: all 0.15s;
+}
+.tipo-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+.tipo-btn.ativa { background: rgba(0,180,204,0.12); border-color: var(--cyan); color: var(--cyan); border-style: solid; }
+.fixa-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 0.62rem; font-weight: 700; padding: 2px 7px; border-radius: 20px;
+  background: rgba(0,180,204,0.12); color: var(--cyan); white-space: nowrap;
+}
+/* ─── Por Pessoa grid ─── */
+.por-pessoa-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 14px; margin-top: 8px;
+}
+.por-pessoa-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 16px;
+}
+.por-pessoa-task-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.035);
+}
+.por-pessoa-task-row:last-child { border-bottom: none; }
+@media (max-width: 900px) {
+  .por-pessoa-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .por-pessoa-grid { grid-template-columns: 1fr; }
+}
 .add-task-btn {
   padding: 8px 16px;
   background: linear-gradient(135deg, var(--purple), var(--purple-l));
@@ -2505,12 +2540,19 @@ body.edit-mode .user-mgmt-section { display: block; }
         <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--text)" class="resumo-pessoas">—</div><div style="font-size:0.68rem;color:var(--text3)">Pessoas</div></div>
       </div>
 
-      <!-- Cards de membro por departamento -->
+      <!-- Cards por departamento -->
       <div class="team-page-grid">
         <div class="team-dept-card hub"  id="team-dept-hub"></div>
         <div class="team-dept-card inov" id="team-dept-inov"></div>
         <div class="team-dept-card tec"  id="team-dept-tec"></div>
       </div>
+
+      <!-- Atribuições por pessoa -->
+      <div style="margin-top:28px;margin-bottom:10px;display:flex;align-items:center;gap:10px">
+        <div style="font-size:0.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3)">Atribuições individuais</div>
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+      </div>
+      <div id="por-pessoa-section"></div>
     </div>
 
     <!-- ═══════════════════════════════ TAREFAS ═══════════════════════════════ -->
@@ -2548,6 +2590,7 @@ body.edit-mode .user-mgmt-section { display: block; }
             <div class="member-picker-chips" id="ap-chips-hub"><button class="picker-add-btn">+ Responsável</button></div>
             <div class="member-picker-dd" id="ap-dd-hub"></div>
           </div>
+          <button class="tipo-btn" id="hub-tipo-btn" onclick="toggleTipo('hub')" title="Atividade sem fim definido — recorre durante o semestre">🔄 Fixa</button>
           <button class="add-task-btn" onclick="addNewTask('hub')">+ Adicionar</button>
         </div>
 
@@ -2562,6 +2605,7 @@ body.edit-mode .user-mgmt-section { display: block; }
             <div class="member-picker-chips" id="ap-chips-inov"><button class="picker-add-btn">+ Responsável</button></div>
             <div class="member-picker-dd" id="ap-dd-inov"></div>
           </div>
+          <button class="tipo-btn" id="inov-tipo-btn" onclick="toggleTipo('inov')" title="Atividade sem fim definido — recorre durante o semestre">🔄 Fixa</button>
           <button class="add-task-btn" onclick="addNewTask('inov')">+ Adicionar</button>
         </div>
 
@@ -2576,6 +2620,7 @@ body.edit-mode .user-mgmt-section { display: block; }
             <div class="member-picker-chips" id="ap-chips-tec"><button class="picker-add-btn">+ Responsável</button></div>
             <div class="member-picker-dd" id="ap-dd-tec"></div>
           </div>
+          <button class="tipo-btn" id="tec-tipo-btn" onclick="toggleTipo('tec')" title="Atividade sem fim definido — recorre durante o semestre">🔄 Fixa</button>
           <button class="add-task-btn" onclick="addNewTask('tec')">+ Adicionar</button>
         </div>
       </div>
@@ -2879,6 +2924,7 @@ function showPage(id, el) {
   if (id === 'equipe') {
     renderTeamCards();
     renderMemberChips();
+    renderPorPessoa();
     atualizarResumoTarefas();
   }
   if (id === 'tarefas') {
@@ -3196,8 +3242,8 @@ function renderTeamCards() {
     });
     card.innerHTML = html;
   });
-  // Recalcula chips após reconstruir o DOM
-  setTimeout(() => { renderMemberChips(); }, 0);
+  // Recalcula chips e seção por pessoa após reconstruir o DOM
+  setTimeout(() => { renderMemberChips(); renderPorPessoa(); }, 0);
 }
 
 // ════════════════════════════════════════════════════════
@@ -3318,6 +3364,33 @@ function removeEditPM(dept, i, m) {
 }
 function getEditPM(dept, i) {
   return Array.from(_editPicker[dept + '_' + i] || new Set());
+}
+
+// ── Tipo de tarefa (Normal vs Atividade Fixa) ──────────
+const _tipoState = { hub: 'normal', inov: 'normal', tec: 'normal' };
+const _editTipo  = {}; // keyed by "dept_i"
+
+function toggleTipo(dept) {
+  _tipoState[dept] = _tipoState[dept] === 'fixa' ? 'normal' : 'fixa';
+  const btn = document.getElementById(dept + '-tipo-btn');
+  if (!btn) return;
+  const isFixa = _tipoState[dept] === 'fixa';
+  btn.classList.toggle('ativa', isFixa);
+  btn.title = isFixa ? 'Atividade Fixa ativada — clique para desativar' : 'Atividade sem fim definido — clique para ativar';
+}
+function clearTipo(dept) {
+  _tipoState[dept] = 'normal';
+  const btn = document.getElementById(dept + '-tipo-btn');
+  if (btn) { btn.classList.remove('ativa'); }
+}
+function toggleEditTipo(dept, i) {
+  const key = dept + '_' + i;
+  _editTipo[key] = (_editTipo[key] || 'normal') === 'fixa' ? 'normal' : 'fixa';
+  const btn = document.getElementById('btn-etipo-' + key);
+  if (!btn) return;
+  const isFixa = _editTipo[key] === 'fixa';
+  btn.classList.toggle('ativa', isFixa);
+  btn.textContent = isFixa ? '🔄 Fixa' : '○ Normal';
 }
 
 // ── Inicializa os member pickers de nova tarefa ────────
@@ -3631,19 +3704,31 @@ function renderTaskTable(dept) {
   if(!tbl) return;
   const pillCls = PILL_CLASS[dept];
   const logado  = !!_currentUser;
-  tbl.innerHTML = '<thead><tr><th style="width:38%">Tarefa</th><th>Responsáveis</th><th>Status</th><th style="width:100px">Ações</th></tr></thead>';
-  const tbody = document.createElement('tbody');
-  let ativos = 0;
-  TASKS[dept].forEach((task, i) => {
-    if (task.status === 'Concluída') return; // vai para a seção Concluídos
-    ativos++;
+  tbl.innerHTML = '<thead><tr><th style="width:38%">Tarefa</th><th>Responsáveis</th><th>Status</th><th style="width:108px">Ações</th></tr></thead>';
+  const tbody   = document.createElement('tbody');
+  const fixas   = TASKS[dept].map((t,i)=>({t,i})).filter(({t}) => t.tipo === 'fixa');
+  const regulares = TASKS[dept].map((t,i)=>({t,i})).filter(({t}) => t.tipo !== 'fixa' && t.status !== 'Concluída');
+
+  function addSepRow(label, color) {
+    const sr = document.createElement('tr');
+    sr.innerHTML = `<td colspan="4" style="padding:6px 0 2px;border:none;border-top:1px solid var(--border)">
+      <span style="font-size:0.6rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:${color}">${label}</span>
+    </td>`;
+    tbody.appendChild(sr);
+  }
+  function buildRow(task, i) {
+    const isFixa = task.tipo === 'fixa';
     const shared = task.assignees.length > 1;
-    const key = dept + '_' + i;
+    const key    = dept + '_' + i;
+    const etipo  = _editTipo[key] || task.tipo || 'normal';
     const row = document.createElement('tr');
     row.id = `row-${dept}-${i}`;
     row.innerHTML = `
       <td>
-        <span class="task-name-view-${dept}-${i}" style="color:var(--text);font-size:0.79rem">${task.name}</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          ${isFixa ? '<span class="fixa-badge">🔄 Fixa</span>' : ''}
+          <span class="task-name-view-${dept}-${i}" style="color:var(--text);font-size:0.79rem">${task.name}</span>
+        </div>
         <input class="task-name-edit-${dept}-${i} add-task-input" style="display:none;width:100%;font-size:0.78rem;padding:4px 8px" value="${task.name.replace(/"/g,'&quot;')}" />
       </td>
       <td>
@@ -3661,14 +3746,18 @@ function renderTaskTable(dept) {
       </td>
       <td>${renderStatusPill(dept, i, task.status || 'Pendente', logado)}</td>
       <td style="white-space:nowrap">
-        <button onclick="startEdit('${dept}',${i})" id="btn-edit-${dept}-${i}" style="background:rgba(79,45,127,0.2);border:1px solid rgba(79,45,127,0.3);border-radius:6px;color:var(--purple-l);font-size:0.72rem;padding:3px 10px;cursor:pointer;font-family:'DM Sans',sans-serif">Editar</button>
-        <button onclick="saveEdit('${dept}',${i})" id="btn-save-${dept}-${i}" style="display:none;background:rgba(39,174,96,0.15);border:1px solid rgba(39,174,96,0.3);border-radius:6px;color:var(--green);font-size:0.72rem;padding:3px 10px;cursor:pointer;font-family:'DM Sans',sans-serif">Salvar</button>
-        <button onclick="deleteTask('${dept}',${i})" style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.2);border-radius:6px;color:var(--red);font-size:0.72rem;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-left:3px">✕</button>
+        <button onclick="startEdit('${dept}',${i})" id="btn-edit-${dept}-${i}" style="background:rgba(79,45,127,0.2);border:1px solid rgba(79,45,127,0.3);border-radius:6px;color:var(--purple-l);font-size:0.72rem;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif">Editar</button>
+        <button onclick="saveEdit('${dept}',${i})" id="btn-save-${dept}-${i}" style="display:none;background:rgba(39,174,96,0.15);border:1px solid rgba(39,174,96,0.3);border-radius:6px;color:var(--green);font-size:0.72rem;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif">Salvar</button>
+        <button class="tipo-btn${etipo==='fixa'?' ativa':''}" id="btn-etipo-${key}" onclick="toggleEditTipo('${dept}',${i})" style="display:none;padding:2px 7px;font-size:0.68rem">${etipo==='fixa'?'🔄 Fixa':'○ Normal'}</button>
+        <button onclick="deleteTask('${dept}',${i})" style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.2);border-radius:6px;color:var(--red);font-size:0.72rem;padding:3px 7px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-left:2px">✕</button>
       </td>
     `;
     tbody.appendChild(row);
-  });
-  if (ativos === 0) {
+  }
+
+  if (fixas.length > 0)    { addSepRow('🔄 Atividades Fixas', 'var(--cyan)'); fixas.forEach(({t,i}) => buildRow(t,i)); }
+  if (regulares.length > 0){ if (fixas.length) addSepRow('Tarefas', 'var(--text3)'); regulares.forEach(({t,i}) => buildRow(t,i)); }
+  if (fixas.length === 0 && regulares.length === 0) {
     const empty = document.createElement('tr');
     empty.innerHTML = `<td colspan="4" style="text-align:center;color:var(--text3);font-size:0.8rem;padding:20px;font-style:italic">✅ Todas as tarefas deste departamento estão concluídas</td>`;
     tbody.appendChild(empty);
@@ -3682,10 +3771,10 @@ function atualizarResumoTarefas() {
   const conc    = ['hub','inov','tec'].reduce((s,d) => s + (TASKS[d]?.filter(t=>t.status==='Concluída').length||0), 0);
   const shared  = ['hub','inov','tec'].reduce((s,d) => s + (TASKS[d]?.filter(t=>t.assignees.length>1).length||0), 0);
   const pessoas = getAllMembersForTask().length;
-  document.querySelectorAll('.resumo-total').forEach(el => el.textContent   = total);
-  document.querySelectorAll('.resumo-conc').forEach(el  => el.textContent   = conc);
-  document.querySelectorAll('.resumo-shared').forEach(el => el.textContent  = shared);
-  document.querySelectorAll('.resumo-pessoas').forEach(el => el.textContent = pessoas);
+  document.querySelectorAll('.resumo-total').forEach(el  => el.textContent = total);
+  document.querySelectorAll('.resumo-conc').forEach(el   => el.textContent = conc);
+  document.querySelectorAll('.resumo-shared').forEach(el => el.textContent = shared);
+  document.querySelectorAll('.resumo-pessoas').forEach(el=> el.textContent = pessoas);
 }
 
 // ── Seção Concluídos ──────────────────────────────────────────
@@ -3700,7 +3789,7 @@ function renderConcluidos() {
   ['hub','inov','tec'].forEach(dept => {
     const lista = TASKS[dept]
       .map((t,i) => ({...t, _dept: dept, _idx: i}))
-      .filter(t => t.status === 'Concluída');
+      .filter(t => t.status === 'Concluída' && t.tipo !== 'fixa'); // fixas nunca vão para concluídos
     if (lista.length) grupos.push({ dept, tasks: lista });
   });
   const total = grupos.reduce((s,g) => s + g.tasks.length, 0);
@@ -3745,21 +3834,85 @@ function toggleConcluidos() {
   _concluidosOpen = !_concluidosOpen;
   const body    = document.getElementById('concl-body');
   const chevron = document.getElementById('concl-chevron');
-  if (body)    body.style.display       = _concluidosOpen ? 'block' : 'none';
-  if (chevron) chevron.textContent      = _concluidosOpen ? '▲' : '▼';
+  if (body)    body.style.display  = _concluidosOpen ? 'block' : 'none';
+  if (chevron) chevron.textContent = _concluidosOpen ? '▲' : '▼';
+}
+
+// ─── Atribuições individuais por pessoa ──────────────────────────────
+function renderPorPessoa() {
+  const el = document.getElementById('por-pessoa-section');
+  if (!el) return;
+  const logado  = !!_currentUser;
+  // João + todos os membros de dept
+  const joaoInfo = MEMBER_INFO['João'] || { sigla:'JO', role:'Gestor Geral · Prof.' };
+  const members  = ['João', ...getAllMembersForTask().filter(m => m !== 'João')];
+  const DEPT_COLOR = { hub:'var(--pink)', inov:'var(--purple-l)', tec:'var(--cyan)' };
+
+  let html = '<div class="por-pessoa-grid">';
+  members.forEach(nome => {
+    const info = MEMBER_INFO[nome] || { sigla: nome.substring(0,2).toUpperCase(), role: '—' };
+    // Todas as tarefas desta pessoa
+    const tarefas = [];
+    ['hub','inov','tec'].forEach(dept => {
+      TASKS[dept].forEach((t,i) => {
+        if (t.assignees.includes(nome)) tarefas.push({...t, dept, _idx: i});
+      });
+    });
+    const ativas = tarefas.filter(t => t.status !== 'Concluída').length;
+    const conc   = tarefas.filter(t => t.status === 'Concluída').length;
+
+    html += `<div class="por-pessoa-card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+        <div class="avatar" style="background:linear-gradient(135deg,var(--purple),var(--purple-l));width:38px;height:38px;font-size:0.75rem;flex-shrink:0">${info.sigla}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:0.86rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${nome}</div>
+          <div style="font-size:0.63rem;color:var(--text3);margin-top:1px">${info.role}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0">
+          ${ativas>0?`<span style="font-size:0.61rem;font-weight:600;background:rgba(79,45,127,0.22);color:var(--text2);border-radius:20px;padding:1px 7px">${ativas} ativa${ativas>1?'s':''}</span>`:''}
+          ${conc>0?`<span style="font-size:0.61rem;font-weight:600;background:rgba(39,174,96,0.15);color:var(--green);border-radius:20px;padding:1px 7px">✓ ${conc}</span>`:''}
+        </div>
+      </div>`;
+
+    if (tarefas.length === 0) {
+      html += `<div style="text-align:center;color:var(--text3);font-size:0.76rem;padding:12px 0">Sem tarefas atribuídas</div>`;
+    } else {
+      // Agrupar por dept
+      ['hub','inov','tec'].forEach(dept => {
+        const dt = tarefas.filter(t => t.dept === dept);
+        if (!dt.length) return;
+        html += `<div style="font-size:0.59rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:${DEPT_COLOR[dept]};margin:8px 0 4px">${DEPT_LABELS[dept]}</div>`;
+        dt.forEach(t => {
+          const done = t.status === 'Concluída';
+          html += `<div class="por-pessoa-task-row">
+            <div style="flex:1;min-width:0">
+              ${t.tipo==='fixa'?'<span class="fixa-badge" style="margin-right:4px;font-size:0.58rem">🔄</span>':''}
+              <span style="font-size:0.76rem;color:${done?'var(--text3)':'var(--text)'};${done?'text-decoration:line-through':''}">${t.name}</span>
+            </div>
+            ${renderStatusPill(t.dept, t._idx, t.status||'Pendente', logado)}
+          </div>`;
+        });
+      });
+    }
+    html += `</div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
 }
 
 function startEdit(dept, i) {
   if (!_currentUser) { abrirLoginModal(); return; }
-  // Inicializa o edit picker com os responsáveis atuais da tarefa
-  _editPicker[dept + '_' + i] = new Set(TASKS[dept][i].assignees);
+  const key = dept + '_' + i;
+  _editPicker[key] = new Set(TASKS[dept][i].assignees);
+  _editTipo[key]   = TASKS[dept][i].tipo || 'normal';
   document.querySelector(`.task-name-view-${dept}-${i}`).style.display = 'none';
   document.querySelector(`.task-name-edit-${dept}-${i}`).style.display = 'block';
   document.querySelector(`.assignees-view-${dept}-${i}`).style.display = 'none';
   document.querySelector(`.assignees-edit-${dept}-${i}`).style.display = 'flex';
   renderEditPicker(dept, i);
-  document.getElementById(`btn-edit-${dept}-${i}`).style.display = 'none';
-  document.getElementById(`btn-save-${dept}-${i}`).style.display = 'inline';
+  document.getElementById(`btn-edit-${dept}-${i}`).style.display  = 'none';
+  document.getElementById(`btn-save-${dept}-${i}`).style.display  = 'inline';
+  document.getElementById(`btn-etipo-${key}`)?.style && (document.getElementById(`btn-etipo-${key}`).style.display = 'inline');
 }
 
 function saveEdit(dept, i) {
@@ -3769,8 +3922,9 @@ function saveEdit(dept, i) {
   if (!newName || newAssignees.length === 0) {
     mostrarToast('⚠️ Adicione ao menos um responsável.', ''); return;
   }
-  TASKS[dept][i].name = newName;
+  TASKS[dept][i].name      = newName;
   TASKS[dept][i].assignees = newAssignees;
+  TASKS[dept][i].tipo      = _editTipo[dept + '_' + i] || TASKS[dept][i].tipo || 'normal';
   saveTasksToStorage();
   saveTasksToFirebase(dept); // persiste imediatamente no Firebase
   registrarLog('Editou tarefa em ' + dept + ': ' + newName);
@@ -3872,9 +4026,11 @@ function addNewTask(dept) {
     mostrarToast('⚠️ Preencha o nome e selecione ao menos um responsável.', '');
     return;
   }
-  TASKS[dept].push({name, assignees, status:'Pendente'});
+  const tipo = _tipoState[dept] || 'normal';
+  TASKS[dept].push({name, assignees, status:'Pendente', tipo});
   inp.value = '';
   clearAddPicker(dept);
+  clearTipo(dept);
   saveTasksToStorage();
   saveTasksToFirebase(dept); // persiste imediatamente no Firebase
   registrarLog('Adicionou tarefa em ' + dept + ': ' + name);
