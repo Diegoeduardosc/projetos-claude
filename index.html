@@ -497,6 +497,22 @@ body::before {
 .status-pill.warn   { background: rgba(245,166,35,0.12); color: var(--gold); }
 .status-pill.alert  { background: rgba(231,76,60,0.12); color: var(--red); }
 .status-pill.idle   { background: rgba(255,255,255,0.05); color: var(--text3); }
+.status-pill.block  { background: rgba(231,76,60,0.10); color: var(--red); }
+
+/* ── Pill de status unificado — usado em TODAS as telas ── */
+.st-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 0.72rem; font-weight: 500;
+  white-space: nowrap; user-select: none;
+  transition: opacity 0.15s, transform 0.12s;
+}
+.st-pill.clickable { cursor: pointer; }
+.st-pill.clickable:hover { opacity: 0.78; transform: scale(1.04); }
+.st-pill.sp-andamento { background: rgba(245,166,35,0.15); color: var(--gold); }
+.st-pill.sp-concluida  { background: rgba(39,174,96,0.15);  color: var(--green); }
+.st-pill.sp-pendente   { background: rgba(107,95,133,0.13); color: var(--text2); }
+.st-pill.sp-bloqueada  { background: rgba(231,76,60,0.13);  color: var(--red); }
 
 /* GAUGE */
 .gauge-wrap { display: flex; flex-direction: column; align-items: center; }
@@ -3139,13 +3155,37 @@ function updateMemberSelects() {
   });
 }
 
-// ── Atividades do Setor — espelho de TASKS ────────────────────
+// ── Status unificado — mesma pill em TODAS as telas ──────────
+const STATUS_CYCLE = ['Pendente', 'Em andamento', 'Concluída', 'Bloqueada'];
+const STATUS_CFG = {
+  'Em andamento': { cls:'sp-andamento', label:'● Em andamento' },
+  'Concluída':    { cls:'sp-concluida', label:'● Concluída'    },
+  'Pendente':     { cls:'sp-pendente',  label:'● Pendente'     },
+  'Bloqueada':    { cls:'sp-bloqueada', label:'● Bloqueada'    },
+};
+// Mantido por compatibilidade com código legado
 const ATIV_STATUS = {
   'Em andamento': { cls:'warn', label:'● Andamento' },
   'Concluída':    { cls:'ok',   label:'● Concluída' },
   'Pendente':     { cls:'idle', label:'● Pendente'  },
   'Bloqueada':    { cls:'block',label:'● Bloqueada' },
 };
+
+/**
+ * Renderiza a pill de status unificada.
+ * Quando logado: clicável, cicla para o próximo status.
+ * Quando visitante: exibição estática.
+ */
+function renderStatusPill(dept, idx, status, logado) {
+  const cfg  = STATUS_CFG[status] || STATUS_CFG['Pendente'];
+  const next = STATUS_CYCLE[(STATUS_CYCLE.indexOf(status) + 1) % STATUS_CYCLE.length];
+  if (!logado) {
+    return `<span class="st-pill ${cfg.cls}">${cfg.label}</span>`;
+  }
+  return `<span class="st-pill ${cfg.cls} clickable"
+    title="Clique para alterar status"
+    onclick="changeTaskStatus('${dept}',${idx},'${next}')">${cfg.label} ↻</span>`;
+}
 function renderAtividadesSetor(dept) {
   const tbody = document.getElementById('ativ-tbody-' + dept);
   if (!tbody) return;
@@ -3158,22 +3198,11 @@ function renderAtividadesSetor(dept) {
     return;
   }
   tbody.innerHTML = tasks.map((t, i) => {
-    const st   = ATIV_STATUS[t.status] || ATIV_STATUS['Pendente'];
     const resp = t.assignees.filter(a => a !== 'A definir').join(', ') || '—';
-    const statusCell = logado
-      ? `<select onchange="changeTaskStatus('${dept}',${i},this.value)"
-           class="status-pill ${st.cls}"
-           style="border:none;cursor:pointer;font-family:'DM Sans',sans-serif;
-                  font-size:0.72rem;appearance:none;outline:none;background:transparent;">
-           ${['Em andamento','Concluída','Pendente','Bloqueada']
-               .map(s => `<option value="${s}"${t.status===s?' selected':''}>${s==='Em andamento'?'● Andamento':s==='Concluída'?'● Concluída':s==='Pendente'?'● Pendente':'● Bloqueada'}</option>`)
-               .join('')}
-         </select>`
-      : `<span class="status-pill ${st.cls}">${st.label}</span>`;
     return `<tr>
       <td style="font-size:0.78rem">${escapeHtml(t.name)}</td>
       <td style="font-size:0.72rem;color:var(--text3)">${escapeHtml(resp)}</td>
-      <td>${statusCell}</td>
+      <td>${renderStatusPill(dept, i, t.status || 'Pendente', logado)}</td>
     </tr>`;
   }).join('');
 }
@@ -3203,23 +3232,9 @@ function renderMeetingCards() {
     const itens = tasks.length === 0
       ? `<div style="font-size:0.78rem;color:var(--text3);padding:8px 0">Nenhuma tarefa cadastrada.</div>`
       : tasks.map((t, i) => {
-          const dot = MEETING_DOT_COLOR[t.status] || 'var(--gold)';
-          const statusEl = logado
-            ? `<select onchange="changeTaskStatus('${dept}',${i},this.value)"
-                 style="background:transparent;border:none;font-family:'DM Sans',sans-serif;
-                        font-size:0.68rem;color:${dot};cursor:pointer;appearance:none;outline:none;
-                        padding:0;margin-top:1px;max-width:110px">
-                 ${['Em andamento','Concluída','Pendente','Bloqueada']
-                     .map(s => `<option value="${s}"${t.status===s?' selected':''}>${s}</option>`)
-                     .join('')}
-               </select>`
-            : `<span style="font-size:0.68rem;color:${dot}">${escapeHtml(t.status||'Pendente')}</span>`;
-          return `<div class="gap-item" style="align-items:flex-start">
-            <div class="gap-dot" style="background:${dot};margin-top:6px;flex-shrink:0"></div>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:0.78rem;color:var(--text2);line-height:1.4">${escapeHtml(t.name)}</div>
-              ${statusEl}
-            </div>
+          return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+            <span style="font-size:0.78rem;color:var(--text2);line-height:1.4;flex:1;min-width:0">${escapeHtml(t.name)}</span>
+            ${renderStatusPill(dept, i, t.status || 'Pendente', logado)}
           </div>`;
         }).join('');
 
@@ -3399,12 +3414,11 @@ function renderTaskTable(dept) {
   const tbl = document.getElementById('table-'+dept);
   if(!tbl) return;
   const pillCls = PILL_CLASS[dept];
+  const logado  = !!_currentUser;
   tbl.innerHTML = '<thead><tr><th style="width:38%">Tarefa</th><th>Responsáveis</th><th>Status</th><th style="width:100px">Ações</th></tr></thead>';
   const tbody = document.createElement('tbody');
   TASKS[dept].forEach((task, i) => {
     const shared = task.assignees.length > 1;
-    const statusOpts = ['Em andamento','Concluída','Pendente'].map(s =>
-      `<option${task.status===s?' selected':''}>${s}</option>`).join('');
     // Mostra toda a equipe no select de edição (não só o depto)
     const allForTask = ['A definir', ...getAllMembersForTask()];
     const deptM = DEPT_MEMBERS[dept].filter(m => m !== 'A definir');
@@ -3435,7 +3449,7 @@ function renderTaskTable(dept) {
         </div>
         <select class="assignees-edit-${dept}-${i} add-task-select" multiple style="display:none;min-height:70px;width:100%">${memberOpts}</select>
       </td>
-      <td><select onchange="changeTaskStatus('${dept}',${i},this.value)" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.75rem;padding:4px 8px;font-family:'DM Sans',sans-serif">${statusOpts}</select></td>
+      <td>${renderStatusPill(dept, i, task.status || 'Pendente', logado)}</td>
       <td style="white-space:nowrap">
         <button onclick="startEdit('${dept}',${i})" id="btn-edit-${dept}-${i}" style="background:rgba(79,45,127,0.2);border:1px solid rgba(79,45,127,0.3);border-radius:6px;color:var(--purple-l);font-size:0.72rem;padding:3px 10px;cursor:pointer;font-family:'DM Sans',sans-serif">Editar</button>
         <button onclick="saveEdit('${dept}',${i})" id="btn-save-${dept}-${i}" style="display:none;background:rgba(39,174,96,0.15);border:1px solid rgba(39,174,96,0.3);border-radius:6px;color:var(--green);font-size:0.72rem;padding:3px 10px;cursor:pointer;font-family:'DM Sans',sans-serif">Salvar</button>
@@ -3532,13 +3546,20 @@ function updateTaskCounts() {
 
 function changeTaskStatus(dept, idx, val) {
   if (!_currentUser) { abrirLoginModal(); return; }
-  TASKS[dept][idx].status = val;
+  const tarefa   = TASKS[dept][idx];
+  const anterior = tarefa.status || 'Pendente';
+  if (anterior === val) return; // nada mudou
+  tarefa.status = val;
   saveTasksToStorage();
-  saveTasksToFirebase(dept); // persiste no Firebase imediatamente
-  // Sincroniza as 3 telas que exibem tarefas
-  renderTaskTable(dept);        // Equipe & Tarefas
-  renderAtividadesSetor(dept);  // Departamentos
-  renderMeetingCards();         // Reuniões
+  saveTasksToFirebase(dept);
+  // Log auditável no Firebase
+  registrarLog(
+    `Status alterado: "${tarefa.name}" (${DEPT_LABELS[dept]}) · ${anterior} → ${val}`
+  );
+  // Sincroniza as 3 telas
+  renderTaskTable(dept);
+  renderAtividadesSetor(dept);
+  renderMeetingCards();
 }
 
 function addNewTask(dept) {
