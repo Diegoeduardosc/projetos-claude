@@ -3407,6 +3407,10 @@ function exportCSV() {
   if(notif){ notif.style.display='flex'; setTimeout(()=>{ notif.style.display='none'; },3000); }
 }
 
+// Globais declaradas antes do init para evitar Temporal Dead Zone
+let _currentUser   = null;  // { matricula, nome, sigla, role }
+let editModeActive = false;
+
 // Init on load
 loadDeptMembers();
 loadTasksFromStorage();
@@ -3507,8 +3511,7 @@ document.getElementById('modal-senha').addEventListener('click', function(e) {
 });
 
 // ═══════════════════════ EDIT MODE ═══════════════════════
-let editModeActive = false;
-let _currentUser   = null; // { matricula, nome, sigla, role } — declarado aqui para evitar TDZ
+// editModeActive e _currentUser declarados antes do init block (evita TDZ)
 
 const TEXT_ED_SELS = [
   '.stat-change', '.pkpi-val', '.kpi-cur', '.kpi-tgt', '.kpi-name', '.pkpi-name', '.section-sub',
@@ -4203,7 +4206,6 @@ function loadPbiState() {
 }
 
 // ════════════════ SISTEMA DE USUÁRIOS ════════════════
-// _currentUser declarado antes do init block para evitar Temporal Dead Zone
 
 function abrirLoginModal() {
   document.getElementById('login-modal').style.display = 'flex';
