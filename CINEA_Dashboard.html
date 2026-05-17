@@ -6256,8 +6256,8 @@ async function carregarSemestresFirebase() {
 function toggleTheme() {
   const light = document.body.classList.toggle('light-mode');
   localStorage.setItem('cinea_theme', light ? 'light' : 'dark');
-  const btn = document.getElementById('theme-toggle-btn');
-  if (btn) btn.textContent = light ? '☀️' : '🌙';
+  // Atualiza todos os botões de tema (topbar + portão de login)
+  document.querySelectorAll('.theme-toggle-btn').forEach(b => b.textContent = light ? '☀️' : '🌙');
 }
 // Aplicar tema salvo ao carregar
 (function() {
@@ -6267,8 +6267,8 @@ function toggleTheme() {
   }
 })();
 document.addEventListener('DOMContentLoaded', () => {
-  const btn = document.getElementById('theme-toggle-btn');
-  if (btn && document.body.classList.contains('light-mode')) btn.textContent = '☀️';
+  if (document.body.classList.contains('light-mode'))
+    document.querySelectorAll('.theme-toggle-btn').forEach(b => b.textContent = '☀️');
 });
 
 // FIREBASE RULES: cinea/users deve ter ".read": "auth != null" e ".write": "auth != null"
@@ -6869,6 +6869,7 @@ async function salvarFeedbackSugestao(key) {
 <!-- ═══════════ AUTH GATE ═══════════ -->
 <div id="auth-gate">
   <div class="gate-card">
+    <button class="theme-toggle-btn" id="gate-theme-btn" onclick="toggleTheme()" title="Alternar tema claro/escuro" style="position:absolute;top:14px;right:14px">🌙</button>
     <div class="gate-logo-area">
       <div class="gate-logo">CINEA</div>
       <div class="gate-sub">Dashboard Operacional</div>
