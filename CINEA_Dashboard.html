@@ -3866,10 +3866,21 @@ function renderIdeas() {
 async function loadIdeasFromFirebase() {
   try {
     if (!_db) { IDEAS_DATA = JSON.parse(JSON.stringify(IDEAS_DEFAULT)); renderIdeas(); return; }
+    // Aguarda autenticação anônima estar pronta (chamada no init pode ser anterior ao callback)
+    if (!_fbAuthReady) {
+      await new Promise(resolve => {
+        const unsub = _auth.onAuthStateChanged(user => {
+          unsub();
+          if (user) _fbAuthReady = true;
+          resolve();
+        });
+      });
+    }
     const snap = await _db.ref('cinea/ideas').once('value');
     const data = snap.val();
     IDEAS_DATA = Array.isArray(data) && data.length > 0 ? data : JSON.parse(JSON.stringify(IDEAS_DEFAULT));
   } catch(e) {
+    console.warn('[CINEA] loadIdeas falhou, usando default:', e.message);
     IDEAS_DATA = JSON.parse(JSON.stringify(IDEAS_DEFAULT));
   }
   renderIdeas();
