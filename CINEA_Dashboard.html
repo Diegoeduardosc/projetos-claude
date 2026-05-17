@@ -2941,6 +2941,58 @@ function saveTasksToStorage() {
   });
 }
 
+// ── Firebase: salva tarefas automaticamente em cada operação ─────────────
+async function saveTasksToFirebase(dept) {
+  if (!_db) return;
+  // Aguarda auth anônima se ainda não está pronta
+  if (!_fbAuthReady) {
+    await new Promise(resolve => {
+      const unsub = _auth.onAuthStateChanged(user => { unsub(); if (user) _fbAuthReady = true; resolve(); });
+    });
+  }
+  try {
+    if (dept) {
+      await _db.ref('cinea/tasks/' + dept).set(TASKS[dept] || []);
+    } else {
+      await _db.ref('cinea/tasks').set({ hub: TASKS.hub, inov: TASKS.inov, tec: TASKS.tec });
+    }
+  } catch(e) {
+    console.warn('[CINEA] Erro ao salvar tarefas no Firebase:', e.message);
+    mostrarToast('⚠️ Aviso', 'Tarefa salva localmente. Firebase indisponível no momento.');
+  }
+}
+
+// ── Firebase: carrega tarefas frescas do banco e re-renderiza ────────────
+async function loadTasksFromFirebase() {
+  if (!_db) return;
+  if (!_fbAuthReady) {
+    await new Promise(resolve => {
+      const unsub = _auth.onAuthStateChanged(user => { unsub(); if (user) _fbAuthReady = true; resolve(); });
+    });
+  }
+  try {
+    const snap = await _db.ref('cinea/tasks').once('value');
+    const data = snap.val();
+    if (data && typeof data === 'object') {
+      let updated = false;
+      ['hub','inov','tec'].forEach(d => {
+        if (Array.isArray(data[d])) {
+          TASKS[d] = data[d];
+          localStorage.setItem('cinea_tasks_' + d, JSON.stringify(TASKS[d]));
+          updated = true;
+        }
+      });
+      if (updated) {
+        ['hub','inov','tec'].forEach(d => { renderTaskTable(d); renderAtividadesSetor(d); });
+        renderMeetingCards();
+        renderMemberChips();
+      }
+    }
+  } catch(e) {
+    console.warn('[CINEA] loadTasksFromFirebase falhou, usando localStorage:', e.message);
+  }
+}
+
 const DEPT_MEMBERS = {
   hub:  ['Rosimeire','Aline','A definir'],
   inov: ['Cláudia','Thamires','James','Bruna','A definir'],
@@ -2959,8 +3011,46 @@ function loadDeptMembers() {
     }
   } catch(e) {}
 }
+
+async function loadDeptMembersFromFirebase() {
+  if (!_db) return;
+  if (!_fbAuthReady) {
+    await new Promise(resolve => {
+      const unsub = _auth.onAuthStateChanged(user => { unsub(); if (user) _fbAuthReady = true; resolve(); });
+    });
+  }
+  try {
+    const snap = await _db.ref('cinea/dept_members').once('value');
+    const data = snap.val();
+    if (data && typeof data === 'object') {
+      ['hub','inov','tec'].forEach(d => {
+        if (Array.isArray(data[d])) DEPT_MEMBERS[d] = data[d];
+      });
+      localStorage.setItem('cinea_dept_members', JSON.stringify(DEPT_MEMBERS));
+      updateMemberSelects();
+      renderTeamCards();
+      renderAllDeptHeaders();
+      renderMeetingCards();
+    }
+  } catch(e) {
+    console.warn('[CINEA] loadDeptMembersFromFirebase falhou:', e.message);
+  }
+}
 function saveDeptMembers() {
   localStorage.setItem('cinea_dept_members', JSON.stringify(DEPT_MEMBERS));
+  // Persiste também no Firebase para sincronizar entre computadores
+  if (_db) {
+    const persist = async () => {
+      if (!_fbAuthReady) {
+        await new Promise(resolve => {
+          const unsub = _auth.onAuthStateChanged(user => { unsub(); if (user) _fbAuthReady = true; resolve(); });
+        });
+      }
+      _db.ref('cinea/dept_members').set(DEPT_MEMBERS).catch(e =>
+        console.warn('[CINEA] Erro ao salvar dept_members:', e.message));
+    };
+    persist();
+  }
 }
 
 // ── Cards dinâmicos de equipe ─────────────────────────────────
@@ -3310,6 +3400,8 @@ function saveEdit(dept, i) {
   TASKS[dept][i].name = newName;
   TASKS[dept][i].assignees = newAssignees;
   saveTasksToStorage();
+  saveTasksToFirebase(dept); // persiste imediatamente no Firebase
+  registrarLog('Editou tarefa em ' + dept + ': ' + newName);
   renderTaskTable(dept);
   renderMemberChips();
   renderAtividadesSetor(dept);
@@ -3327,6 +3419,7 @@ function deleteTask(dept, i) {
   localStorage.setItem('cinea_tasks_lixeira', JSON.stringify(lixeira));
   TASKS[dept].splice(i, 1);
   saveTasksToStorage();
+  saveTasksToFirebase(dept); // persiste remoção imediatamente no Firebase
   registrarLog('Moveu tarefa para lixeira: ' + tarefa.name + ' (' + dept + ')');
   renderTaskTable(dept);
   renderMemberChips();
@@ -3374,6 +3467,7 @@ function changeTaskStatus(dept, idx, val) {
   if (!_currentUser) { abrirLoginModal(); return; }
   TASKS[dept][idx].status = val;
   saveTasksToStorage();
+  saveTasksToFirebase(dept); // persiste mudança de status imediatamente no Firebase
   renderAtividadesSetor(dept);
   renderMeetingCards();
 }
@@ -3390,6 +3484,7 @@ function addNewTask(dept) {
   inp.value = '';
   sel.value = '';
   saveTasksToStorage();
+  saveTasksToFirebase(dept); // persiste imediatamente no Firebase
   registrarLog('Adicionou tarefa em ' + dept + ': ' + name);
   renderTaskTable(dept);
   renderMemberChips();
@@ -3458,7 +3553,9 @@ renderAllDeptHeaders();
 // Ideias: carrega do Firebase (ou usa default se offline)
 IDEAS_DATA = JSON.parse(JSON.stringify(IDEAS_DEFAULT));
 renderIdeas();
-loadIdeasFromFirebase(); // atualiza assincronamente do Firebase
+loadIdeasFromFirebase();         // atualiza ideias assincronamente do Firebase
+loadTasksFromFirebase();         // atualiza tarefas assincronamente do Firebase
+loadDeptMembersFromFirebase();   // atualiza membros assincronamente do Firebase
 
 // ═══════════════════════ SENHA ADMIN (SHA-256) ═══════════════════════
 // Senha padrão inicial: cinea2026
@@ -5085,6 +5182,7 @@ function restaurarTarefa(idx) {
   const { dept, deletadoEm, deletadoPor, ...tarefa } = t;
   TASKS[dept].push(tarefa);
   saveTasksToStorage();
+  saveTasksToFirebase(dept); // persiste restauração imediatamente no Firebase
   lixeira.splice(idx, 1);
   localStorage.setItem('cinea_tasks_lixeira', JSON.stringify(lixeira));
   registrarLog('Restaurou tarefa da lixeira: ' + tarefa.name + ' (' + dept + ')');
