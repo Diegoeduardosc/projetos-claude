@@ -5226,9 +5226,7 @@ async function fazerLoginGate() {
 function abrirSolicitarResetGate() {
   // Abre o modal de reset acima do portão (z-index 9500)
   document.getElementById('solicitar-reset-modal').style.display = 'flex';
-  document.getElementById('reset-req-mat').value   = '';
-  document.getElementById('reset-req-error').textContent = '';
-  setTimeout(() => document.getElementById('reset-req-mat').focus(), 80);
+  _abrirResetModal(); // Gerencia estado de rate limit + foco
 }
 
 function fazerLogout() {
@@ -5604,37 +5602,136 @@ async function resolverReset(notifKey, mat, nome) {
 }
 
 // ════════ SOLICITAR RESET (modal do login) ════════
+
+// ── Rate limiting: bloqueia após 3 tentativas erradas por 5 minutos ───────────
+const _RESET_MAX_TENTATIVAS = 3;
+const _RESET_LOCKOUT_MS     = 5 * 60 * 1000; // 5 min
+let   _resetCountdownTimer  = null;
+
+function _getRLState() {
+  try { return JSON.parse(localStorage.getItem('cinea_rl_reset') || '{}'); }
+  catch { return {}; }
+}
+function _setRLState(s) { localStorage.setItem('cinea_rl_reset', JSON.stringify(s)); }
+
+// Retorna true se o usuário pode tentar; false se está bloqueado (e exibe msg)
+function _rlPermitido(errEl) {
+  const s = _getRLState();
+  const now = Date.now();
+  if (s.bloqueadoAte && s.bloqueadoAte > now) {
+    _iniciarCountdown(errEl, s.bloqueadoAte);
+    return false;
+  }
+  // Lockout expirou — reseta
+  if (s.bloqueadoAte && s.bloqueadoAte <= now) _setRLState({});
+  return true;
+}
+
+// Registra falha e bloqueia se atingiu o limite
+function _rlRegistrarFalha(errEl) {
+  const s   = _getRLState();
+  const now = Date.now();
+  const tentativas = (s.tentativas || 0) + 1;
+  const restantes  = _RESET_MAX_TENTATIVAS - tentativas;
+
+  if (tentativas >= _RESET_MAX_TENTATIVAS) {
+    const bloqueadoAte = now + _RESET_LOCKOUT_MS;
+    _setRLState({ tentativas, bloqueadoAte });
+    _iniciarCountdown(errEl, bloqueadoAte);
+  } else {
+    _setRLState({ tentativas });
+    const aviso = restantes === 1
+      ? '⚠️ Matrícula não encontrada. Última tentativa antes do bloqueio temporário.'
+      : `⚠️ Matrícula não encontrada. ${restantes} tentativas restantes.`;
+    errEl.style.color  = 'var(--red)';
+    errEl.textContent  = aviso;
+  }
+}
+
+// Contador regressivo exibido no campo de erro
+function _iniciarCountdown(errEl, bloqueadoAte) {
+  clearInterval(_resetCountdownTimer);
+  const atualizar = () => {
+    const restMs = bloqueadoAte - Date.now();
+    if (restMs <= 0) {
+      clearInterval(_resetCountdownTimer);
+      _setRLState({});
+      errEl.style.color = 'var(--text3)';
+      errEl.textContent = 'Bloqueio encerrado. Você pode tentar novamente.';
+      document.getElementById('reset-req-mat').disabled  = false;
+      document.getElementById('btn-enviar-reset').disabled = false;
+      return;
+    }
+    const min = String(Math.floor(restMs / 60000)).padStart(2, '0');
+    const seg = String(Math.floor((restMs % 60000) / 1000)).padStart(2, '0');
+    errEl.style.color = 'var(--red)';
+    errEl.textContent = `🔒 Muitas tentativas. Tente novamente em ${min}:${seg}.`;
+    document.getElementById('reset-req-mat').disabled  = true;
+    document.getElementById('btn-enviar-reset').disabled = true;
+  };
+  atualizar();
+  _resetCountdownTimer = setInterval(atualizar, 1000);
+}
+
+function _rlSucesso() {
+  clearInterval(_resetCountdownTimer);
+  _setRLState({});
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+function _abrirResetModal() {
+  const errEl = document.getElementById('reset-req-error');
+  const mat   = document.getElementById('reset-req-mat');
+  const btn   = document.getElementById('btn-enviar-reset');
+  mat.value        = '';
+  errEl.textContent = '';
+  errEl.style.color = 'var(--text3)';
+  // Verifica imediatamente se ainda está bloqueado
+  if (!_rlPermitido(errEl)) return;
+  if (mat) mat.disabled = false;
+  if (btn) btn.disabled = false;
+  setTimeout(() => mat?.focus(), 80);
+}
+
 function abrirSolicitarReset() {
   fecharLoginModal();
   document.getElementById('solicitar-reset-modal').style.display = 'flex';
-  document.getElementById('reset-req-mat').value   = '';
-  document.getElementById('reset-req-error').textContent = '';
-  setTimeout(() => document.getElementById('reset-req-mat').focus(), 80);
+  _abrirResetModal();
 }
 function fecharSolicitarReset() {
+  clearInterval(_resetCountdownTimer);
   document.getElementById('solicitar-reset-modal').style.display = 'none';
+  // Reabilita campos para a próxima abertura (o _abrirResetModal trata o estado)
+  document.getElementById('reset-req-mat').disabled    = false;
+  document.getElementById('btn-enviar-reset').disabled = false;
   if (!_currentUser) {
-    // Volta o foco para o portão de entrada (sem abrir o modal flutuante)
     setTimeout(() => document.getElementById('gate-mat')?.focus(), 80);
   } else {
     abrirLoginModal();
   }
 }
+
 async function enviarSolicitacaoReset() {
-  const mat   = document.getElementById('reset-req-mat').value.trim();
   const errEl = document.getElementById('reset-req-error');
+
+  // ── 1. Verifica rate limit ANTES de qualquer consulta ao Firebase ──
+  if (!_rlPermitido(errEl)) return;
+
+  const mat = document.getElementById('reset-req-mat').value.trim();
   if (!mat) { errEl.style.color = 'var(--red)'; errEl.textContent = 'Informe sua matrícula.'; return; }
-  errEl.style.color = 'var(--text3)'; errEl.textContent = 'Verificando matrícula…';
+
+  errEl.style.color = 'var(--text3)'; errEl.textContent = 'Verificando…';
   try {
-    // ── Valida se a matrícula existe no banco ANTES de criar qualquer notificação ──
+    // ── 2. Consulta o banco apenas se não estiver bloqueado ──
     const snap = await _db.ref('cinea/users/' + mat).once('value');
-    const u = snap.val();
+    const u    = snap.val();
     if (!u) {
-      errEl.style.color = 'var(--red)';
-      errEl.textContent = '❌ Matrícula não encontrada no sistema.';
+      // Matrícula não existe — registra falha (pode bloquear)
+      _rlRegistrarFalha(errEl);
       return;
     }
-    // Nome vem do banco — nunca do campo digitado pelo usuário
+    // ── 3. Sucesso: zera contagem e cria notificação ──
+    _rlSucesso();
     const nomeReal = u.nome || mat;
     await _db.ref('cinea/notificacoes').push({
       matricula: mat, nome: nomeReal,
@@ -5644,7 +5741,11 @@ async function enviarSolicitacaoReset() {
     errEl.style.color = 'var(--green)';
     errEl.textContent = '✅ Solicitação enviada! O administrador irá resetar sua senha em breve.';
     setTimeout(fecharSolicitarReset, 3000);
-  } catch(e) { errEl.style.color = 'var(--red)'; errEl.textContent = '❌ Erro de conexão.'; }
+  } catch(e) {
+    // Erros de conexão NÃO contam como tentativa falha
+    errEl.style.color = 'var(--red)';
+    errEl.textContent = '❌ Erro de conexão. Tente novamente.';
+  }
 }
 
 // ════════ LOG DE ATIVIDADES ════════
@@ -6887,7 +6988,7 @@ async function salvarFeedbackSugestao(key) {
            inputmode="numeric" oninput="somenteNumeros(this)" style="margin-bottom:4px"
            onkeydown="if(event.key==='Enter') enviarSolicitacaoReset()">
     <div id="reset-req-mat-hint" style="display:none;font-size:0.72rem;color:var(--gold);margin-bottom:14px">⚠️ A matrícula é composta apenas por números</div>
-    <button onclick="enviarSolicitacaoReset()" style="width:100%;padding:12px;background:var(--purple);border:none;border-radius:12px;color:#fff;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Enviar solicitação</button>
+    <button id="btn-enviar-reset" onclick="enviarSolicitacaoReset()" style="width:100%;padding:12px;background:var(--purple);border:none;border-radius:12px;color:#fff;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Enviar solicitação</button>
     <div id="reset-req-error" style="font-size:0.78rem;margin-top:10px;min-height:18px;text-align:center"></div>
     <button onclick="fecharSolicitarReset()" style="margin-top:12px;width:100%;background:transparent;border:none;color:var(--text3);font-size:0.77rem;cursor:pointer;font-family:'DM Sans',sans-serif">Voltar ao login</button>
   </div>
