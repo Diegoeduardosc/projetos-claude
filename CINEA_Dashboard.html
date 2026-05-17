@@ -3432,7 +3432,6 @@ const ATIV_STATUS = {
  * Quando logado: clicável, cicla para o próximo status.
  * Quando visitante: exibição estática.
  */
-// IDs únicos para cada dropdown de status aberto
 const ST_DD_DOT = {
   'Pendente':     'var(--text3)',
   'Em andamento': 'var(--gold)',
@@ -3444,30 +3443,32 @@ function renderStatusPill(dept, idx, status, logado) {
   if (!logado) {
     return `<span class="st-pill ${cfg.cls}">${cfg.label}</span>`;
   }
-  const ddId = `st-dd-${dept}-${idx}`;
+  // Sem IDs globais — usa referência direta ao elemento (evita conflito entre páginas)
   const opts = STATUS_CYCLE.map(s => {
-    const isCur = s === status;
-    return `<div class="st-dd-opt${isCur?' current':''}" onclick="event.stopPropagation();pickStatus('${dept}',${idx},'${s}','${ddId}')">
+    const isCur = s === (status || 'Pendente');
+    return `<div class="st-dd-opt${isCur?' current':''}"
+      onclick="event.stopPropagation();pickStatus('${dept}',${idx},'${s}')">
       <div class="st-dd-dot" style="background:${ST_DD_DOT[s]}"></div>
-      ${s}${isCur?' <span style="margin-left:auto;font-size:0.65rem;opacity:0.5">atual</span>':''}
+      ${s}${isCur?' <span style="margin-left:auto;font-size:0.63rem;opacity:0.45">atual</span>':''}
     </div>`;
   }).join('');
   return `<span class="st-wrap">
     <span class="st-pill ${cfg.cls} clickable" title="Clique para escolher o status"
-      onclick="event.stopPropagation();toggleStatusDD('${ddId}')">${cfg.label} ▾</span>
-    <div class="st-dropdown" id="${ddId}">${opts}</div>
+      onclick="event.stopPropagation();openStDD(this)">${cfg.label} ▾</span>
+    <div class="st-dropdown">${opts}</div>
   </span>`;
 }
-function toggleStatusDD(ddId) {
-  const dd = document.getElementById(ddId);
-  if (!dd) return;
+// Abre/fecha pelo elemento irmão — sem getElementById, sem conflito de IDs
+function openStDD(pillEl) {
+  const dd = pillEl.nextElementSibling;
+  if (!dd || !dd.classList.contains('st-dropdown')) return;
   const wasOpen = dd.classList.contains('open');
-  // fecha todos
   document.querySelectorAll('.st-dropdown.open').forEach(el => el.classList.remove('open'));
   if (!wasOpen) dd.classList.add('open');
 }
-function pickStatus(dept, idx, val, ddId) {
-  document.getElementById(ddId)?.classList.remove('open');
+// Fecha pelo elemento mais próximo na árvore — sem getElementById
+function pickStatus(dept, idx, val) {
+  event.target.closest('.st-dropdown')?.classList.remove('open');
   changeTaskStatus(dept, idx, val);
 }
 function renderAtividadesSetor(dept) {
