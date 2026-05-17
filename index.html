@@ -2551,6 +2551,7 @@ body.edit-mode .user-mgmt-section { display: block; }
         <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--purple-l)" class="resumo-total">—</div><div style="font-size:0.68rem;color:var(--text3)">Tarefas totais</div></div>
         <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--green)" class="resumo-conc">—</div><div style="font-size:0.68rem;color:var(--text3)">Concluídas</div></div>
         <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--gold)" class="resumo-shared">—</div><div style="font-size:0.68rem;color:var(--text3)">Compartilhadas</div></div>
+        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--cyan)" class="resumo-fixa">—</div><div style="font-size:0.68rem;color:var(--text3)">Ativ. Fixas</div></div>
         <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--text)" class="resumo-pessoas">—</div><div style="font-size:0.68rem;color:var(--text3)">Pessoas</div></div>
       </div>
 
@@ -2584,6 +2585,7 @@ body.edit-mode .user-mgmt-section { display: block; }
         <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--purple-l)" class="resumo-total">—</div><div style="font-size:0.68rem;color:var(--text3)">Tarefas totais</div></div>
         <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--green)" class="resumo-conc">—</div><div style="font-size:0.68rem;color:var(--text3)">Concluídas</div></div>
         <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--gold)" class="resumo-shared">—</div><div style="font-size:0.68rem;color:var(--text3)">Compartilhadas</div></div>
+        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--cyan)" class="resumo-fixa">—</div><div style="font-size:0.68rem;color:var(--text3)">Ativ. Fixas</div></div>
         <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--text)" class="resumo-pessoas">—</div><div style="font-size:0.68rem;color:var(--text3)">Pessoas</div></div>
         <div style="margin-left:auto;font-size:0.74rem;color:var(--text3);line-height:1.6">
           Clique em <strong style="color:var(--text2)">Editar</strong> para alterar responsáveis.<br>
@@ -3768,8 +3770,8 @@ function renderTaskTable(dept) {
     row.innerHTML = `
       <td>
         <div style="display:flex;align-items:center;gap:6px">
-          ${isFixa ? '<span class="fixa-badge">🔄 Fixa</span>' : ''}
           <span class="task-name-view-${dept}-${i}" style="color:var(--text);font-size:0.79rem">${task.name}</span>
+          ${isFixa ? '<span class="fixa-badge">🔄 Fixa</span>' : ''}
         </div>
         <input class="task-name-edit-${dept}-${i} add-task-input" style="display:none;width:100%;font-size:0.78rem;padding:4px 8px" value="${task.name.replace(/"/g,'&quot;')}" />
       </td>
@@ -3812,10 +3814,12 @@ function atualizarResumoTarefas() {
   const total   = ['hub','inov','tec'].reduce((s,d) => s + (TASKS[d]?.length||0), 0);
   const conc    = ['hub','inov','tec'].reduce((s,d) => s + (TASKS[d]?.filter(t=>t.status==='Concluída').length||0), 0);
   const shared  = ['hub','inov','tec'].reduce((s,d) => s + (TASKS[d]?.filter(t=>t.assignees.length>1).length||0), 0);
+  const fixas   = ['hub','inov','tec'].reduce((s,d) => s + (TASKS[d]?.filter(t=>t.tipo==='fixa').length||0), 0);
   const pessoas = getAllMembersForTask().length;
   document.querySelectorAll('.resumo-total').forEach(el  => el.textContent = total);
   document.querySelectorAll('.resumo-conc').forEach(el   => el.textContent = conc);
   document.querySelectorAll('.resumo-shared').forEach(el => el.textContent = shared);
+  document.querySelectorAll('.resumo-fixa').forEach(el   => el.textContent = fixas);
   document.querySelectorAll('.resumo-pessoas').forEach(el=> el.textContent = pessoas);
 }
 
@@ -3928,8 +3932,8 @@ function renderPorPessoa() {
           const done = t.status === 'Concluída';
           html += `<div class="por-pessoa-task-row">
             <div style="flex:1;min-width:0">
-              ${t.tipo==='fixa'?'<span class="fixa-badge" style="margin-right:4px;font-size:0.58rem">🔄</span>':''}
               <span style="font-size:0.76rem;color:${done?'var(--text3)':'var(--text)'};${done?'text-decoration:line-through':''}">${t.name}</span>
+              ${t.tipo==='fixa'?'<span class="fixa-badge" style="margin-left:4px;font-size:0.58rem">🔄 Fixa</span>':''}
             </div>
             ${renderStatusPill(t.dept, t._idx, t.status||'Pendente', logado)}
           </div>`;
