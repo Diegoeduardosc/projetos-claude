@@ -2203,10 +2203,7 @@ body.edit-mode .user-mgmt-section { display: block; }
 
     <!-- ═══════════════════════════════ HUB ═══════════════════════════════ -->
     <div class="page" id="page-hub">
-      <div class="section-header" style="margin-bottom:20px">
-        <div class="section-sub" style="color:var(--pink)">Responsável: Rosimeire</div>
-        <div class="avatar pink">RO</div>
-      </div>
+      <div class="section-header" style="margin-bottom:20px" id="dept-header-hub"></div>
 
       <div class="stat-grid">
         <div class="stat-card pink"><div class="stat-icon">📋</div><div class="stat-label">Meta Atendimentos</div><div class="stat-value">200</div><div class="stat-change" style="color:var(--text3)">Meta anual</div></div>
@@ -2251,10 +2248,7 @@ body.edit-mode .user-mgmt-section { display: block; }
 
     <!-- ═══════════════════════════════ INOVAÇÃO ═══════════════════════════════ -->
     <div class="page" id="page-inov">
-      <div class="section-header" style="margin-bottom:20px">
-        <div class="section-sub" style="color:var(--purple-l)">Responsável: Cláudia</div>
-        <div class="avatar purple">CL</div>
-      </div>
+      <div class="section-header" style="margin-bottom:20px" id="dept-header-inov"></div>
 
       <div class="stat-grid">
         <div class="stat-card purple"><div class="stat-icon">🎓</div><div class="stat-label">Formações/Ano</div><div class="stat-value">20</div><div class="stat-change" style="color:var(--text3)">Meta anual</div></div>
@@ -2298,10 +2292,7 @@ body.edit-mode .user-mgmt-section { display: block; }
 
     <!-- ═══════════════════════════════ TECNOLOGIAS ═══════════════════════════════ -->
     <div class="page" id="page-tec">
-      <div class="section-header" style="margin-bottom:20px">
-        <div class="section-sub" style="color:var(--cyan)">Responsável: Jefferson</div>
-        <div class="avatar cyan">JE</div>
-      </div>
+      <div class="section-header" style="margin-bottom:20px" id="dept-header-tec"></div>
 
       <div class="stat-grid">
         <div class="stat-card cyan"><div class="stat-icon">💻</div><div class="stat-label">Docentes/Ano</div><div class="stat-value">300</div><div class="stat-change" style="color:var(--text3)">Meta anual</div></div>
@@ -2812,6 +2803,7 @@ function showPage(id, el) {
   }
   if (['hub','inov','tec'].includes(id)) {
     renderAtividadesSetor(id);
+    renderDeptHeader(id);
   }
   if (id === 'meeting') {
     renderMeetingCards();
@@ -2996,18 +2988,16 @@ function renderTeamCards() {
       <div class="avatar" style="background:linear-gradient(135deg,var(--gold),#e6960a);width:34px;height:34px;font-size:0.72rem">${joaoInfo.sigla}</div>
       <div class="member-info">
         <div class="member-name-lbl" style="color:var(--gold)">João <span style="font-size:0.65rem;font-weight:400;color:var(--text3)">· Gestor Geral</span></div>
-        <div class="member-role-lbl">${joaoInfo.role}</div>
         <div class="task-chip-wrap" id="jo-chips-${dept}"></div>
       </div>
     </div>`;
     members.forEach(nome => {
-      const info  = MEMBER_INFO[nome] || { sigla: nome.substring(0,2).toUpperCase(), role: 'Membro' };
+      const info  = MEMBER_INFO[nome] || { sigla: nome.substring(0,2).toUpperCase() };
       const chipId = MEMBER_MAP[nome] || nome.toLowerCase().replace(/\s/g,'');
       html += `<div class="member-row">
         <div class="avatar ${color}" style="${info.sigla.length>2?'font-size:0.72rem':''}">${info.sigla}</div>
         <div class="member-info">
           <div class="member-name-lbl">${nome}</div>
-          <div class="member-role-lbl">${info.role}</div>
           <div class="task-chip-wrap" id="${chipId}-chips"></div>
         </div>
       </div>`;
@@ -3096,15 +3086,17 @@ function renderMeetingCards() {
   const grid = document.getElementById('meeting-cards-grid');
   if (!grid) return;
   const deptStyle = {
-    hub:  { border: 'rgba(233,30,140,0.2)',  avatarCls: 'pink'   },
-    inov: { border: 'rgba(79,45,127,0.3)',   avatarCls: 'purple' },
-    tec:  { border: 'rgba(0,180,204,0.2)',   avatarCls: 'cyan'   },
+    hub:  { border:'rgba(233,30,140,0.2)',  avatarCls:'pink',   colorVar:'var(--pink)'     },
+    inov: { border:'rgba(79,45,127,0.3)',   avatarCls:'purple', colorVar:'var(--purple-l)' },
+    tec:  { border:'rgba(0,180,204,0.2)',   avatarCls:'cyan',   colorVar:'var(--cyan)'     },
   };
+  const logado = !!_currentUser;
   grid.innerHTML = ['hub','inov','tec'].map(dept => {
-    const s = deptStyle[dept];
-    const gestorNome = (DEPT_MEMBERS[dept] || []).find(m => m !== 'A definir') || '—';
-    const gestorInfo = MEMBER_INFO[gestorNome] || { sigla: gestorNome.substring(0,2).toUpperCase() };
-    const tasks = TASKS[dept] || [];
+    const s        = deptStyle[dept];
+    const members  = (DEPT_MEMBERS[dept] || []).filter(m => m !== 'A definir');
+    const respNome = getDeptResp(dept);
+    const respInfo = MEMBER_INFO[respNome] || { sigla: respNome.substring(0,2).toUpperCase() };
+    const tasks    = TASKS[dept] || [];
     const itens = tasks.length === 0
       ? `<div style="font-size:0.78rem;color:var(--text3);padding:8px 0">Nenhuma tarefa cadastrada.</div>`
       : tasks.map(t => {
@@ -3114,17 +3106,80 @@ function renderMeetingCards() {
             <span style="font-size:0.78rem;color:var(--text2);line-height:1.4">${escapeHtml(t.name)}</span>
           </div>`;
         }).join('');
+
+    // Cabeçalho do card: seletor se logado e há mais de 1 membro, senão fixo
+    const header = (logado && members.length > 1)
+      ? `<select onchange="setDeptResp('${dept}',this.value)"
+           style="background:transparent;border:none;border-bottom:1px solid ${s.border};
+                  color:${s.colorVar};font-family:'DM Sans',sans-serif;font-size:0.85rem;
+                  font-weight:700;padding:0 4px 2px 0;cursor:pointer;appearance:none;outline:none;
+                  max-width:120px;margin-bottom:1px">
+           ${members.map(m => `<option value="${m}"${m===respNome?' selected':''}>${m}</option>`).join('')}
+         </select>`
+      : `<div class="meeting-person">${escapeHtml(respNome)}</div>`;
+
     return `<div class="meeting-card" style="border-color:${s.border}">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-        <div class="avatar ${s.avatarCls}" style="width:32px;height:32px;font-size:${gestorInfo.sigla.length>2?'0.65':'0.75'}rem;flex-shrink:0">${escapeHtml(gestorInfo.sigla)}</div>
+        <div class="avatar ${s.avatarCls}" style="width:32px;height:32px;font-size:${respInfo.sigla.length>2?'0.65':'0.75'}rem;flex-shrink:0">${escapeHtml(respInfo.sigla)}</div>
         <div>
-          <div class="meeting-person">${escapeHtml(gestorNome)}</div>
+          ${header}
           <div class="meeting-dept">${escapeHtml(DEPT_LABELS[dept])}</div>
         </div>
       </div>
       ${itens}
     </div>`;
   }).join('');
+}
+
+// ── Responsável por departamento ──────────────────────────────
+const DEPT_COLOR_VAR = { hub:'var(--pink)', inov:'var(--purple-l)', tec:'var(--cyan)' };
+
+function getDeptResp(dept) {
+  const stored  = localStorage.getItem('cinea_resp_' + dept);
+  const members = DEPT_MEMBERS[dept].filter(m => m !== 'A definir');
+  if (stored && members.includes(stored)) return stored;
+  return members[0] || '—';
+}
+
+function setDeptResp(dept, nome) {
+  localStorage.setItem('cinea_resp_' + dept, nome);
+  renderDeptHeader(dept);
+  renderMeetingCards();
+}
+
+function renderDeptHeader(dept) {
+  const el = document.getElementById('dept-header-' + dept);
+  if (!el) return;
+  const color    = DEPT_COLORS[dept];
+  const colorVar = DEPT_COLOR_VAR[dept];
+  const members  = DEPT_MEMBERS[dept].filter(m => m !== 'A definir');
+  const resp     = getDeptResp(dept);
+  const info     = MEMBER_INFO[resp] || { sigla: resp.substring(0,2).toUpperCase() };
+  const logado   = !!_currentUser;
+
+  if (logado && members.length > 1) {
+    // Seletor dinâmico — visível para qualquer usuário logado
+    el.innerHTML = `
+      <div>
+        <div style="font-size:0.65rem;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Responsável pelo setor</div>
+        <select onchange="setDeptResp('${dept}', this.value)"
+          style="background:var(--card2);border:1px solid var(--border);border-radius:10px;
+                 color:${colorVar};font-family:'DM Sans',sans-serif;font-size:0.88rem;
+                 padding:7px 12px;cursor:pointer;font-weight:600;appearance:none">
+          ${members.map(m => `<option value="${m}"${m === resp ? ' selected' : ''}>${m}</option>`).join('')}
+        </select>
+      </div>
+      <div class="avatar ${color}" style="transition:background 0.2s">${escapeHtml(info.sigla)}</div>`;
+  } else {
+    // Exibição estática (não logado ou só 1 membro)
+    el.innerHTML = `
+      <div class="section-sub" style="color:${colorVar}">Responsável: ${escapeHtml(resp)}</div>
+      <div class="avatar ${color}">${escapeHtml(info.sigla)}</div>`;
+  }
+}
+
+function renderAllDeptHeaders() {
+  ['hub','inov','tec'].forEach(renderDeptHeader);
 }
 
 // ── Migração de membro ────────────────────────────────────────
@@ -3359,6 +3414,7 @@ updateMemberSelects();
 renderTeamCards(); // renderTeamCards chama renderMemberChips internamente
 ['hub','inov','tec'].forEach(d => { renderTaskTable(d); renderAtividadesSetor(d); });
 renderMeetingCards();
+renderAllDeptHeaders();
 // Ideias: carrega do Firebase (ou usa default se offline)
 IDEAS_DATA = JSON.parse(JSON.stringify(IDEAS_DEFAULT));
 renderIdeas();
@@ -4242,6 +4298,9 @@ function atualizarTopbarUser() {
   document.body.classList.toggle('user-logged-in', !!_currentUser);
   // Atualiza visibilidade das atas ao mudar estado de login
   atualizarVisibilidadeMeetings();
+  // Re-renderiza cabeçalhos de depto (seletor aparece/some conforme login)
+  renderAllDeptHeaders();
+  renderMeetingCards();
 }
 
 function toggleUserDropdown(e) {
@@ -4560,7 +4619,7 @@ function atualizarVisibilidadeMeetings() {
     if (list)   list.style.display   = 'block';
     // Botão nova reunião + config GitHub: só em edit mode
     if (btnNovo) btnNovo.style.display = editModeActive ? 'flex' : 'none';
-    if (ghSec)   ghSec.style.display   = (editModeActive && _currentUser?.role === 'admin') ? 'block' : 'none';
+    if (ghSec)   ghSec.style.display   = (_currentUser?.role === 'admin') ? 'block' : 'none';
     if (editModeActive) {
       const repo  = localStorage.getItem('cinea_gh_repo');
       const pat   = localStorage.getItem('cinea_gh_pat');
