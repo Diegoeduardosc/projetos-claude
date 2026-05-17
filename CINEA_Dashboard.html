@@ -1042,6 +1042,15 @@ body:not(.user-logged-in) .add-task-row { display: none !important; }
   min-width: 130px;
 }
 .add-task-select:focus { border-color: var(--purple-l); }
+.add-task-select[multiple] {
+  min-width: 160px;
+  padding: 6px 8px;
+  max-height: 120px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--purple-l) transparent;
+}
+.add-task-select[multiple] option { padding: 3px 6px; border-radius: 4px; }
+.add-task-select[multiple] option:checked { background: rgba(79,45,127,0.35); color: var(--text); }
 .add-task-btn {
   padding: 8px 16px;
   background: linear-gradient(135deg, var(--purple), var(--purple-l));
@@ -2360,22 +2369,8 @@ body.edit-mode .user-mgmt-section { display: block; }
         </div>
       </div>
 
-      <!-- Cards de reunião — espelhados de Equipe & Tarefas -->
-      <div class="meeting-grid" id="meeting-cards-grid">
-        <div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:40px;grid-column:1/-1">Carregando...</div>
-      </div>
-
-      <div class="card" style="margin-top:16px">
-        <div class="card-title">Legenda de Status <span style="font-size:0.65rem;font-weight:400;color:var(--text3);margin-left:6px">· espelhado de Equipe &amp; Tarefas</span></div>
-        <div style="display:flex;gap:32px;flex-wrap:wrap">
-          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--text2)"><div style="width:10px;height:10px;border-radius:50%;background:var(--green)"></div>Concluída</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--text2)"><div style="width:10px;height:10px;border-radius:50%;background:var(--gold)"></div>Em andamento</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--text2)"><div style="width:10px;height:10px;border-radius:50%;background:var(--red)"></div>Pendente / Bloqueada</div>
-        </div>
-      </div>
-
       <!-- ═══ ATAS DE REUNIÃO ═══ -->
-      <div style="margin-top:28px">
+      <div style="margin-top:4px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
           <div>
             <div style="font-size:1rem;font-weight:600;color:var(--text)">Atas de Reunião</div>
@@ -2428,6 +2423,26 @@ body.edit-mode .user-mgmt-section { display: block; }
           </div>
         </div>
       </div>
+
+      <!-- ═══ TAREFAS POR DEPARTAMENTO ═══ -->
+      <div style="margin-top:28px;margin-bottom:10px;display:flex;align-items:center;gap:10px">
+        <div style="font-size:0.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3)">Tarefas pendentes por departamento</div>
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+      </div>
+
+      <!-- Cards de reunião — espelhados de Equipe & Tarefas -->
+      <div class="meeting-grid" id="meeting-cards-grid">
+        <div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:40px;grid-column:1/-1">Carregando...</div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">Legenda de Status <span style="font-size:0.65rem;font-weight:400;color:var(--text3);margin-left:6px">· espelhado de Equipe &amp; Tarefas</span></div>
+        <div style="display:flex;gap:32px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--text2)"><div style="width:10px;height:10px;border-radius:50%;background:var(--green)"></div>Concluída</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--text2)"><div style="width:10px;height:10px;border-radius:50%;background:var(--gold)"></div>Em andamento</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--text2)"><div style="width:10px;height:10px;border-radius:50%;background:var(--red)"></div>Pendente / Bloqueada</div>
+        </div>
+      </div>
     </div>
 
 
@@ -2469,16 +2484,13 @@ body.edit-mode .user-mgmt-section { display: block; }
         <!-- HUB -->
         <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--pink);margin-bottom:8px;margin-top:4px">Hub de Integração</div>
         <table class="task-full-table" id="table-hub"></table>
-        <div class="add-task-row">
-          <input class="add-task-input" id="hub-input" placeholder="Nova tarefa para o Hub..." />
-          <select class="add-task-select" id="hub-member-sel">
-            <option value="">Responsável...</option>
-            <option value="A definir">⏳ A definir</option>
-            <option value="Rosimeire">Rosimeire</option>
-            <option value="Aline">Aline</option>
-            <option value="Rosimeire,Aline">Rosimeire + Aline</option>
-          </select>
-          <button class="add-task-btn" onclick="addNewTask('hub')">+ Adicionar</button>
+        <div class="add-task-row" style="align-items:flex-start">
+          <input class="add-task-input" id="hub-input" placeholder="Nova tarefa para o Hub..." style="align-self:center" />
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:0.67rem;color:var(--text3);padding-left:2px">Responsáveis (Ctrl+clique p/ múltiplos)</div>
+            <select class="add-task-select" id="hub-member-sel" multiple></select>
+          </div>
+          <button class="add-task-btn" onclick="addNewTask('hub')" style="align-self:flex-end">+ Adicionar</button>
         </div>
 
         <div style="height:1px;background:var(--border);margin:20px 0"></div>
@@ -2486,20 +2498,13 @@ body.edit-mode .user-mgmt-section { display: block; }
         <!-- INOVAÇÃO -->
         <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--purple-l);margin-bottom:8px">Inovação Pedagógica</div>
         <table class="task-full-table" id="table-inov"></table>
-        <div class="add-task-row">
-          <input class="add-task-input" id="inov-input" placeholder="Nova tarefa para Inovação..." />
-          <select class="add-task-select" id="inov-member-sel">
-            <option value="">Responsável...</option>
-            <option value="A definir">⏳ A definir</option>
-            <option value="Cláudia">Cláudia</option>
-            <option value="Thamires">Thamires</option>
-            <option value="James">James</option>
-            <option value="Bruna">Bruna</option>
-            <option value="Cláudia,Thamires">Cláudia + Thamires</option>
-            <option value="Cláudia,James">Cláudia + James</option>
-            <option value="Thamires,James,Bruna">Thamires + James + Bruna</option>
-          </select>
-          <button class="add-task-btn" onclick="addNewTask('inov')">+ Adicionar</button>
+        <div class="add-task-row" style="align-items:flex-start">
+          <input class="add-task-input" id="inov-input" placeholder="Nova tarefa para Inovação..." style="align-self:center" />
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:0.67rem;color:var(--text3);padding-left:2px">Responsáveis (Ctrl+clique p/ múltiplos)</div>
+            <select class="add-task-select" id="inov-member-sel" multiple></select>
+          </div>
+          <button class="add-task-btn" onclick="addNewTask('inov')" style="align-self:flex-end">+ Adicionar</button>
         </div>
 
         <div style="height:1px;background:var(--border);margin:20px 0"></div>
@@ -2507,16 +2512,13 @@ body.edit-mode .user-mgmt-section { display: block; }
         <!-- TECNOLOGIAS -->
         <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--cyan);margin-bottom:8px">Tecnologias & Aprendizagem</div>
         <table class="task-full-table" id="table-tec"></table>
-        <div class="add-task-row">
-          <input class="add-task-input" id="tec-input" placeholder="Nova tarefa para Tecnologias..." />
-          <select class="add-task-select" id="tec-member-sel">
-            <option value="">Responsável...</option>
-            <option value="A definir">⏳ A definir</option>
-            <option value="Jefferson">Jefferson</option>
-            <option value="Diego">Diego</option>
-            <option value="Jefferson,Diego">Jefferson + Diego</option>
-          </select>
-          <button class="add-task-btn" onclick="addNewTask('tec')">+ Adicionar</button>
+        <div class="add-task-row" style="align-items:flex-start">
+          <input class="add-task-input" id="tec-input" placeholder="Nova tarefa para Tecnologias..." style="align-self:center" />
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:0.67rem;color:var(--text3);padding-left:2px">Responsáveis (Ctrl+clique p/ múltiplos)</div>
+            <select class="add-task-select" id="tec-member-sel" multiple></select>
+          </div>
+          <button class="add-task-btn" onclick="addNewTask('tec')" style="align-self:flex-end">+ Adicionar</button>
         </div>
       </div>
     </div>
@@ -3123,35 +3125,22 @@ function updateMemberSelects() {
     const sel = document.getElementById(dept + '-member-sel');
     if (!sel) return;
     const deptMembers = DEPT_MEMBERS[dept].filter(m => m !== 'A definir');
-    // Opções individuais: primeiro do depto, depois os demais
-    let html = '<option value="">Responsável...</option><option value="A definir">⏳ A definir</option>';
-    // Membros do próprio depto
+    const outros = allMembers.filter(m => !deptMembers.includes(m));
+    // Multi-select: mostra TODOS os membros em optgroups
+    let html = '<option value="A definir">⏳ A definir</option>';
     if (deptMembers.length) {
       html += `<optgroup label="── ${DEPT_LABELS[dept]}">`;
       deptMembers.forEach(m => { html += `<option value="${m}">${m}</option>`; });
       html += '</optgroup>';
     }
-    // Demais membros + João
-    const outros = allMembers.filter(m => !deptMembers.includes(m));
     if (outros.length) {
       html += `<optgroup label="── Outros membros">`;
       outros.forEach(m => { html += `<option value="${m}">${m}</option>`; });
       html += '</optgroup>';
     }
-    // Combinações mais comuns do depto (pares)
-    if (deptMembers.length >= 2) {
-      html += `<optgroup label="── Duplas do setor">`;
-      for (let i = 0; i < deptMembers.length; i++) {
-        for (let j = i+1; j < deptMembers.length; j++) {
-          html += `<option value="${deptMembers[i]},${deptMembers[j]}">${deptMembers[i]} + ${deptMembers[j]}</option>`;
-        }
-      }
-      if (deptMembers.length >= 3) {
-        html += `<option value="${deptMembers.join(',')}">${deptMembers.join(' + ')}</option>`;
-      }
-      html += '</optgroup>';
-    }
     sel.innerHTML = html;
+    sel.multiple = true;
+    sel.size = Math.min(5, deptMembers.length + outros.length + 1);
   });
 }
 
@@ -3613,12 +3602,14 @@ function addNewTask(dept) {
   const inp = document.getElementById(dept+'-input');
   const sel = document.getElementById(dept+'-member-sel');
   const name = inp.value.trim();
-  const assigneesStr = sel.value;
-  if(!name || !assigneesStr) return;
-  const assignees = assigneesStr.split(',').map(s => s.trim());
+  const assignees = Array.from(sel.selectedOptions).map(o => o.value).filter(Boolean);
+  if (!name || assignees.length === 0) {
+    mostrarToast('⚠️ Preencha o nome e selecione ao menos um responsável.', '');
+    return;
+  }
   TASKS[dept].push({name, assignees, status:'Pendente'});
   inp.value = '';
-  sel.value = '';
+  Array.from(sel.options).forEach(o => { o.selected = false; }); // deseleciona multi-select
   saveTasksToStorage();
   saveTasksToFirebase(dept); // persiste imediatamente no Firebase
   registrarLog('Adicionou tarefa em ' + dept + ': ' + name);
@@ -4579,9 +4570,11 @@ function atualizarTopbarUser() {
     if (ddLog)     ddLog.style.display     = isAdmin ? 'flex' : 'none';
     if (ddSenha)   ddSenha.style.display   = isAdmin ? 'flex' : 'none';
     if (editBtn)   editBtn.style.display   = 'flex';
-    // Sino de notificações: só admin
-    if (bellWrap)  bellWrap.classList.toggle('visible', isAdmin);
-    if (isAdmin) { carregarNotificacoes(); iniciarListenerSugestoes(); }
+    // Sino de notificações: visível para todos os usuários logados
+    if (bellWrap)  bellWrap.classList.toggle('visible', !!_currentUser);
+    pararListenerNotificacoes(); // garante clean start se trocou de usuário
+    iniciarListenerNotificacoes();
+    if (isAdmin) { iniciarListenerSugestoes(); }
     iniciarListenerMeetings();
     atualizarBadgeChangelog();
   } else {
@@ -4591,6 +4584,7 @@ function atualizarTopbarUser() {
     if (bellWrap)  bellWrap.classList.remove('visible');
     pararListenerMeetings();
     pararListenerSugestoes();
+    pararListenerNotificacoes();
   }
   // Classe no body controla visibilidade de elementos que exigem login
   document.body.classList.toggle('user-logged-in', !!_currentUser);
@@ -5824,6 +5818,39 @@ function atualizarBadgeChangelog() {
     if (novas > 0) { badge.textContent = novas; badge.classList.add('show'); }
     else           { badge.textContent = '';    badge.classList.remove('show'); }
   }).catch(()=>{});
+}
+
+// ── Listener em tempo real para o sino 🔔 (todos os usuários logados) ──────────
+let _notifListenerRef = null;
+function iniciarListenerNotificacoes() {
+  if (_notifListenerRef) return; // já ativo
+  if (!_currentUser || !_db) return;
+  const isAdmin = _currentUser.role === 'admin';
+  _notifListenerRef = _db.ref('cinea/notificacoes');
+  _notifListenerRef.on('value', snap => {
+    const data  = snap.val() || {};
+    const badge = document.getElementById('notif-badge');
+    if (!badge) return;
+    let count = 0;
+    if (isAdmin) {
+      // Admin vê tudo que está não lido
+      count = Object.values(data).filter(n => !n.lido).length;
+    } else {
+      // Usuário comum: só notificações endereçadas a ele (ex: resposta de sugestão)
+      count = Object.values(data).filter(n => !n.lido && n.matricula === _currentUser.matricula && n.tipo === 'resposta_sugestao').length;
+    }
+    if (count > 0) { badge.textContent = count; badge.classList.add('show'); }
+    else           { badge.textContent = '';    badge.classList.remove('show'); }
+    // Recarrega o painel se estiver aberto
+    if (document.getElementById('notif-bell-wrap')?.classList.contains('open')) {
+      carregarNotificacoes();
+    }
+  });
+}
+function pararListenerNotificacoes() {
+  if (_notifListenerRef) { _notifListenerRef.off(); _notifListenerRef = null; }
+  const badge = document.getElementById('notif-badge');
+  if (badge) { badge.textContent = ''; badge.classList.remove('show'); }
 }
 
 // Badge no 💡 para admin: conta sugestões "nova" em tempo real
