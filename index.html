@@ -3508,6 +3508,7 @@ document.getElementById('modal-senha').addEventListener('click', function(e) {
 
 // ═══════════════════════ EDIT MODE ═══════════════════════
 let editModeActive = false;
+let _currentUser   = null; // { matricula, nome, sigla, role } — declarado aqui para evitar TDZ
 
 const TEXT_ED_SELS = [
   '.stat-change', '.pkpi-val', '.kpi-cur', '.kpi-tgt', '.kpi-name', '.pkpi-name', '.section-sub',
@@ -4202,7 +4203,7 @@ function loadPbiState() {
 }
 
 // ════════════════ SISTEMA DE USUÁRIOS ════════════════
-let _currentUser = null; // { matricula, nome, sigla, role }
+// _currentUser declarado antes do init block para evitar Temporal Dead Zone
 
 function abrirLoginModal() {
   document.getElementById('login-modal').style.display = 'flex';
