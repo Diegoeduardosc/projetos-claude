@@ -4154,20 +4154,25 @@ async function carregarListaUsuarios() {
       container.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:20px">Nenhum membro cadastrado.</div>';
       return;
     }
-    container.innerHTML = entries.map(([mat, u]) => `
-      <div class="user-mgmt-row">
+    container.innerHTML = entries.map(([mat, u]) => {
+      const isSelf = mat === _currentUser?.matricula;
+      const removeBtn = isSelf
+        ? `<span title="Você não pode remover sua própria conta" style="background:rgba(107,95,133,0.08);border:1px solid rgba(107,95,133,0.15);border-radius:8px;padding:5px 10px;font-size:0.72rem;color:var(--text3);font-family:'DM Sans',sans-serif;cursor:not-allowed;user-select:none">🔒 Você</span>`
+        : `<button onclick="removerUsuario('${mat}','${u.nome||mat}')" style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.25);border-radius:8px;padding:5px 10px;font-size:0.72rem;color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif">✕ Remover</button>`;
+      const resetBtn = isSelf
+        ? ''
+        : `<button onclick="resetarSenhaUsuario('${mat}','${u.nome||mat}')" style="background:rgba(0,180,204,0.08);border:1px solid rgba(0,180,204,0.25);border-radius:8px;padding:5px 10px;font-size:0.72rem;color:var(--cyan);cursor:pointer;font-family:'DM Sans',sans-serif" title="Resetar senha para a matrícula">🔄 Resetar</button>`;
+      return `<div class="user-mgmt-row">
         <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--purple-l));display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;color:#fff;flex-shrink:0">${(u.sigla||mat.slice(0,2)).toUpperCase()}</div>
+          <div style="width:32px;height:32px;border-radius:50%;background:${isSelf?'linear-gradient(135deg,var(--pink),var(--pink-l))':'linear-gradient(135deg,var(--purple),var(--purple-l))'};display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;color:#fff;flex-shrink:0">${(u.sigla||mat.slice(0,2)).toUpperCase()}</div>
           <div>
-            <div style="font-size:0.82rem;font-weight:600;color:var(--text)">${u.nome||mat}</div>
-            <div style="font-size:0.68rem;color:var(--text3)">Mat: ${mat} · ${u.role==='admin'?'Admin':'Membro'}</div>
+            <div style="font-size:0.82rem;font-weight:600;color:var(--text)">${u.nome||mat}${isSelf?' <span style="font-size:0.65rem;color:var(--text3);font-weight:400">(você)</span>':''}</div>
+            <div style="font-size:0.68rem;color:var(--text3)">Mat: ${mat} · ${u.role==='admin'?'👑 Admin':'Membro'}</div>
           </div>
         </div>
-        <div style="display:flex;gap:6px">
-          <button onclick="resetarSenhaUsuario('${mat}','${u.nome||mat}')" style="background:rgba(0,180,204,0.08);border:1px solid rgba(0,180,204,0.25);border-radius:8px;padding:5px 10px;font-size:0.72rem;color:var(--cyan);cursor:pointer;font-family:'DM Sans',sans-serif" title="Resetar senha para a matrícula">🔄 Resetar</button>
-          <button onclick="removerUsuario('${mat}')" style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.25);border-radius:8px;padding:5px 10px;font-size:0.72rem;color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif">✕ Remover</button>
-        </div>
-      </div>`).join('');
+        <div style="display:flex;gap:6px">${resetBtn}${removeBtn}</div>
+      </div>`;
+    }).join('');
   } catch(e) {
     container.innerHTML = '<div style="text-align:center;color:var(--red);font-size:0.82rem;padding:20px">Erro ao carregar usuários.</div>';
   }
@@ -4196,9 +4201,15 @@ async function adicionarUsuario() {
   } catch(e) { errEl.textContent = '❌ Erro: ' + e.message; }
 }
 
-async function removerUsuario(mat) {
-  if (!confirm(`Remover o usuário "${mat}" permanentemente?`)) return;
+async function removerUsuario(mat, nome) {
+  if (mat === _currentUser?.matricula) {
+    mostrarToast('🔒 Ação bloqueada', 'Você não pode remover sua própria conta.');
+    return;
+  }
+  if (!confirm(`Remover "${nome || mat}" permanentemente?\nEsta ação não pode ser desfeita.`)) return;
   await _db.ref('cinea/users/' + mat).remove();
+  registrarLog('Removeu usuário: ' + (nome || mat) + ' (' + mat + ')');
+  mostrarToast('🗑 Usuário removido', (nome || mat) + ' foi excluído do sistema.');
   carregarListaUsuarios();
 }
 
