@@ -4152,6 +4152,21 @@ function loadSavedEdits() {
 
   // Power BI state
   loadPbiState();
+
+  // ── Re-render de componentes dinâmicos ─────────────────────────────────
+  // O init block roda antes do Firebase responder. Quando loadFromFirebase()
+  // popula o localStorage, estes componentes precisam ser re-renderizados
+  // para refletir os dados reais (tarefas, membros, responsáveis).
+  loadDeptMembers();
+  loadTasksFromStorage();
+  renderTeamCards();
+  ['hub','inov','tec'].forEach(d => {
+    renderTaskTable(d);
+    renderAtividadesSetor(d);
+  });
+  renderAllDeptHeaders();
+  renderMeetingCards();
+  renderIdeas();   // garante ideias do Firebase (loadIdeasFromFirebase é async separado)
 }
 
 // ═══════════════════════ POWER BI ═══════════════════════
