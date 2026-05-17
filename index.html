@@ -1808,13 +1808,13 @@ body.edit-mode .user-mgmt-section { display: block; }
 
   <div class="nav-group">
     <div class="nav-label">Operacional</div>
-    <div class="nav-item" onclick="showPage('equipe',this)">
-      <div class="nav-dot" style="background:var(--pink-l)"></div>
-      Equipe
-    </div>
     <div class="nav-item" onclick="showPage('tarefas',this)">
       <div class="nav-dot" style="background:var(--gold)"></div>
       Tarefas
+    </div>
+    <div class="nav-item" onclick="showPage('equipe',this)">
+      <div class="nav-dot" style="background:var(--pink-l)"></div>
+      Equipe
     </div>
     <div class="nav-item" onclick="showPage('meeting',this)">
       <div class="nav-dot" style="background:var(--green)"></div>
@@ -2497,6 +2497,14 @@ body.edit-mode .user-mgmt-section { display: block; }
         <button id="mover-membro-btn" onclick="abrirMoverMembro()" style="display:none;align-items:center;gap:6px;padding:7px 14px;background:rgba(79,45,127,0.2);border:1px solid rgba(79,45,127,0.4);border-radius:10px;color:var(--purple-l);font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s">👥 Mover membro</button>
       </div>
 
+      <!-- Métricas compartilhadas -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 24px;margin-bottom:20px;display:flex;gap:28px;flex-wrap:wrap;align-items:center">
+        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--purple-l)" class="resumo-total">—</div><div style="font-size:0.68rem;color:var(--text3)">Tarefas totais</div></div>
+        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--green)" class="resumo-conc">—</div><div style="font-size:0.68rem;color:var(--text3)">Concluídas</div></div>
+        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--gold)" class="resumo-shared">—</div><div style="font-size:0.68rem;color:var(--text3)">Compartilhadas</div></div>
+        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--text)" class="resumo-pessoas">—</div><div style="font-size:0.68rem;color:var(--text3)">Pessoas</div></div>
+      </div>
+
       <!-- Cards de membro por departamento -->
       <div class="team-page-grid">
         <div class="team-dept-card hub"  id="team-dept-hub"></div>
@@ -2516,15 +2524,14 @@ body.edit-mode .user-mgmt-section { display: block; }
       </div>
 
       <!-- RESUMO TAREFAS -->
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 24px;margin-bottom:20px;display:flex;align-items:center;gap:32px;flex-wrap:wrap">
-        <div style="display:flex;gap:28px;text-align:center">
-          <div><div style="font-size:1.6rem;font-weight:700;color:var(--purple-l)" id="total-tasks-count">—</div><div style="font-size:0.7rem;color:var(--text3)">Tarefas cadastradas</div></div>
-          <div><div style="font-size:1.6rem;font-weight:700;color:var(--gold)" id="shared-tasks-count">—</div><div style="font-size:0.7rem;color:var(--text3)">Compartilhadas</div></div>
-          <div><div style="font-size:1.6rem;font-weight:700;color:var(--text)" id="team-members-count">—</div><div style="font-size:0.7rem;color:var(--text3)">Pessoas na equipe</div></div>
-        </div>
-        <div style="margin-left:auto;font-size:0.75rem;color:var(--text3);line-height:1.6">
-          Clique em <strong style="color:var(--text2)">Editar</strong> em qualquer tarefa para alterar os responsáveis.<br>
-          Use <strong style="color:var(--text2)">+ Nova tarefa</strong> para adicionar. Alterações salvas automaticamente.
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 24px;margin-bottom:20px;display:flex;gap:28px;flex-wrap:wrap;align-items:center">
+        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--purple-l)" class="resumo-total">—</div><div style="font-size:0.68rem;color:var(--text3)">Tarefas totais</div></div>
+        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--green)" class="resumo-conc">—</div><div style="font-size:0.68rem;color:var(--text3)">Concluídas</div></div>
+        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--gold)" class="resumo-shared">—</div><div style="font-size:0.68rem;color:var(--text3)">Compartilhadas</div></div>
+        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--text)" class="resumo-pessoas">—</div><div style="font-size:0.68rem;color:var(--text3)">Pessoas</div></div>
+        <div style="margin-left:auto;font-size:0.74rem;color:var(--text3);line-height:1.6">
+          Clique em <strong style="color:var(--text2)">Editar</strong> para alterar responsáveis.<br>
+          Use <strong style="color:var(--text2)">+ Nova tarefa</strong> para adicionar.
         </div>
       </div>
 
@@ -2572,6 +2579,9 @@ body.edit-mode .user-mgmt-section { display: block; }
           <button class="add-task-btn" onclick="addNewTask('tec')">+ Adicionar</button>
         </div>
       </div>
+
+      <!-- ═══ CONCLUÍDOS ═══ -->
+      <div id="concluidos-section"></div>
     </div>
 
   </div><!-- /content -->
@@ -2869,21 +2879,14 @@ function showPage(id, el) {
   if (id === 'equipe') {
     renderTeamCards();
     renderMemberChips();
+    atualizarResumoTarefas();
   }
   if (id === 'tarefas') {
     loadTasksFromStorage();
     ['hub','inov','tec'].forEach(d => renderTaskTable(d));
     renderMemberChips();
-    // Atualiza resumo
-    const total  = ['hub','inov','tec'].reduce((s,d) => s + (TASKS[d]?.length||0), 0);
-    const shared = ['hub','inov','tec'].reduce((s,d) => s + (TASKS[d]?.filter(t=>t.assignees.length>1).length||0), 0);
-    const pessoas = getAllMembersForTask().length;
-    const elT = document.getElementById('total-tasks-count');
-    const elS = document.getElementById('shared-tasks-count');
-    const elP = document.getElementById('team-members-count');
-    if (elT) elT.textContent = total;
-    if (elS) elS.textContent = shared;
-    if (elP) elP.textContent = pessoas;
+    renderConcluidos();
+    atualizarResumoTarefas();
   }
   if (['hub','inov','tec'].includes(id)) {
     renderAtividadesSetor(id);
@@ -3070,6 +3073,9 @@ async function loadTasksFromFirebase() {
         ['hub','inov','tec'].forEach(d => { renderTaskTable(d); renderAtividadesSetor(d); });
         renderMeetingCards();
         renderMemberChips();
+        renderTeamCards();
+        renderConcluidos();
+        atualizarResumoTarefas();
       }
     }
   } catch(e) {
@@ -3168,12 +3174,22 @@ function renderTeamCards() {
       </div>
     </div>`;
     members.forEach(nome => {
-      const info  = MEMBER_INFO[nome] || { sigla: nome.substring(0,2).toUpperCase() };
+      const info   = MEMBER_INFO[nome] || { sigla: nome.substring(0,2).toUpperCase(), role: '—' };
       const chipId = MEMBER_MAP[nome] || nome.toLowerCase().replace(/\s/g,'');
+      // Conta tarefas ativas (não concluídas) desta pessoa
+      const nTarefas = ['hub','inov','tec'].reduce((s,d) =>
+        s + (TASKS[d]?.filter(t => t.assignees.includes(nome) && t.status !== 'Concluída').length||0), 0);
+      const nConc    = ['hub','inov','tec'].reduce((s,d) =>
+        s + (TASKS[d]?.filter(t => t.assignees.includes(nome) && t.status === 'Concluída').length||0), 0);
       html += `<div class="member-row">
         <div class="avatar ${color}" style="${info.sigla.length>2?'font-size:0.72rem':''}">${info.sigla}</div>
-        <div class="member-info">
-          <div class="member-name-lbl">${nome}</div>
+        <div class="member-info" style="flex:1">
+          <div style="display:flex;align-items:center;gap:6px">
+            <div class="member-name-lbl">${nome}</div>
+            ${nTarefas>0?`<span style="font-size:0.62rem;background:rgba(79,45,127,0.22);color:var(--text2);border-radius:20px;padding:1px 7px;font-weight:600">${nTarefas} ativa${nTarefas>1?'s':''}</span>`:''}
+            ${nConc>0?`<span style="font-size:0.62rem;background:rgba(39,174,96,0.15);color:var(--green);border-radius:20px;padding:1px 7px;font-weight:600">✓${nConc}</span>`:''}
+          </div>
+          <div style="font-size:0.63rem;color:var(--text3);margin-top:1px;margin-bottom:3px">${info.role || '—'}</div>
           <div class="task-chip-wrap" id="${chipId}-chips"></div>
         </div>
       </div>`;
@@ -3617,7 +3633,10 @@ function renderTaskTable(dept) {
   const logado  = !!_currentUser;
   tbl.innerHTML = '<thead><tr><th style="width:38%">Tarefa</th><th>Responsáveis</th><th>Status</th><th style="width:100px">Ações</th></tr></thead>';
   const tbody = document.createElement('tbody');
+  let ativos = 0;
   TASKS[dept].forEach((task, i) => {
+    if (task.status === 'Concluída') return; // vai para a seção Concluídos
+    ativos++;
     const shared = task.assignees.length > 1;
     const key = dept + '_' + i;
     const row = document.createElement('tr');
@@ -3649,7 +3668,85 @@ function renderTaskTable(dept) {
     `;
     tbody.appendChild(row);
   });
+  if (ativos === 0) {
+    const empty = document.createElement('tr');
+    empty.innerHTML = `<td colspan="4" style="text-align:center;color:var(--text3);font-size:0.8rem;padding:20px;font-style:italic">✅ Todas as tarefas deste departamento estão concluídas</td>`;
+    tbody.appendChild(empty);
+  }
   tbl.appendChild(tbody);
+}
+
+// ── Métricas compartilhadas (atualiza todos os elementos com as classes resumo-*) ──
+function atualizarResumoTarefas() {
+  const total   = ['hub','inov','tec'].reduce((s,d) => s + (TASKS[d]?.length||0), 0);
+  const conc    = ['hub','inov','tec'].reduce((s,d) => s + (TASKS[d]?.filter(t=>t.status==='Concluída').length||0), 0);
+  const shared  = ['hub','inov','tec'].reduce((s,d) => s + (TASKS[d]?.filter(t=>t.assignees.length>1).length||0), 0);
+  const pessoas = getAllMembersForTask().length;
+  document.querySelectorAll('.resumo-total').forEach(el => el.textContent   = total);
+  document.querySelectorAll('.resumo-conc').forEach(el  => el.textContent   = conc);
+  document.querySelectorAll('.resumo-shared').forEach(el => el.textContent  = shared);
+  document.querySelectorAll('.resumo-pessoas').forEach(el => el.textContent = pessoas);
+}
+
+// ── Seção Concluídos ──────────────────────────────────────────
+let _concluidosOpen = true;
+function renderConcluidos() {
+  const el = document.getElementById('concluidos-section');
+  if (!el) return;
+  const DEPT_COLOR = { hub: 'var(--pink)', inov: 'var(--purple-l)', tec: 'var(--cyan)' };
+  const logado = !!_currentUser;
+  // Coleta tarefas concluídas por depto mantendo o índice original
+  const grupos = [];
+  ['hub','inov','tec'].forEach(dept => {
+    const lista = TASKS[dept]
+      .map((t,i) => ({...t, _dept: dept, _idx: i}))
+      .filter(t => t.status === 'Concluída');
+    if (lista.length) grupos.push({ dept, tasks: lista });
+  });
+  const total = grupos.reduce((s,g) => s + g.tasks.length, 0);
+  if (!total) { el.innerHTML = ''; return; }
+
+  let html = `<div class="card" style="margin-top:16px;border-color:rgba(39,174,96,0.22)">
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:2px 0 6px" onclick="toggleConcluidos()">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--green)">✅ Concluídos</span>
+        <span style="background:rgba(39,174,96,0.15);color:var(--green);border-radius:20px;padding:2px 10px;font-size:0.72rem;font-weight:600">${total}</span>
+      </div>
+      <span id="concl-chevron" style="color:var(--text3);font-size:0.75rem;transition:transform 0.2s">${_concluidosOpen?'▲':'▼'}</span>
+    </div>
+    <div id="concl-body" style="display:${_concluidosOpen?'block':'none'}">`;
+
+  grupos.forEach(({dept, tasks}) => {
+    html += `<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:${DEPT_COLOR[dept]};margin:12px 0 6px">${DEPT_LABELS[dept]}</div>`;
+    html += `<table class="task-full-table"><tbody>`;
+    tasks.forEach(task => {
+      const pillCls = PILL_CLASS[dept];
+      const shared  = task.assignees.length > 1;
+      html += `<tr style="opacity:0.65">
+        <td style="width:38%"><span style="color:var(--text2);font-size:0.79rem;text-decoration:line-through">${task.name}</span></td>
+        <td>
+          <div class="assignee-pills">${task.assignees.map(a =>
+            `<span class="assignee-pill ${pillCls}">${a}</span>`).join('')}</div>
+          ${shared?'<span class="shared-tag" style="margin-top:4px;display:inline-flex">⟳ Compartilhada</span>':''}
+        </td>
+        <td><span class="st-pill sp-concluida">● Concluída</span></td>
+        <td style="white-space:nowrap">
+          ${logado?`<button onclick="changeTaskStatus('${dept}',${task._idx},'Pendente')" style="background:rgba(107,95,133,0.15);border:1px solid rgba(107,95,133,0.3);border-radius:6px;color:var(--text2);font-size:0.72rem;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif">↩ Re-abrir</button>`:''}
+        </td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+  });
+  html += `</div></div>`;
+  el.innerHTML = html;
+}
+
+function toggleConcluidos() {
+  _concluidosOpen = !_concluidosOpen;
+  const body    = document.getElementById('concl-body');
+  const chevron = document.getElementById('concl-chevron');
+  if (body)    body.style.display       = _concluidosOpen ? 'block' : 'none';
+  if (chevron) chevron.textContent      = _concluidosOpen ? '▲' : '▼';
 }
 
 function startEdit(dept, i) {
@@ -3681,6 +3778,9 @@ function saveEdit(dept, i) {
   renderMemberChips();
   renderAtividadesSetor(dept);
   renderMeetingCards();
+  renderConcluidos();
+  atualizarResumoTarefas();
+  renderTeamCards();
 }
 
 function deleteTask(dept, i) {
@@ -3701,6 +3801,9 @@ function deleteTask(dept, i) {
   renderMemberChips();
   renderAtividadesSetor(dept);
   renderMeetingCards();
+  renderConcluidos();
+  atualizarResumoTarefas();
+  renderTeamCards();
 }
 
 function renderMemberChips() {
@@ -3755,6 +3858,9 @@ function changeTaskStatus(dept, idx, val) {
   renderTaskTable(dept);
   renderAtividadesSetor(dept);
   renderMeetingCards();
+  renderConcluidos();
+  atualizarResumoTarefas();
+  renderTeamCards(); // atualiza contadores por pessoa
 }
 
 function addNewTask(dept) {
@@ -3776,6 +3882,9 @@ function addNewTask(dept) {
   renderMemberChips();
   renderAtividadesSetor(dept);
   renderMeetingCards();
+  renderConcluidos();
+  atualizarResumoTarefas();
+  renderTeamCards();
 }
 
 function exportCSV() {
