@@ -2438,59 +2438,17 @@ body.edit-mode .user-mgmt-section { display: block; }
         </div>
       </div>
 
-      <div class="meeting-grid">
-        <div class="meeting-card" style="border-color:rgba(233,30,140,0.2)">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-            <div class="avatar pink" style="width:32px;height:32px;font-size:0.75rem">RO</div>
-            <div>
-              <div class="meeting-person">Rosimeire</div>
-              <div class="meeting-dept">Hub de Integração e Relacionamento</div>
-            </div>
-          </div>
-          <div class="gap-item"><div class="gap-dot" style="background:var(--green)"></div>Atendimentos realizados na semana</div>
-          <div class="gap-item"><div class="gap-dot" style="background:var(--gold)"></div>Demandas pendentes de coordenações</div>
-          <div class="gap-item"><div class="gap-dot" style="background:var(--gold)"></div>UDAs aguardando associação no SGA</div>
-          <div class="gap-item"><div class="gap-dot" style="background:var(--red)"></div>Gargalos no fluxo CINEA ↔ COED/CEAD</div>
-          <div class="gap-item"><div class="gap-dot" style="background:var(--green)"></div>Comunicados enviados</div>
-        </div>
-
-        <div class="meeting-card" style="border-color:rgba(79,45,127,0.3)">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-            <div class="avatar purple" style="width:32px;height:32px;font-size:0.75rem">CL</div>
-            <div>
-              <div class="meeting-person">Cláudia</div>
-              <div class="meeting-dept">Inovação Pedagógica e Formação Continuada</div>
-            </div>
-          </div>
-          <div class="gap-item"><div class="gap-dot" style="background:var(--green)"></div>Formações realizadas e agendadas</div>
-          <div class="gap-item"><div class="gap-dot" style="background:var(--gold)"></div>Professores sem confirmação de agendamento</div>
-          <div class="gap-item"><div class="gap-dot" style="background:var(--gold)"></div>PPCs em revisão ou atualização</div>
-          <div class="gap-item"><div class="gap-dot" style="background:var(--red)"></div>Gaps identificados nas formações</div>
-          <div class="gap-item"><div class="gap-dot" style="background:var(--green)"></div>UDAs planejadas e cadastradas</div>
-        </div>
-
-        <div class="meeting-card" style="border-color:rgba(0,180,204,0.2)">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-            <div class="avatar cyan" style="width:32px;height:32px;font-size:0.75rem">JE</div>
-            <div>
-              <div class="meeting-person">Jefferson</div>
-              <div class="meeting-dept">Tecnologias & Aprendizagem</div>
-            </div>
-          </div>
-          <div class="gap-item"><div class="gap-dot" style="background:var(--green)"></div>Docentes atendidos no Canvas</div>
-          <div class="gap-item"><div class="gap-dot" style="background:var(--gold)"></div>Tecnologias em fase de validação</div>
-          <div class="gap-item"><div class="gap-dot" style="background:var(--gold)"></div>Engajamento discente nos AVAs</div>
-          <div class="gap-item"><div class="gap-dot" style="background:var(--red)"></div>Problemas técnicos nos ambientes digitais</div>
-          <div class="gap-item"><div class="gap-dot" style="background:var(--green)"></div>Tutores formados na semana</div>
-        </div>
+      <!-- Cards de reunião — espelhados de Equipe & Tarefas -->
+      <div class="meeting-grid" id="meeting-cards-grid">
+        <div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:40px;grid-column:1/-1">Carregando...</div>
       </div>
 
       <div class="card" style="margin-top:16px">
-        <div class="card-title">Legenda de Status</div>
+        <div class="card-title">Legenda de Status <span style="font-size:0.65rem;font-weight:400;color:var(--text3);margin-left:6px">· espelhado de Equipe &amp; Tarefas</span></div>
         <div style="display:flex;gap:32px;flex-wrap:wrap">
-          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--text2)"><div style="width:10px;height:10px;border-radius:50%;background:var(--green)"></div>Concluído / Em dia</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--text2)"><div style="width:10px;height:10px;border-radius:50%;background:var(--gold)"></div>Em andamento / Atenção necessária</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--text2)"><div style="width:10px;height:10px;border-radius:50%;background:var(--red)"></div>Gap identificado / Gargalo crítico</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--text2)"><div style="width:10px;height:10px;border-radius:50%;background:var(--green)"></div>Concluída</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--text2)"><div style="width:10px;height:10px;border-radius:50%;background:var(--gold)"></div>Em andamento</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--text2)"><div style="width:10px;height:10px;border-radius:50%;background:var(--red)"></div>Pendente / Bloqueada</div>
         </div>
       </div>
 
@@ -2940,6 +2898,9 @@ function showPage(id, el) {
   if (['hub','inov','tec'].includes(id)) {
     renderAtividadesSetor(id);
   }
+  if (id === 'meeting') {
+    renderMeetingCards();
+  }
   // Fecha sidebar no mobile ao navegar
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebar-overlay');
@@ -3165,6 +3126,48 @@ function renderAtividadesSetor(dept) {
   }).join('');
 }
 
+// ── Reuniões — espelho de TASKS ───────────────────────────────
+const MEETING_DOT_COLOR = {
+  'Em andamento': 'var(--gold)',
+  'Concluída':    'var(--green)',
+  'Pendente':     'var(--red)',
+  'Bloqueada':    'var(--red)',
+};
+function renderMeetingCards() {
+  const grid = document.getElementById('meeting-cards-grid');
+  if (!grid) return;
+  const deptStyle = {
+    hub:  { border: 'rgba(233,30,140,0.2)',  avatarCls: 'pink'   },
+    inov: { border: 'rgba(79,45,127,0.3)',   avatarCls: 'purple' },
+    tec:  { border: 'rgba(0,180,204,0.2)',   avatarCls: 'cyan'   },
+  };
+  grid.innerHTML = ['hub','inov','tec'].map(dept => {
+    const s = deptStyle[dept];
+    const gestorNome = (DEPT_MEMBERS[dept] || []).find(m => m !== 'A definir') || '—';
+    const gestorInfo = MEMBER_INFO[gestorNome] || { sigla: gestorNome.substring(0,2).toUpperCase() };
+    const tasks = TASKS[dept] || [];
+    const itens = tasks.length === 0
+      ? `<div style="font-size:0.78rem;color:var(--text3);padding:8px 0">Nenhuma tarefa cadastrada.</div>`
+      : tasks.map(t => {
+          const dot = MEETING_DOT_COLOR[t.status] || 'var(--gold)';
+          return `<div class="gap-item">
+            <div class="gap-dot" style="background:${dot};margin-top:5px"></div>
+            <span style="font-size:0.78rem;color:var(--text2);line-height:1.4">${escapeHtml(t.name)}</span>
+          </div>`;
+        }).join('');
+    return `<div class="meeting-card" style="border-color:${s.border}">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+        <div class="avatar ${s.avatarCls}" style="width:32px;height:32px;font-size:${gestorInfo.sigla.length>2?'0.65':'0.75'}rem;flex-shrink:0">${escapeHtml(gestorInfo.sigla)}</div>
+        <div>
+          <div class="meeting-person">${escapeHtml(gestorNome)}</div>
+          <div class="meeting-dept">${escapeHtml(DEPT_LABELS[dept])}</div>
+        </div>
+      </div>
+      ${itens}
+    </div>`;
+  }).join('');
+}
+
 // ── Migração de membro ────────────────────────────────────────
 function abrirMoverMembro() {
   if (!_currentUser || _currentUser.role !== 'admin') {
@@ -3273,6 +3276,7 @@ function saveEdit(dept, i) {
   renderTaskTable(dept);
   renderMemberChips();
   renderAtividadesSetor(dept);
+  renderMeetingCards();
 }
 
 function deleteTask(dept, i) {
@@ -3290,6 +3294,7 @@ function deleteTask(dept, i) {
   renderTaskTable(dept);
   renderMemberChips();
   renderAtividadesSetor(dept);
+  renderMeetingCards();
 }
 
 function renderMemberChips() {
@@ -3333,6 +3338,7 @@ function changeTaskStatus(dept, idx, val) {
   TASKS[dept][idx].status = val;
   saveTasksToStorage();
   renderAtividadesSetor(dept);
+  renderMeetingCards();
 }
 
 function addNewTask(dept) {
@@ -3351,6 +3357,7 @@ function addNewTask(dept) {
   renderTaskTable(dept);
   renderMemberChips();
   renderAtividadesSetor(dept);
+  renderMeetingCards();
 }
 
 function exportCSV() {
@@ -3381,6 +3388,7 @@ loadTasksFromStorage();
 updateMemberSelects();
 renderTeamCards(); // renderTeamCards chama renderMemberChips internamente
 ['hub','inov','tec'].forEach(d => { renderTaskTable(d); renderAtividadesSetor(d); });
+renderMeetingCards();
 
 // ═══════════════════════ SENHA ADMIN (SHA-256) ═══════════════════════
 // Senha padrão inicial: cinea2026
