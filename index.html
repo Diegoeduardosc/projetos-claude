@@ -799,6 +799,12 @@ body.edit-mode .idea-tag { cursor: text; }
   cursor: pointer;
 }
 
+/* ─── RESPONSIVE 1200px (wide tablet) ─── */
+@media (max-width: 1200px) {
+  .stat-grid { grid-template-columns: repeat(2,1fr); }
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+}
+
 /* ─── RESPONSIVE 900px (tablet) ─── */
 @media (max-width: 900px) {
   .sidebar {
@@ -829,25 +835,74 @@ body.edit-mode .idea-tag { cursor: text; }
   .section-header { flex-direction: column; align-items: flex-start; gap: 8px; }
   .section-title { font-size: 1.3rem; }
   .bar-chart { overflow-x: auto; min-width: 0; }
+  /* task table scroll horizontal em tablet */
+  .card { overflow: visible; }
+  .task-full-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  /* filtro de reuniões: busca ocupa linha inteira */
+  .filtro-input-text { width: 100%; }
+  /* métricas: gap menor */
+  .resumo-bar { gap: 16px !important; padding: 14px 16px !important; }
+  /* hint de dica some em telas menores */
+  .resumo-hint { display: none; }
+}
+
+/* ─── RESPONSIVE 600px (smartphone) ─── */
+@media (max-width: 600px) {
+  /* Esconde botões secundários do topbar — ficam no menu do usuário */
+  .sug-wrap       { display: none !important; }
+  .lixeira-topbar-btn { display: none !important; }
+  /* Mostra itens mobile-only no dropdown */
+  .dd-mob-only    { display: flex !important; }
+  /* Chip de usuário: oculta cargo para economizar espaço */
+  .user-chip-role { display: none; }
+  .user-chip      { padding: 5px 8px; gap: 5px; }
+  .user-chip-name { font-size: 0.7rem; }
+  /* Dropdown do usuário abre para a esquerda em telas pequenas */
+  .user-dropdown  { right: -8px; min-width: 200px; }
 }
 
 /* ─── RESPONSIVE 480px (phone) ─── */
 @media (max-width: 480px) {
-  .stat-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-grid  { grid-template-columns: 1fr 1fr; gap: 10px; }
   .stat-value { font-size: 1.6rem; }
-  .person-cards { grid-template-columns: 1fr; }
-  .meeting-grid { grid-template-columns: 1fr; }
-  .topbar-title { font-size: 0.92rem; }
+  .person-cards  { grid-template-columns: 1fr; }
+  .meeting-grid  { grid-template-columns: 1fr; }
+  .topbar-title  { font-size: 0.88rem; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .section-title { font-size: 1.15rem; }
-  .content { padding: 12px; }
-  .stat-card { padding: 14px; }
+  .content    { padding: 10px; }
+  .stat-card  { padding: 12px; }
+  .card       { padding: 14px 12px; }
   .card-header { flex-direction: column; align-items: flex-start; gap: 6px; }
-}
-
-/* ─── RESPONSIVE 1200px (wide tablet) ─── */
-@media (max-width: 1200px) {
-  .stat-grid { grid-template-columns: repeat(2,1fr); }
-  .grid-3 { grid-template-columns: 1fr 1fr; }
+  /* Métricas: 2-3 por linha em telas pequenas */
+  .resumo-bar { gap: 10px !important; padding: 12px !important; }
+  .resumo-item { flex: 1; min-width: calc(30% - 10px); }
+  /* Linha de tarefa individual: empilha nome + status */
+  .por-pessoa-task-row { flex-wrap: wrap; gap: 4px; }
+  .por-pessoa-task-row > div:first-child { flex-basis: 100%; }
+  /* Botões de ação da tabela de tarefas ficam menores */
+  .task-full-table td { padding: 8px 6px; font-size: 0.74rem; }
+  .task-full-table th { font-size: 0.62rem; padding: 6px; }
+  /* Filtro de reuniões em coluna */
+  .reunioes-filtro { flex-direction: column; }
+  .filtro-input-date, .filtro-select { width: 100%; }
+  /* Add-task-row: botão ocupa linha inteira */
+  .add-task-row   { flex-direction: column; }
+  .add-task-btn   { width: 100%; justify-content: center; }
+  .member-picker  { width: 100%; }
+  .member-picker-chips { width: 100%; min-width: 0; }
+  /* Tipo btn e botão adicionar */
+  .tipo-btn       { font-size: 0.7rem; padding: 5px 8px; }
+  /* Cards por pessoa */
+  .por-pessoa-card { padding: 12px; }
+  /* Atas de reunião */
+  .reuniao-card .reunion-grid { grid-template-columns: 1fr !important; }
+  /* Section-header: título e botão empilhados */
+  .section-header { gap: 6px; }
+  .section-header button { font-size: 0.72rem; padding: 6px 10px; }
+  /* User dropdown no mobile: mais largo e abre em posição correta */
+  .user-dropdown  { right: 0; min-width: 210px; }
+  /* Notif dropdown */
+  .notif-dropdown-panel { right: -60px; min-width: 280px; }
 }
 
 /* GESTOR GERAL */
@@ -1513,28 +1568,21 @@ body.light-mode .sug-btn:hover { background: rgba(245,166,35,0.1); }
   padding: 2px 7px; letter-spacing: 0.5px;
 }
 
-/* ═══ CHANGELOG ═══ */
-.cl-btn-wrap {
-  position: relative; display: none; flex-shrink: 0;
-}
-body.user-logged-in .cl-btn-wrap { display: flex; }
-.cl-btn {
-  width: 32px; height: 32px; background: transparent;
-  border: 1px solid var(--border); border-radius: 50%;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; color: var(--text2);
-  transition: background 0.15s, border-color 0.15s;
-}
-.cl-btn:hover { background: rgba(39,174,96,0.12); border-color: rgba(39,174,96,0.35); }
-body.light-mode .cl-btn:hover { background: rgba(39,174,96,0.09); }
-.cl-badge {
-  position: absolute; top: -3px; right: -3px;
+/* ═══ CHANGELOG (movido para o dropdown de usuário) ═══ */
+.cl-btn-wrap { display: none; } /* desativado — fica no menu do usuário */
+.cl-dd-badge {
+  display: none;
   background: var(--green); color: #fff;
-  font-size: 0.52rem; font-weight: 700;
-  min-width: 15px; height: 15px; border-radius: 8px;
-  display: none; align-items: center; justify-content: center; padding: 0 3px;
+  font-size: 0.6rem; font-weight: 700;
+  min-width: 18px; height: 18px; border-radius: 9px;
+  align-items: center; justify-content: center; padding: 0 5px;
+  margin-left: auto;
 }
-.cl-badge.show { display: flex; }
+.cl-dd-badge.show { display: inline-flex; }
+/* divider no dropdown */
+.user-dd-divider { height: 1px; background: var(--border); margin: 4px 0; }
+/* itens apenas visíveis no mobile */
+.dd-mob-only { display: none; }
 
 /* Cards do changelog */
 .cl-card {
@@ -1917,11 +1965,6 @@ body.edit-mode .user-mgmt-section { display: block; }
       </div>
       <!-- Lixeira (todos os logados) -->
       <button class="lixeira-topbar-btn" id="lixeira-topbar-btn" onclick="abrirLixeira()" title="Lixeira">🗑️</button>
-      <!-- Changelog (todos os logados) -->
-      <div class="cl-btn-wrap" id="cl-btn-wrap">
-        <button class="cl-btn" onclick="abrirChangelog()" title="Melhorias & Versões">🚀</button>
-        <div class="cl-badge" id="cl-badge"></div>
-      </div>
       <!-- Sino de notificações (admin) -->
       <div class="notif-bell-wrap" id="notif-bell-wrap" onclick="toggleNotifPanel(event)">
         <button class="notif-bell-btn" title="Notificações">🔔</button>
@@ -1945,6 +1988,10 @@ body.edit-mode .user-mgmt-section { display: block; }
           <div class="user-dd-item" id="dd-sugestoes" onclick="abrirSugestoesAdmin()" style="display:none">💡 Sugestões recebidas</div>
           <div class="user-dd-item" id="dd-log" onclick="abrirLog()" style="display:none">📋 Log de atividades</div>
           <div class="user-dd-item" id="dd-senha" onclick="abrirModal()" style="display:none">🔑 Alterar senha admin</div>
+          <div class="user-dd-divider"></div>
+          <div class="user-dd-item" id="dd-changelog" onclick="abrirChangelog()">🚀 Melhorias &amp; Versões <span id="cl-badge" class="cl-dd-badge"></span></div>
+          <div class="user-dd-item dd-mob-only" onclick="abrirSugestaoModal()">💡 Enviar sugestão</div>
+          <div class="user-dd-item dd-mob-only" onclick="abrirLixeira()">🗑️ Lixeira</div>
           <div class="user-dd-item" id="dd-trocar-senha" onclick="abrirTrocarSenha()">🔑 Trocar minha senha</div>
           <div class="user-dd-item danger" onclick="fazerLogout()">🚪 Sair</div>
         </div>
@@ -2547,12 +2594,12 @@ body.edit-mode .user-mgmt-section { display: block; }
       </div>
 
       <!-- Métricas compartilhadas -->
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 24px;margin-bottom:20px;display:flex;gap:28px;flex-wrap:wrap;align-items:center">
-        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--purple-l)" class="resumo-total">—</div><div style="font-size:0.68rem;color:var(--text3)">Tarefas totais</div></div>
-        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--green)" class="resumo-conc">—</div><div style="font-size:0.68rem;color:var(--text3)">Concluídas</div></div>
-        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--gold)" class="resumo-shared">—</div><div style="font-size:0.68rem;color:var(--text3)">Compartilhadas</div></div>
-        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--cyan)" class="resumo-fixa">—</div><div style="font-size:0.68rem;color:var(--text3)">Ativ. Fixas</div></div>
-        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--text)" class="resumo-pessoas">—</div><div style="font-size:0.68rem;color:var(--text3)">Pessoas</div></div>
+      <div class="resumo-bar" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 24px;margin-bottom:20px;display:flex;gap:28px;flex-wrap:wrap;align-items:center">
+        <div class="resumo-item" style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--purple-l)" class="resumo-total">—</div><div style="font-size:0.68rem;color:var(--text3)">Tarefas totais</div></div>
+        <div class="resumo-item" style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--green)" class="resumo-conc">—</div><div style="font-size:0.68rem;color:var(--text3)">Concluídas</div></div>
+        <div class="resumo-item" style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--gold)" class="resumo-shared">—</div><div style="font-size:0.68rem;color:var(--text3)">Compartilhadas</div></div>
+        <div class="resumo-item" style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--cyan)" class="resumo-fixa">—</div><div style="font-size:0.68rem;color:var(--text3)">Ativ. Fixas</div></div>
+        <div class="resumo-item" style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--text)" class="resumo-pessoas">—</div><div style="font-size:0.68rem;color:var(--text3)">Pessoas</div></div>
       </div>
 
       <!-- Cards por departamento -->
@@ -2581,13 +2628,13 @@ body.edit-mode .user-mgmt-section { display: block; }
       </div>
 
       <!-- RESUMO TAREFAS -->
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 24px;margin-bottom:20px;display:flex;gap:28px;flex-wrap:wrap;align-items:center">
-        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--purple-l)" class="resumo-total">—</div><div style="font-size:0.68rem;color:var(--text3)">Tarefas totais</div></div>
-        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--green)" class="resumo-conc">—</div><div style="font-size:0.68rem;color:var(--text3)">Concluídas</div></div>
-        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--gold)" class="resumo-shared">—</div><div style="font-size:0.68rem;color:var(--text3)">Compartilhadas</div></div>
-        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--cyan)" class="resumo-fixa">—</div><div style="font-size:0.68rem;color:var(--text3)">Ativ. Fixas</div></div>
-        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--text)" class="resumo-pessoas">—</div><div style="font-size:0.68rem;color:var(--text3)">Pessoas</div></div>
-        <div style="margin-left:auto;font-size:0.74rem;color:var(--text3);line-height:1.6">
+      <div class="resumo-bar" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 24px;margin-bottom:20px;display:flex;gap:28px;flex-wrap:wrap;align-items:center">
+        <div class="resumo-item" style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--purple-l)" class="resumo-total">—</div><div style="font-size:0.68rem;color:var(--text3)">Tarefas totais</div></div>
+        <div class="resumo-item" style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--green)" class="resumo-conc">—</div><div style="font-size:0.68rem;color:var(--text3)">Concluídas</div></div>
+        <div class="resumo-item" style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--gold)" class="resumo-shared">—</div><div style="font-size:0.68rem;color:var(--text3)">Compartilhadas</div></div>
+        <div class="resumo-item" style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--cyan)" class="resumo-fixa">—</div><div style="font-size:0.68rem;color:var(--text3)">Ativ. Fixas</div></div>
+        <div class="resumo-item" style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--text)" class="resumo-pessoas">—</div><div style="font-size:0.68rem;color:var(--text3)">Pessoas</div></div>
+        <div class="resumo-hint" style="margin-left:auto;font-size:0.74rem;color:var(--text3);line-height:1.6">
           Clique em <strong style="color:var(--text2)">Editar</strong> para alterar responsáveis.<br>
           Use <strong style="color:var(--text2)">+ Nova tarefa</strong> para adicionar.
         </div>
@@ -6283,9 +6330,9 @@ function atualizarBadgeChangelog() {
   if (!_currentUser) return;
   const lastSeen = parseInt(localStorage.getItem('cinea_changelog_seen') || '0');
   _db.ref('cinea/changelog').once('value').then(snap => {
-    const data = snap.val() || {};
+    const data  = snap.val() || {};
     const novas = Object.values(data).filter(e => e.ts && new Date(e.ts).getTime() > lastSeen).length;
-    const badge = document.getElementById('cl-badge');
+    const badge = document.getElementById('cl-badge'); // agora está no dropdown
     if (!badge) return;
     if (novas > 0) { badge.textContent = novas; badge.classList.add('show'); }
     else           { badge.textContent = '';    badge.classList.remove('show'); }
