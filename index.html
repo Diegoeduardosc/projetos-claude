@@ -5176,7 +5176,6 @@ function abrirSolicitarResetGate() {
   // Abre o modal de reset acima do portão (z-index 9500)
   document.getElementById('solicitar-reset-modal').style.display = 'flex';
   document.getElementById('reset-req-mat').value   = '';
-  document.getElementById('reset-req-nome').value  = '';
   document.getElementById('reset-req-error').textContent = '';
   setTimeout(() => document.getElementById('reset-req-mat').focus(), 80);
 }
@@ -5558,7 +5557,6 @@ function abrirSolicitarReset() {
   fecharLoginModal();
   document.getElementById('solicitar-reset-modal').style.display = 'flex';
   document.getElementById('reset-req-mat').value   = '';
-  document.getElementById('reset-req-nome').value  = '';
   document.getElementById('reset-req-error').textContent = '';
   setTimeout(() => document.getElementById('reset-req-mat').focus(), 80);
 }
@@ -5573,16 +5571,29 @@ function fecharSolicitarReset() {
 }
 async function enviarSolicitacaoReset() {
   const mat   = document.getElementById('reset-req-mat').value.trim();
-  const nome  = document.getElementById('reset-req-nome').value.trim();
   const errEl = document.getElementById('reset-req-error');
-  if (!mat || !nome) { errEl.style.color='var(--red)'; errEl.textContent = 'Preencha matrícula e nome.'; return; }
-  errEl.style.color = 'var(--text3)'; errEl.textContent = 'Enviando...';
+  if (!mat) { errEl.style.color = 'var(--red)'; errEl.textContent = 'Informe sua matrícula.'; return; }
+  errEl.style.color = 'var(--text3)'; errEl.textContent = 'Verificando matrícula…';
   try {
-    await _db.ref('cinea/notificacoes').push({ matricula: mat, nome, tipo: 'reset_senha', lido: false, ts: new Date().toISOString() });
+    // ── Valida se a matrícula existe no banco ANTES de criar qualquer notificação ──
+    const snap = await _db.ref('cinea/users/' + mat).once('value');
+    const u = snap.val();
+    if (!u) {
+      errEl.style.color = 'var(--red)';
+      errEl.textContent = '❌ Matrícula não encontrada no sistema.';
+      return;
+    }
+    // Nome vem do banco — nunca do campo digitado pelo usuário
+    const nomeReal = u.nome || mat;
+    await _db.ref('cinea/notificacoes').push({
+      matricula: mat, nome: nomeReal,
+      tipo: 'reset_senha', lido: false,
+      ts: new Date().toISOString()
+    });
     errEl.style.color = 'var(--green)';
     errEl.textContent = '✅ Solicitação enviada! O administrador irá resetar sua senha em breve.';
     setTimeout(fecharSolicitarReset, 3000);
-  } catch(e) { errEl.style.color='var(--red)'; errEl.textContent = '❌ Erro: ' + e.message; }
+  } catch(e) { errEl.style.color = 'var(--red)'; errEl.textContent = '❌ Erro de conexão.'; }
 }
 
 // ════════ LOG DE ATIVIDADES ════════
@@ -6818,12 +6829,10 @@ async function salvarFeedbackSugestao(key) {
     <div style="text-align:center;margin-bottom:20px">
       <div style="font-size:1.8rem;margin-bottom:8px">🔑</div>
       <div style="font-size:1rem;font-weight:700;color:var(--text)">Esqueci minha senha</div>
-      <div style="font-size:0.78rem;color:var(--text3);margin-top:6px">Informe sua matrícula. O administrador receberá a solicitação e fará o reset.</div>
+      <div style="font-size:0.78rem;color:var(--text3);margin-top:6px">Informe sua matrícula cadastrada. A solicitação será enviada ao administrador somente se a matrícula existir no sistema.</div>
     </div>
     <label class="reuniao-label">Sua matrícula</label>
-    <input id="reset-req-mat" class="reuniao-input" type="text" placeholder="Ex: 12345678" style="margin-bottom:8px">
-    <label class="reuniao-label">Seu nome (para identificação)</label>
-    <input id="reset-req-nome" class="reuniao-input" type="text" placeholder="Ex: Rosimeire" style="margin-bottom:20px"
+    <input id="reset-req-mat" class="reuniao-input" type="text" placeholder="Ex: 12345678" style="margin-bottom:20px"
            onkeydown="if(event.key==='Enter') enviarSolicitacaoReset()">
     <button onclick="enviarSolicitacaoReset()" style="width:100%;padding:12px;background:var(--purple);border:none;border-radius:12px;color:#fff;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Enviar solicitação</button>
     <div id="reset-req-error" style="font-size:0.78rem;margin-top:10px;min-height:18px;text-align:center"></div>
