@@ -905,6 +905,45 @@ body.edit-mode .idea-tag { cursor: text; }
   .notif-dropdown-panel { right: -60px; min-width: 280px; }
 }
 
+/* ═══ AUTH GATE — portão de acesso ═══ */
+#auth-gate {
+  position: fixed; inset: 0; z-index: 9000;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+#auth-gate::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 65% 55% at 20% 50%, rgba(79,45,127,0.22) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 45% at 80% 50%, rgba(233,30,140,0.10) 0%, transparent 60%);
+}
+.gate-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 24px; padding: 40px 44px;
+  width: 100%; max-width: 420px;
+  position: relative; z-index: 1;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.55);
+  animation: fadeUp 0.45s ease;
+}
+.gate-logo-area { text-align: center; margin-bottom: 28px; }
+.gate-logo {
+  font-family: 'Playfair Display', serif; font-size: 2.4rem;
+  font-weight: 700; color: var(--purple-l); letter-spacing: 3px; margin-bottom: 7px;
+}
+.gate-sub  { font-size: 0.85rem; font-weight: 500; color: var(--text2); letter-spacing: 0.5px; }
+.gate-org  { font-size: 0.72rem; color: var(--text3); margin-top: 5px; }
+.gate-notice {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  font-size: 0.76rem; color: var(--text3);
+  background: rgba(79,45,127,0.1); border: 1px solid rgba(79,45,127,0.2);
+  border-radius: 10px; padding: 9px 14px; margin-bottom: 26px;
+}
+#auth-gate.gate-hiding { animation: gateOut 0.38s forwards; }
+@keyframes gateOut { to { opacity: 0; transform: scale(1.03); pointer-events: none; } }
+/* Reset de senha aparece acima do portão */
+#solicitar-reset-modal { z-index: 9500 !important; }
+
 /* GESTOR GERAL */
 .gestor-geral-card {
   margin: 0 12px 16px;
@@ -5099,6 +5138,49 @@ async function fazerLogin() {
   }
 }
 
+// ── Login pelo portão de entrada ──────────────────────────────────────────────
+async function fazerLoginGate() {
+  const mat    = document.getElementById('gate-mat').value.trim();
+  const senha  = document.getElementById('gate-senha').value;
+  const errEl  = document.getElementById('gate-error');
+  const lembrar = document.getElementById('gate-lembrar')?.checked;
+  if (!mat || !senha) { errEl.textContent = 'Preencha matrícula e senha.'; return; }
+  errEl.textContent = 'Verificando…';
+  try {
+    const hash = await sha256(senha);
+    const snap = await _db.ref('cinea/users/' + mat).once('value');
+    const u = snap.val();
+    if (!u || u.senha_hash !== hash) {
+      errEl.textContent = '❌ Matrícula ou senha incorretos.';
+      document.getElementById('gate-senha').value = '';
+      setTimeout(() => document.getElementById('gate-mat').select(), 50);
+      return;
+    }
+    _currentUser = { matricula: mat, nome: u.nome, sigla: (u.sigla || mat.slice(0,2)).toUpperCase(), role: u.role || 'membro' };
+    const sessJSON = JSON.stringify(_currentUser);
+    sessionStorage.setItem('cinea_session', sessJSON);
+    if (lembrar) localStorage.setItem('cinea_session', sessJSON);
+    else         localStorage.removeItem('cinea_session');
+    // Fecha o portão com animação
+    const gate = document.getElementById('auth-gate');
+    gate.classList.add('gate-hiding');
+    setTimeout(() => { gate.style.display = 'none'; gate.classList.remove('gate-hiding'); }, 380);
+    atualizarTopbarUser();
+    _db.ref('cinea/acessos').push({ matricula: mat, nome: u.nome, role: u.role, ts: new Date().toISOString() }).catch(() => {});
+  } catch(e) {
+    errEl.textContent = '❌ Erro de conexão. Tente novamente.';
+    console.warn('Gate login error:', e);
+  }
+}
+function abrirSolicitarResetGate() {
+  // Abre o modal de reset acima do portão (z-index 9500)
+  document.getElementById('solicitar-reset-modal').style.display = 'flex';
+  document.getElementById('reset-req-mat').value   = '';
+  document.getElementById('reset-req-nome').value  = '';
+  document.getElementById('reset-req-error').textContent = '';
+  setTimeout(() => document.getElementById('reset-req-mat').focus(), 80);
+}
+
 function fazerLogout() {
   if (editModeActive) desativarEditMode();
   _currentUser = null;
@@ -5148,6 +5230,17 @@ function atualizarTopbarUser() {
     pararListenerMeetings();
     pararListenerSugestoes();
     pararListenerNotificacoes();
+  }
+  // Portão de acesso: mostra ao deslogar, esconde ao logar
+  const gate = document.getElementById('auth-gate');
+  if (gate) {
+    if (_currentUser) {
+      gate.style.display = 'none';
+    } else {
+      gate.style.display = 'flex';
+      gate.classList.remove('gate-hiding');
+      setTimeout(() => document.getElementById('gate-mat')?.focus(), 120);
+    }
   }
   // Classe no body controla visibilidade de elementos que exigem login
   document.body.classList.toggle('user-logged-in', !!_currentUser);
@@ -5471,7 +5564,12 @@ function abrirSolicitarReset() {
 }
 function fecharSolicitarReset() {
   document.getElementById('solicitar-reset-modal').style.display = 'none';
-  abrirLoginModal();
+  if (!_currentUser) {
+    // Volta o foco para o portão de entrada (sem abrir o modal flutuante)
+    setTimeout(() => document.getElementById('gate-mat')?.focus(), 80);
+  } else {
+    abrirLoginModal();
+  }
 }
 async function enviarSolicitacaoReset() {
   const mat   = document.getElementById('reset-req-mat').value.trim();
@@ -6765,6 +6863,35 @@ async function salvarFeedbackSugestao(key) {
            onkeydown="if(event.key==='Enter') salvarNovaSenha()">
     <button onclick="salvarNovaSenha()" style="width:100%;padding:12px;background:var(--purple);border:none;border-radius:12px;color:#fff;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Salvar nova senha</button>
     <div id="ts-error" style="font-size:0.78rem;margin-top:10px;min-height:18px;text-align:center"></div>
+  </div>
+</div>
+
+<!-- ═══════════ AUTH GATE ═══════════ -->
+<div id="auth-gate">
+  <div class="gate-card">
+    <div class="gate-logo-area">
+      <div class="gate-logo">CINEA</div>
+      <div class="gate-sub">Dashboard Operacional</div>
+      <div class="gate-org">PUC Minas · NED</div>
+    </div>
+    <div class="gate-notice">🔒 Acesso restrito à equipe CINEA</div>
+    <div class="modal-label">Matrícula</div>
+    <input id="gate-mat" class="modal-input" type="text" placeholder="Sua matrícula"
+      autocomplete="username" autofocus
+      onkeydown="if(event.key==='Enter')document.getElementById('gate-senha').focus()">
+    <div class="modal-label" style="margin-top:13px">Senha</div>
+    <input id="gate-senha" class="modal-input" type="password" placeholder="Sua senha"
+      autocomplete="current-password"
+      onkeydown="if(event.key==='Enter')fazerLoginGate()">
+    <div style="display:flex;align-items:center;gap:8px;margin:14px 0 6px">
+      <input type="checkbox" id="gate-lembrar" style="accent-color:var(--purple-l);width:14px;height:14px;cursor:pointer">
+      <label for="gate-lembrar" style="font-size:0.76rem;color:var(--text3);cursor:pointer">Manter conectado</label>
+    </div>
+    <div id="gate-error" style="font-size:0.78rem;color:var(--red);min-height:20px;margin-bottom:10px;text-align:center"></div>
+    <button class="modal-btn" onclick="fazerLoginGate()">🔐 Entrar</button>
+    <div style="text-align:center;margin-top:18px">
+      <button onclick="abrirSolicitarResetGate()" style="background:transparent;border:none;color:var(--text3);font-size:0.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline">Esqueci minha senha</button>
+    </div>
   </div>
 </div>
 
