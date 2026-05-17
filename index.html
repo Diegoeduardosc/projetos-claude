@@ -2052,7 +2052,7 @@ body.edit-mode .user-mgmt-section { display: block; }
             <button id="notif-aviso-btn" class="notif-aviso-compose-btn" onclick="toggleAvisoCompose(event)" title="Enviar aviso a todos" style="display:none">📢 Aviso</button>
           </div>
           <div id="aviso-compose" style="display:none" onclick="event.stopPropagation()">
-            <textarea id="aviso-texto-input" class="notif-aviso-textarea" placeholder="Mensagem para todos os usuários..."></textarea>
+            <textarea id="aviso-texto-input" class="notif-aviso-textarea" placeholder="Mensagem para todos os usuários..." maxlength="500"></textarea>
             <div style="display:flex;gap:6px;margin-top:6px">
               <button class="notif-resolve-btn" style="flex:1" onclick="enviarAvisoGlobal()">📢 Enviar a todos</button>
               <button class="notif-dismiss-btn" onclick="document.getElementById('aviso-compose').style.display='none'">Cancelar</button>
@@ -5144,6 +5144,11 @@ function somenteNumeros(el) {
   }
 }
 
+// ── Sanitiza matrícula para uso seguro como chave Firebase (só dígitos) ─────────
+function sanitizarMat(mat) {
+  return String(mat).replace(/\D/g, '');
+}
+
 // ════════════════ SISTEMA DE USUÁRIOS ════════════════
 
 function abrirLoginModal() {
@@ -5165,7 +5170,7 @@ async function fazerLogin() {
   errEl.textContent = 'Verificando…';
   try {
     const hash = await sha256(senha);
-    const snap = await _db.ref('cinea/users/' + mat).once('value');
+    const snap = await _db.ref('cinea/users/' + sanitizarMat(mat)).once('value');
     const u = snap.val();
     if (!u || u.senha_hash !== hash) {
       errEl.textContent = '❌ Matrícula ou senha incorretos.';
@@ -5199,7 +5204,7 @@ async function fazerLoginGate() {
   errEl.textContent = 'Verificando…';
   try {
     const hash = await sha256(senha);
-    const snap = await _db.ref('cinea/users/' + mat).once('value');
+    const snap = await _db.ref('cinea/users/' + sanitizarMat(mat)).once('value');
     const u = snap.val();
     if (!u || u.senha_hash !== hash) {
       errEl.textContent = '❌ Matrícula ou senha incorretos.';
@@ -5368,7 +5373,7 @@ async function adicionarUsuario() {
   errEl.textContent = 'Salvando…';
   try {
     const hash = await sha256(senha);
-    await _db.ref('cinea/users/' + mat).set({ nome, sigla, senha_hash: hash, role: 'membro', ativo: true, criadoEm: new Date().toISOString() });
+    await _db.ref('cinea/users/' + sanitizarMat(mat)).set({ nome, sigla, senha_hash: hash, role: 'membro', ativo: true, criadoEm: new Date().toISOString() });
     errEl.style.color = 'var(--green)';
     errEl.textContent = '✅ Membro adicionado!';
     document.getElementById('new-user-nome').value = '';
@@ -5386,7 +5391,7 @@ async function removerUsuario(mat, nome) {
     return;
   }
   if (!confirm(`Remover "${nome || mat}" permanentemente?\nEsta ação não pode ser desfeita.`)) return;
-  await _db.ref('cinea/users/' + mat).remove();
+  await _db.ref('cinea/users/' + sanitizarMat(mat)).remove();
   registrarLog('Removeu usuário: ' + (nome || mat) + ' (' + mat + ')');
   mostrarToast('🗑 Usuário removido', (nome || mat) + ' foi excluído do sistema.');
   carregarListaUsuarios();
@@ -5396,7 +5401,7 @@ async function resetarSenhaUsuario(mat, nome) {
   if (!confirm(`Resetar a senha de "${nome}"?\n\nA nova senha será a própria matrícula: ${mat}`)) return;
   try {
     const hash = await sha256(mat);
-    await _db.ref('cinea/users/' + mat + '/senha_hash').set(hash);
+    await _db.ref('cinea/users/' + sanitizarMat(mat) + '/senha_hash').set(hash);
     registrarLog('Resetou senha de: ' + nome + ' (' + mat + ')');
     alert(`✅ Senha de "${nome}" resetada!\nNova senha temporária: ${mat}\nOriente o usuário a trocá-la após o login.`);
   } catch(e) { alert('❌ Erro ao resetar: ' + e.message); }
@@ -5416,9 +5421,20 @@ document.addEventListener('click', () => {
   document.querySelectorAll('.st-dropdown.open').forEach(el => el.classList.remove('open'));
 });
 
+// ── Rate limit em-memória: evita flood de notificações por console ───────────────
+let _notifAdminRL = { count: 0, resetAt: 0 };
+
 // ── Notifica o admin sobre eventos importantes (apenas usuários não-admin) ──────
 async function notificarAdmin(tipo, dados) {
   if (!_db || !_currentUser || _currentUser.role === 'admin') return;
+  // Janela deslizante: máx 15 notificações por minuto (silencioso — não exibe mensagem)
+  const _agora = Date.now();
+  if (_agora > _notifAdminRL.resetAt) {
+    _notifAdminRL.count  = 0;
+    _notifAdminRL.resetAt = _agora + 60_000;
+  }
+  if (_notifAdminRL.count >= 15) return;
+  _notifAdminRL.count++;
   try {
     await _db.ref('cinea/notificacoes').push({
       tipo,
@@ -5441,6 +5457,10 @@ async function dispensarNotif(key) {
 async function enviarAvisoGlobal() {
   const texto = document.getElementById('aviso-texto-input')?.value?.trim();
   if (!texto) { mostrarToast('⚠️ Atenção', 'Digite uma mensagem para enviar.'); return; }
+  if (texto.length > 500) {
+    mostrarToast('⚠️ Mensagem muito longa', `Máximo de 500 caracteres (atual: ${texto.length}).`);
+    return;
+  }
   if (!_currentUser || _currentUser.role !== 'admin') return;
   try {
     await _db.ref('cinea/notificacoes').push({
@@ -5593,7 +5613,7 @@ async function resolverReset(notifKey, mat, nome) {
   if (!confirm(`Resetar a senha de "${nome}" (matrícula: ${mat})?\nA nova senha será a própria matrícula.`)) return;
   try {
     const hash = await sha256(mat);
-    await _db.ref('cinea/users/' + mat + '/senha_hash').set(hash);
+    await _db.ref('cinea/users/' + sanitizarMat(mat) + '/senha_hash').set(hash);
     await _db.ref('cinea/notificacoes/' + notifKey + '/lido').set(true);
     registrarLog('Resetou senha de: ' + nome + ' (' + mat + ')');
     await carregarNotificacoes();
@@ -5723,7 +5743,7 @@ async function enviarSolicitacaoReset() {
   errEl.style.color = 'var(--text3)'; errEl.textContent = 'Verificando…';
   try {
     // ── 2. Consulta o banco apenas se não estiver bloqueado ──
-    const snap = await _db.ref('cinea/users/' + mat).once('value');
+    const snap = await _db.ref('cinea/users/' + sanitizarMat(mat)).once('value');
     const u    = snap.val();
     if (!u) {
       // Matrícula não existe — registra falha (pode bloquear)
@@ -5830,7 +5850,7 @@ async function salvarNovaSenha() {
   try {
     const mat       = _currentUser.matricula;
     const hashAtual = await sha256(atual);
-    const snap      = await _db.ref('cinea/users/' + mat + '/senha_hash').once('value');
+    const snap      = await _db.ref('cinea/users/' + sanitizarMat(mat) + '/senha_hash').once('value');
     if (snap.val() !== hashAtual) {
       errEl.style.color = 'var(--red)';
       errEl.textContent = '❌ Senha atual incorreta.';
@@ -5838,7 +5858,7 @@ async function salvarNovaSenha() {
       return;
     }
     const hashNova = await sha256(nova);
-    await _db.ref('cinea/users/' + mat + '/senha_hash').set(hashNova);
+    await _db.ref('cinea/users/' + sanitizarMat(mat) + '/senha_hash').set(hashNova);
     errEl.style.color = 'var(--green)';
     errEl.textContent = '✅ Senha alterada com sucesso!';
     setTimeout(fecharTrocarSenha, 1600);
@@ -5932,6 +5952,11 @@ async function salvarReuniao() {
   const resumo   = document.getElementById('mtg-resumo').value.trim();
   const decisoes = document.getElementById('mtg-decisoes').value.trim();
   if (!data || !horario) { alert('Informe data e horário.'); return; }
+  // ── Limite de tamanho dos campos de texto ─────────────────────────────────
+  if (pauta.length > 3000 || resumo.length > 3000 || decisoes.length > 3000) {
+    alert('⚠️ Um ou mais campos excedem o limite de 3.000 caracteres.\nResuma o conteúdo e tente novamente.');
+    return;
+  }
   const participantes = EQUIPE_CINEA
     .filter(p => document.getElementById('chip-' + p.id)?.classList.contains('selected'))
     .map(p => p.nome);
@@ -6501,7 +6526,7 @@ carregarSemestresFirebase();
     const salvo = JSON.parse(raw);
     if (!salvo?.matricula) return;
     // Verifica silenciosamente se o usuário ainda existe no Firebase
-    const snap = await _db.ref('cinea/users/' + salvo.matricula).once('value');
+    const snap = await _db.ref('cinea/users/' + sanitizarMat(salvo.matricula)).once('value');
     const u = snap.val();
     if (!u || !u.ativo) {
       // Usuário foi removido/desativado pelo admin — limpa sessão
@@ -6619,6 +6644,27 @@ async function enviarSugestao() {
   const texto     = document.getElementById('sug-texto').value.trim();
   if (!texto) { alert('Por favor descreva sua sugestão antes de enviar.'); return; }
 
+  // ── Limite de tamanho ────────────────────────────────────────────────────────
+  if (texto.length > 2000) {
+    mostrarToast('⚠️ Sugestão muito longa', `Máximo de 2000 caracteres (atual: ${texto.length}).`);
+    return;
+  }
+
+  // ── Rate limit: máx 5 sugestões por 30 minutos por usuário ───────────────────
+  const _rlSugKey = 'cinea_rl_sug_' + _currentUser.matricula;
+  const _rlNow    = Date.now();
+  const _rlJanela = 30 * 60 * 1000;
+  let   _rlSug    = {};
+  try { _rlSug = JSON.parse(localStorage.getItem(_rlSugKey) || '{}'); } catch {}
+  if (!_rlSug.inicio || (_rlNow - _rlSug.inicio) >= _rlJanela) {
+    _rlSug = { inicio: _rlNow, count: 0 };
+  }
+  if (_rlSug.count >= 5) {
+    const restMin = Math.ceil((_rlJanela - (_rlNow - _rlSug.inicio)) / 60000);
+    mostrarToast('🔒 Limite atingido', `Você já enviou 5 sugestões. Aguarde ${restMin} min para enviar mais.`);
+    return;
+  }
+
   const btn = document.querySelector('#sug-modal button[onclick="enviarSugestao()"]');
   if (btn) { btn.disabled = true; btn.textContent = 'Gerando ticket...'; }
 
@@ -6646,8 +6692,13 @@ async function enviarSugestao() {
       lido:      false,
     }).catch(() => {});
 
+    // Incrementa contador de rate limit
+    _rlSug.count++;
+    localStorage.setItem(_rlSugKey, JSON.stringify(_rlSug));
+
     registrarLog(`Abriu ticket ${ticket} · ${_CATEGORIAS[categoria] || categoria}`);
     document.getElementById('sug-texto').value = '';
+    document.getElementById('sug-char-count').textContent = '0/2000';
     mostrarToast(`🎫 Ticket ${ticket} aberto!`, 'Clique em "Minhas sugestões" para acompanhar.');
     mudarTabSug('minhas');
   } catch(e) {
@@ -7170,13 +7221,13 @@ async function salvarFeedbackSugestao(key) {
     <div class="participantes-grid" id="participantes-grid"></div>
 
     <label class="reuniao-label" style="margin-top:16px;display:block">Pauta</label>
-    <textarea id="mtg-pauta" class="reuniao-input reuniao-textarea" placeholder="Tópicos a discutir..."></textarea>
+    <textarea id="mtg-pauta" class="reuniao-input reuniao-textarea" placeholder="Tópicos a discutir..." maxlength="3000"></textarea>
 
     <label class="reuniao-label" style="margin-top:16px;display:block">Resumo da reunião</label>
-    <textarea id="mtg-resumo" class="reuniao-input reuniao-textarea" placeholder="O que foi discutido e encaminhado..."></textarea>
+    <textarea id="mtg-resumo" class="reuniao-input reuniao-textarea" placeholder="O que foi discutido e encaminhado..." maxlength="3000"></textarea>
 
     <label class="reuniao-label" style="margin-top:16px;display:block">Decisões / Próximos passos</label>
-    <textarea id="mtg-decisoes" class="reuniao-input reuniao-textarea" placeholder="Decisões tomadas, responsáveis, prazos..."></textarea>
+    <textarea id="mtg-decisoes" class="reuniao-input reuniao-textarea" placeholder="Decisões tomadas, responsáveis, prazos..." maxlength="3000"></textarea>
 
     <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:24px">
       <button onclick="fecharFormReuniao()" style="padding:9px 20px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.85rem;cursor:pointer">Cancelar</button>
@@ -7327,7 +7378,8 @@ async function salvarFeedbackSugestao(key) {
       </div>
       <div style="margin-bottom:20px">
         <label style="font-size:0.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Descrição da sugestão</label>
-        <textarea id="sug-texto" placeholder="Descreva sua ideia de melhoria..." style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;padding:12px;resize:vertical;min-height:110px;line-height:1.5"></textarea>
+        <textarea id="sug-texto" placeholder="Descreva sua ideia de melhoria..." maxlength="2000" oninput="document.getElementById('sug-char-count').textContent=this.value.length+'/2000'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;padding:12px;resize:vertical;min-height:110px;line-height:1.5"></textarea>
+        <div id="sug-char-count" style="font-size:0.68rem;color:var(--text3);text-align:right;margin-top:3px">0/2000</div>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div style="font-size:0.72rem;color:var(--text3)">Enviando como: <strong id="sug-autor-nome" style="color:var(--text2)">—</strong></div>
