@@ -3540,7 +3540,7 @@ document.getElementById('modal-senha').addEventListener('click', function(e) {
 const TEXT_ED_SELS = [
   '.stat-change', '.pkpi-val', '.kpi-cur', '.kpi-tgt', '.kpi-name', '.pkpi-name', '.section-sub',
   '.rm-title', '.rm-phase', '.rm-tag', '.rm-resp-label', '.rm-resp-val',
-  '.idea-title', '.idea-desc', '.idea-tag', '.idea-num',
+  // .idea-title / .idea-desc / .idea-tag / .idea-num são gerenciados pelo renderIdeas() diretamente
   '.ck-text', '.gauge-label',
   '.sidebar-brand', '.sidebar-sub',
   '.sidebar-gestor-label', '.sidebar-gestor-avatar', '.sidebar-gestor-name', '.sidebar-gestor-role'
@@ -3831,24 +3831,44 @@ function renderIdeas() {
     const cor = IDEA_COLORS[idea.cor] || IDEA_COLORS.purple;
     const ef  = IDEA_EFFORT_CFG[idea.esforco] || IDEA_EFFORT_CFG['Médio'];
     const num = String(i + 1).padStart(2, '0');
+
+    // Tags: em edit mode cada tag vira editável inline
     const tags = (idea.tags || []).map((t, ti) => {
       const style = ti === 0
         ? `border-color:${cor.tagBorder};color:${cor.tagColor};background:${cor.tagBg}`
         : `border-color:var(--border);color:var(--text2)`;
+      if (isEdit) {
+        return `<span class="idea-tag ed" contenteditable="plaintext-only" style="${style};cursor:text;min-width:30px;outline:none" oninput="if(IDEAS_DATA[${i}])IDEAS_DATA[${i}].tags[${ti}]=this.textContent.trim()">${escapeHtml(t)}</span>`;
+      }
       return `<span class="idea-tag" style="${style}">${escapeHtml(t)}</span>`;
     }).join('');
+
     const editBtns = isEdit
       ? `<div style="position:absolute;bottom:12px;right:12px;display:flex;gap:6px;z-index:2">
            <button onclick="deletarIdeia(${i})" style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.25);border-radius:8px;padding:4px 8px;font-size:0.68rem;color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif">✕</button>
            <button onclick="abrirEditarIdeia(${i})" style="background:rgba(79,45,127,0.2);border:1px solid rgba(79,45,127,0.35);border-radius:8px;padding:4px 10px;font-size:0.68rem;color:var(--purple-l);cursor:pointer;font-family:'DM Sans',sans-serif">✎ Editar</button>
          </div>`
       : '';
+
+    // Título e descrição: editáveis inline em edit mode
+    const titleEl = isEdit
+      ? `<div class="idea-title ed" contenteditable="plaintext-only"
+             style="cursor:text;outline:none;border-radius:4px"
+             oninput="if(IDEAS_DATA[${i}])IDEAS_DATA[${i}].titulo=this.textContent.trim()">${escapeHtml(idea.titulo)}</div>`
+      : `<div class="idea-title">${escapeHtml(idea.titulo)}</div>`;
+
+    const descEl = isEdit
+      ? `<div class="idea-desc ed" contenteditable="plaintext-only"
+             style="cursor:text;outline:none;border-radius:4px"
+             oninput="if(IDEAS_DATA[${i}])IDEAS_DATA[${i}].desc=this.textContent.trim()">${escapeHtml(idea.desc)}</div>`
+      : `<div class="idea-desc">${escapeHtml(idea.desc)}</div>`;
+
     return `<div class="idea-card" style="--glow-color:${cor.glow}${isEdit ? ';padding-bottom:46px' : ''}">
       ${editBtns}
-      <div class="idea-effort" onclick="if(editModeActive&&_currentUser?.role==='admin')cycleIdeaEffortDyn(${i})" style="background:${ef.bg};color:${ef.color}">${idea.esforco} esforço</div>
+      <div class="idea-effort" onclick="if(editModeActive&&_currentUser?.role==='admin')cycleIdeaEffortDyn(${i})" style="background:${ef.bg};color:${ef.color};${isEdit?'cursor:pointer':''}">${idea.esforco} esforço${isEdit?' ↻':''}</div>
       <div class="idea-num">${num} —</div>
-      <div class="idea-title">${escapeHtml(idea.titulo)}</div>
-      <div class="idea-desc">${escapeHtml(idea.desc)}</div>
+      ${titleEl}
+      ${descEl}
       <div class="idea-tags">${tags}</div>
     </div>`;
   }).join('');
