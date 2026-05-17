@@ -671,6 +671,7 @@ body.edit-mode .idea-tag { cursor: text; }
   top: 0; left: 0;
   width: 100%; height: 100%;
   background: radial-gradient(ellipse at top left, var(--glow-color, rgba(79,45,127,0.08)), transparent 60%);
+  pointer-events: none;
 }
 .idea-num {
   font-family: 'DM Mono', monospace;
@@ -2189,107 +2190,14 @@ body.edit-mode .user-mgmt-section { display: block; }
         <div class="section-sub">Estratégias para evoluir o ecossistema de dados do CINEA</div>
       </div>
 
-      <!-- Hint bar — visível só em edit mode -->
+      <!-- Hint bar — visível só em edit mode (admin) -->
       <div class="edit-hint-bar" style="display:none" id="ideas-edit-hint">
-        ✏️ <strong>Modo edição:</strong> clique em qualquer título, descrição, número ou tag para editar o texto · clique no badge de esforço para alternar Baixo / Médio / Alto
+        ✏️ <strong>Modo edição:</strong> clique em <strong>✎ Editar</strong> no card para alterar título, descrição, esforço e tags · <strong>+</strong> para nova ideia · <strong>✕</strong> para remover · alterações salvas automaticamente no Firebase ao clicar em Salvar
       </div>
 
-      <div class="idea-grid">
-        <div class="idea-card" style="--glow-color:rgba(233,30,140,0.1)">
-          <div class="idea-effort" style="background:rgba(39,174,96,0.15);color:var(--green)">Baixo esforço</div>
-          <div class="idea-num">01 —</div>
-          <div class="idea-title">Forms automáticos de pesquisa de satisfação</div>
-          <div class="idea-desc">Substituir coleta manual por Microsoft Forms enviado automaticamente após cada formação. Os dados chegam direto numa planilha Excel no OneDrive e alimentam o Power BI sem intervenção humana.</div>
-          <div class="idea-tags">
-            <span class="idea-tag" style="border-color:rgba(233,30,140,0.3);color:var(--pink);background:rgba(233,30,140,0.08)">Microsoft Forms</span>
-            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">OneDrive</span>
-            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Automático</span>
-          </div>
-        </div>
-
-        <div class="idea-card" style="--glow-color:rgba(79,45,127,0.1)">
-          <div class="idea-effort" style="background:rgba(245,166,35,0.15);color:var(--gold)">Médio esforço</div>
-          <div class="idea-num">02 —</div>
-          <div class="idea-title">Power Automate para alertas de gargalos</div>
-          <div class="idea-desc">Criar fluxos no Power Automate que detectam quando uma atividade fica "Pendente" por mais de 7 dias ou quando uma meta está abaixo de 60% e disparam um e-mail automático para o responsável.</div>
-          <div class="idea-tags">
-            <span class="idea-tag" style="border-color:rgba(79,45,127,0.4);color:var(--purple-l);background:rgba(79,45,127,0.1)">Power Automate</span>
-            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Alertas por e-mail</span>
-            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Monitoramento</span>
-          </div>
-        </div>
-
-        <div class="idea-card" style="--glow-color:rgba(0,180,204,0.08)">
-          <div class="idea-effort" style="background:rgba(245,166,35,0.15);color:var(--gold)">Médio esforço</div>
-          <div class="idea-num">03 —</div>
-          <div class="idea-title">Dashboard no Teams para as reuniões semanais</div>
-          <div class="idea-desc">Incorporar o relatório do Power BI como uma aba fixa no canal do CINEA no Microsoft Teams. Durante a reunião semanal, todos acessam os dados em tempo real diretamente no Teams, sem precisar abrir outro sistema.</div>
-          <div class="idea-tags">
-            <span class="idea-tag" style="border-color:rgba(0,180,204,0.3);color:var(--cyan);background:rgba(0,180,204,0.08)">Microsoft Teams</span>
-            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Integração nativa</span>
-            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Zero cliques extras</span>
-          </div>
-        </div>
-
-        <div class="idea-card" style="--glow-color:rgba(245,166,35,0.08)">
-          <div class="idea-effort" style="background:rgba(39,174,96,0.15);color:var(--green)">Baixo esforço</div>
-          <div class="idea-num">04 —</div>
-          <div class="idea-title">Template de ata digital integrado às planilhas</div>
-          <div class="idea-desc">Criar uma aba "Atas" nas planilhas com campos padronizados: data, gap relatado, decisão, prazo, responsável e status. O Power BI consolida todas as atas em uma visão histórica de gargalos resolvidos vs. pendentes.</div>
-          <div class="idea-tags">
-            <span class="idea-tag" style="border-color:rgba(245,166,35,0.3);color:var(--gold);background:rgba(245,166,35,0.08)">Excel</span>
-            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Histórico</span>
-            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Rastreabilidade</span>
-          </div>
-        </div>
-
-        <div class="idea-card" style="--glow-color:rgba(233,30,140,0.08)">
-          <div class="idea-effort" style="background:rgba(231,76,60,0.15);color:var(--red)">Alto esforço</div>
-          <div class="idea-num">05 —</div>
-          <div class="idea-title">Painel de acompanhamento de UDAs por autor</div>
-          <div class="idea-desc">Criar uma planilha mestra de UDAs com colunas: autor, instituto, status, data de entrega prevista e real. O Power BI gera um mapa de calor por instituto e identifica automaticamente autores com UDAs atrasadas.</div>
-          <div class="idea-tags">
-            <span class="idea-tag" style="border-color:rgba(233,30,140,0.3);color:var(--pink);background:rgba(233,30,140,0.08)">Mapa de calor</span>
-            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Atrasos automáticos</span>
-            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Por instituto</span>
-          </div>
-        </div>
-
-        <div class="idea-card" style="--glow-color:rgba(79,45,127,0.1)">
-          <div class="idea-effort" style="background:rgba(231,76,60,0.15);color:var(--red)">Alto esforço</div>
-          <div class="idea-num">06 —</div>
-          <div class="idea-title">Score de engajamento docente por instituto</div>
-          <div class="idea-desc">Cruzar dados de participação nas formações, produção de UDAs e uso do Canvas AVA para gerar um "score de engajamento" por docente e por instituto. O Power BI exibe um ranking e identifica onde focar os esforços do CINEA.</div>
-          <div class="idea-tags">
-            <span class="idea-tag" style="border-color:rgba(79,45,127,0.4);color:var(--purple-l);background:rgba(79,45,127,0.1)">Score composto</span>
-            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Ranking institutos</span>
-            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Canvas API</span>
-          </div>
-        </div>
-
-        <div class="idea-card" style="--glow-color:rgba(0,180,204,0.08)">
-          <div class="idea-effort" style="background:rgba(39,174,96,0.15);color:var(--green)">Baixo esforço</div>
-          <div class="idea-num">07 —</div>
-          <div class="idea-title">Relatório mensal automático em PDF</div>
-          <div class="idea-desc">Configurar o Power BI para gerar e enviar por e-mail um relatório PDF consolidado todo início de mês para a equipe CINEA e para a PROGRAD, com os principais indicadores do mês anterior e comparativo histórico.</div>
-          <div class="idea-tags">
-            <span class="idea-tag" style="border-color:rgba(0,180,204,0.3);color:var(--cyan);background:rgba(0,180,204,0.08)">Power BI Service</span>
-            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">E-mail automático</span>
-            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Para PROGRAD</span>
-          </div>
-        </div>
-
-        <div class="idea-card" style="--glow-color:rgba(245,166,35,0.08)">
-          <div class="idea-effort" style="background:rgba(245,166,35,0.15);color:var(--gold)">Médio esforço</div>
-          <div class="idea-num">08 —</div>
-          <div class="idea-title">Página pública de transparência CINEA</div>
-          <div class="idea-desc">Publicar uma versão simplificada e pública do dashboard (sem dados sensíveis) no site da PUC Minas ou no Guia do Professor, mostrando indicadores de formação e satisfação para toda a comunidade acadêmica.</div>
-          <div class="idea-tags">
-            <span class="idea-tag" style="border-color:rgba(245,166,35,0.3);color:var(--gold);background:rgba(245,166,35,0.08)">Publicação web</span>
-            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Transparência</span>
-            <span class="idea-tag" style="border-color:var(--border);color:var(--text2)">Comunidade</span>
-          </div>
-        </div>
+      <!-- Grid renderizado dinamicamente por renderIdeas() -->
+      <div class="idea-grid" id="ideas-grid">
+        <div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:60px;grid-column:1/-1">Carregando ideias...</div>
       </div>
     </div>
 
@@ -2908,6 +2816,9 @@ function showPage(id, el) {
   if (id === 'meeting') {
     renderMeetingCards();
   }
+  if (id === 'ideas') {
+    renderIdeas();
+  }
   // Fecha sidebar no mobile ao navegar
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebar-overlay');
@@ -3448,6 +3359,10 @@ updateMemberSelects();
 renderTeamCards(); // renderTeamCards chama renderMemberChips internamente
 ['hub','inov','tec'].forEach(d => { renderTaskTable(d); renderAtividadesSetor(d); });
 renderMeetingCards();
+// Ideias: carrega do Firebase (ou usa default se offline)
+IDEAS_DATA = JSON.parse(JSON.stringify(IDEAS_DEFAULT));
+renderIdeas();
+loadIdeasFromFirebase(); // atualiza assincronamente do Firebase
 
 // ═══════════════════════ SENHA ADMIN (SHA-256) ═══════════════════════
 // Senha padrão inicial: cinea2026
@@ -3607,6 +3522,9 @@ function desativarEditMode() {
   if (moverBtn) moverBtn.style.display = 'none';
   const ideasHint = document.getElementById('ideas-edit-hint');
   if (ideasHint) ideasHint.style.display = 'none';
+  // Salva ideias no Firebase e re-renderiza sem botões de edição
+  saveIdeasToFirebase();
+  renderIdeas();
   // 📋 Registra log de edição
   registrarLog('Editou o dashboard (modo ' + (_currentUser?.role||'?') + ')');
   // ☁️ Sincroniza tudo com Firebase
@@ -3665,10 +3583,8 @@ function _aplicarEditMode() {
     icon.onclick = () => { if (editModeActive) cycleChecklistItem(icon, i); };
   });
 
-  // 9. Ideas effort badge — click to cycle
-  document.querySelectorAll('.idea-effort').forEach((el, i) => {
-    el.onclick = () => { if (editModeActive) cycleIdeaEffort(el, i); };
-  });
+  // 9. Ideas — re-renderiza com botões de edição visíveis
+  renderIdeas();
 
   // 10. Bar chart values — editable numbers
   document.querySelectorAll('.bar-val').forEach((el, i) => {
@@ -3817,19 +3733,161 @@ function cycleChecklistItem(icon, idx) {
   localStorage.setItem('cinea_ck_' + idx, JSON.stringify(nxt));
 }
 
-// ═══ IDEAS ═══
-function cycleIdeaEffort(el, idx) {
-  const levels = [
-    { text:'Baixo esforço', bg:'rgba(39,174,96,0.15)',  color:'var(--green)' },
-    { text:'Médio esforço', bg:'rgba(245,166,35,0.15)', color:'var(--gold)' },
-    { text:'Alto esforço',  bg:'rgba(231,76,60,0.15)',  color:'var(--red)' },
-  ];
-  const cur = levels.findIndex(l => el.textContent.trim() === l.text);
-  const nxt = levels[(cur + 1) % levels.length];
-  el.textContent    = nxt.text;
-  el.style.background = nxt.bg;
-  el.style.color      = nxt.color;
-  localStorage.setItem('cinea_idea_eff_' + idx, JSON.stringify(nxt));
+// ═══ IDEAS — dados + renderização dinâmica ═══════════════════
+
+const IDEAS_DEFAULT = [
+  { esforco:'Baixo', titulo:'Forms automáticos de pesquisa de satisfação',   desc:'Substituir coleta manual por Microsoft Forms enviado automaticamente após cada formação. Os dados chegam direto numa planilha Excel no OneDrive e alimentam o Power BI sem intervenção humana.', tags:['Microsoft Forms','OneDrive','Automático'], cor:'pink' },
+  { esforco:'Médio', titulo:'Power Automate para alertas de gargalos',        desc:'Criar fluxos no Power Automate que detectam quando uma atividade fica "Pendente" por mais de 7 dias ou quando uma meta está abaixo de 60% e disparam um e-mail automático para o responsável.', tags:['Power Automate','Alertas por e-mail','Monitoramento'], cor:'purple' },
+  { esforco:'Médio', titulo:'Dashboard no Teams para as reuniões semanais',   desc:'Incorporar o relatório do Power BI como uma aba fixa no canal do CINEA no Microsoft Teams. Durante a reunião semanal, todos acessam os dados em tempo real diretamente no Teams, sem precisar abrir outro sistema.', tags:['Microsoft Teams','Integração nativa','Zero cliques extras'], cor:'cyan' },
+  { esforco:'Baixo', titulo:'Template de ata digital integrado às planilhas', desc:'Criar uma aba "Atas" nas planilhas com campos padronizados: data, gap relatado, decisão, prazo, responsável e status. O Power BI consolida todas as atas em uma visão histórica de gargalos resolvidos vs. pendentes.', tags:['Excel','Histórico','Rastreabilidade'], cor:'gold' },
+  { esforco:'Alto',  titulo:'Painel de acompanhamento de UDAs por autor',     desc:'Criar uma planilha mestra de UDAs com colunas: autor, instituto, status, data de entrega prevista e real. O Power BI gera um mapa de calor por instituto e identifica automaticamente autores com UDAs atrasadas.', tags:['Mapa de calor','Atrasos automáticos','Por instituto'], cor:'pink' },
+  { esforco:'Alto',  titulo:'Score de engajamento docente por instituto',      desc:'Cruzar dados de participação nas formações, produção de UDAs e uso do Canvas AVA para gerar um "score de engajamento" por docente e por instituto. O Power BI exibe um ranking e identifica onde focar os esforços do CINEA.', tags:['Score composto','Ranking institutos','Canvas API'], cor:'purple' },
+  { esforco:'Baixo', titulo:'Relatório mensal automático em PDF',              desc:'Configurar o Power BI para gerar e enviar por e-mail um relatório PDF consolidado todo início de mês para a equipe CINEA e para a PROGRAD, com os principais indicadores do mês anterior e comparativo histórico.', tags:['Power BI Service','E-mail automático','Para PROGRAD'], cor:'cyan' },
+  { esforco:'Médio', titulo:'Página pública de transparência CINEA',           desc:'Publicar uma versão simplificada e pública do dashboard (sem dados sensíveis) no site da PUC Minas ou no Guia do Professor, mostrando indicadores de formação e satisfação para toda a comunidade acadêmica.', tags:['Publicação web','Transparência','Comunidade'], cor:'gold' },
+];
+
+let IDEAS_DATA = null;
+
+const IDEA_COLORS = {
+  pink:   { glow:'rgba(233,30,140,0.1)',  tagBorder:'rgba(233,30,140,0.3)',  tagColor:'var(--pink)',     tagBg:'rgba(233,30,140,0.08)' },
+  purple: { glow:'rgba(79,45,127,0.1)',   tagBorder:'rgba(79,45,127,0.4)',   tagColor:'var(--purple-l)', tagBg:'rgba(79,45,127,0.1)'  },
+  cyan:   { glow:'rgba(0,180,204,0.08)',  tagBorder:'rgba(0,180,204,0.3)',   tagColor:'var(--cyan)',     tagBg:'rgba(0,180,204,0.08)' },
+  gold:   { glow:'rgba(245,166,35,0.08)', tagBorder:'rgba(245,166,35,0.3)', tagColor:'var(--gold)',     tagBg:'rgba(245,166,35,0.08)' },
+};
+const IDEA_EFFORT_CFG = {
+  'Baixo': { bg:'rgba(39,174,96,0.15)',  color:'var(--green)' },
+  'Médio': { bg:'rgba(245,166,35,0.15)', color:'var(--gold)' },
+  'Alto':  { bg:'rgba(231,76,60,0.15)',  color:'var(--red)' },
+};
+
+function renderIdeas() {
+  const grid = document.getElementById('ideas-grid');
+  if (!grid) return;
+  const data = (IDEAS_DATA && IDEAS_DATA.length > 0) ? IDEAS_DATA : IDEAS_DEFAULT;
+  const isEdit = editModeActive && _currentUser?.role === 'admin';
+
+  grid.innerHTML = data.map((idea, i) => {
+    const cor = IDEA_COLORS[idea.cor] || IDEA_COLORS.purple;
+    const ef  = IDEA_EFFORT_CFG[idea.esforco] || IDEA_EFFORT_CFG['Médio'];
+    const num = String(i + 1).padStart(2, '0');
+    const tags = (idea.tags || []).map((t, ti) => {
+      const style = ti === 0
+        ? `border-color:${cor.tagBorder};color:${cor.tagColor};background:${cor.tagBg}`
+        : `border-color:var(--border);color:var(--text2)`;
+      return `<span class="idea-tag" style="${style}">${escapeHtml(t)}</span>`;
+    }).join('');
+    const editBtns = isEdit
+      ? `<div style="position:absolute;bottom:12px;right:12px;display:flex;gap:6px;z-index:2">
+           <button onclick="deletarIdeia(${i})" style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.25);border-radius:8px;padding:4px 8px;font-size:0.68rem;color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif">✕</button>
+           <button onclick="abrirEditarIdeia(${i})" style="background:rgba(79,45,127,0.2);border:1px solid rgba(79,45,127,0.35);border-radius:8px;padding:4px 10px;font-size:0.68rem;color:var(--purple-l);cursor:pointer;font-family:'DM Sans',sans-serif">✎ Editar</button>
+         </div>`
+      : '';
+    return `<div class="idea-card" style="--glow-color:${cor.glow}${isEdit ? ';padding-bottom:46px' : ''}">
+      ${editBtns}
+      <div class="idea-effort" onclick="if(editModeActive&&_currentUser?.role==='admin')cycleIdeaEffortDyn(${i})" style="background:${ef.bg};color:${ef.color}">${idea.esforco} esforço</div>
+      <div class="idea-num">${num} —</div>
+      <div class="idea-title">${escapeHtml(idea.titulo)}</div>
+      <div class="idea-desc">${escapeHtml(idea.desc)}</div>
+      <div class="idea-tags">${tags}</div>
+    </div>`;
+  }).join('');
+
+  if (isEdit) {
+    grid.innerHTML += `<div onclick="abrirAdicionarIdeia()" style="background:var(--card);border:2px dashed rgba(79,45,127,0.3);border-radius:14px;padding:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;min-height:160px;transition:border-color 0.2s" onmouseover="this.style.borderColor='var(--purple-l)'" onmouseout="this.style.borderColor='rgba(79,45,127,0.3)'">
+      <div style="text-align:center;color:var(--text3)">
+        <div style="font-size:2.2rem;margin-bottom:8px;line-height:1">+</div>
+        <div style="font-size:0.82rem">Nova ideia</div>
+      </div>
+    </div>`;
+  }
+}
+
+async function loadIdeasFromFirebase() {
+  try {
+    if (!_db) { IDEAS_DATA = JSON.parse(JSON.stringify(IDEAS_DEFAULT)); renderIdeas(); return; }
+    const snap = await _db.ref('cinea/ideas').once('value');
+    const data = snap.val();
+    IDEAS_DATA = Array.isArray(data) && data.length > 0 ? data : JSON.parse(JSON.stringify(IDEAS_DEFAULT));
+  } catch(e) {
+    IDEAS_DATA = JSON.parse(JSON.stringify(IDEAS_DEFAULT));
+  }
+  renderIdeas();
+}
+
+async function saveIdeasToFirebase() {
+  if (!_db || !_currentUser || _currentUser.role !== 'admin') return;
+  const data = IDEAS_DATA && IDEAS_DATA.length > 0 ? IDEAS_DATA : IDEAS_DEFAULT;
+  try {
+    await _db.ref('cinea/ideas').set(data);
+    registrarLog('Atualizou ideias de implantação (' + data.length + ' itens)');
+  } catch(e) {
+    console.warn('[CINEA] Erro ao salvar ideias:', e);
+    mostrarToast('⚠️ Atenção', 'Erro ao salvar ideias. Dados mantidos localmente.');
+  }
+}
+
+function cycleIdeaEffortDyn(idx) {
+  if (!IDEAS_DATA) return;
+  const levels = ['Baixo', 'Médio', 'Alto'];
+  const cur = IDEAS_DATA[idx]?.esforco || 'Baixo';
+  IDEAS_DATA[idx].esforco = levels[(levels.indexOf(cur) + 1) % levels.length];
+  renderIdeas();
+}
+
+let _editIdeaIdx = -1;
+
+function abrirAdicionarIdeia() {
+  _editIdeaIdx = -2;
+  document.getElementById('ei-modal-title').textContent = '💡 Nova Ideia';
+  document.getElementById('ei-titulo').value  = '';
+  document.getElementById('ei-desc').value    = '';
+  document.getElementById('ei-esforco').value = 'Médio';
+  document.getElementById('ei-tags').value    = '';
+  document.getElementById('ei-cor').value     = 'purple';
+  document.getElementById('edit-idea-modal').style.display = 'flex';
+}
+
+function abrirEditarIdeia(idx) {
+  if (!IDEAS_DATA) return;
+  _editIdeaIdx = idx;
+  const idea = IDEAS_DATA[idx];
+  document.getElementById('ei-modal-title').textContent = '✎ Editar Ideia ' + String(idx + 1).padStart(2, '0');
+  document.getElementById('ei-titulo').value  = idea.titulo  || '';
+  document.getElementById('ei-desc').value    = idea.desc    || '';
+  document.getElementById('ei-esforco').value = idea.esforco || 'Médio';
+  document.getElementById('ei-tags').value    = (idea.tags || []).join(', ');
+  document.getElementById('ei-cor').value     = idea.cor     || 'purple';
+  document.getElementById('edit-idea-modal').style.display = 'flex';
+}
+
+function fecharEditarIdeia() {
+  document.getElementById('edit-idea-modal').style.display = 'none';
+  _editIdeaIdx = -1;
+}
+
+function salvarEditarIdeia() {
+  const titulo  = document.getElementById('ei-titulo').value.trim();
+  const desc    = document.getElementById('ei-desc').value.trim();
+  const esforco = document.getElementById('ei-esforco').value;
+  const tags    = document.getElementById('ei-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+  const cor     = document.getElementById('ei-cor').value;
+  if (!titulo) { mostrarToast('⚠️ Campo obrigatório', 'Preencha o título da ideia.'); return; }
+  if (!IDEAS_DATA) IDEAS_DATA = JSON.parse(JSON.stringify(IDEAS_DEFAULT));
+  if (_editIdeaIdx === -2) {
+    IDEAS_DATA.push({ esforco, titulo, desc, tags, cor });
+  } else if (_editIdeaIdx >= 0 && _editIdeaIdx < IDEAS_DATA.length) {
+    IDEAS_DATA[_editIdeaIdx] = { ...IDEAS_DATA[_editIdeaIdx], esforco, titulo, desc, tags, cor };
+  }
+  fecharEditarIdeia();
+  renderIdeas();
+  mostrarToast('💡 Ideia salva', 'Clique em "Salvar" na topbar para persistir no Firebase.');
+}
+
+function deletarIdeia(idx) {
+  if (!IDEAS_DATA || !confirm('Remover esta ideia?')) return;
+  IDEAS_DATA.splice(idx, 1);
+  renderIdeas();
+  mostrarToast('🗑 Ideia removida', 'Clique em "Salvar" na topbar para confirmar.');
 }
 
 // ═══ BAR CHART ═══
@@ -5695,6 +5753,59 @@ async function salvarFeedbackSugestao(key) {
     </div>
     <div id="lixeira-content" style="overflow-y:auto;flex:1">
       <div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:30px">Carregando...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ MODAL EDITAR IDEIA ═══════════════════ -->
+<div id="edit-idea-modal" onclick="if(event.target===this)fecharEditarIdeia()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:600;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:520px;max-height:88vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <div style="font-size:1.05rem;font-weight:700;color:var(--text)" id="ei-modal-title">💡 Editar Ideia</div>
+        <div style="font-size:0.72rem;color:var(--text3);margin-top:2px">Alterações salvas no Firebase ao clicar em Salvar</div>
+      </div>
+      <button onclick="fecharEditarIdeia()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text2);width:32px;height:32px;cursor:pointer;font-size:1rem">✕</button>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <label style="font-size:0.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Título</label>
+      <input id="ei-titulo" class="add-task-input" style="width:100%;font-size:0.9rem;padding:10px 12px" placeholder="Título da ideia..." />
+    </div>
+
+    <div style="margin-bottom:14px">
+      <label style="font-size:0.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Descrição</label>
+      <textarea id="ei-desc" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;padding:10px 12px;resize:vertical;min-height:100px;outline:none" placeholder="Descreva a ideia..."></textarea>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+      <div>
+        <label style="font-size:0.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Nível de Esforço</label>
+        <select id="ei-esforco" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;padding:10px 12px;appearance:none;cursor:pointer">
+          <option value="Baixo">🟢 Baixo esforço</option>
+          <option value="Médio">🟡 Médio esforço</option>
+          <option value="Alto">🔴 Alto esforço</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:0.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Cor do Card</label>
+        <select id="ei-cor" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;padding:10px 12px;appearance:none;cursor:pointer">
+          <option value="pink">🩷 Rosa (Hub)</option>
+          <option value="purple">💜 Roxo (Inovação)</option>
+          <option value="cyan">🩵 Ciano (Tecnologias)</option>
+          <option value="gold">🟡 Dourado</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-bottom:20px">
+      <label style="font-size:0.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Tags <span style="font-weight:400;text-transform:none">(separadas por vírgula)</span></label>
+      <input id="ei-tags" class="add-task-input" style="width:100%;font-size:0.85rem;padding:10px 12px" placeholder="Ex: Power BI, Automação, OneDrive" />
+    </div>
+
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="fecharEditarIdeia()" style="background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text2);padding:9px 18px;font-size:0.82rem;cursor:pointer;font-family:'DM Sans',sans-serif">Cancelar</button>
+      <button onclick="salvarEditarIdeia()" style="background:linear-gradient(135deg,var(--purple),var(--purple-l));border:none;border-radius:10px;color:#fff;padding:9px 22px;font-size:0.82rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600">💾 Salvar ideia</button>
     </div>
   </div>
 </div>
