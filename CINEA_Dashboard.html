@@ -3265,8 +3265,50 @@ function getDeptResp(dept) {
 
 function setDeptResp(dept, nome) {
   localStorage.setItem('cinea_resp_' + dept, nome);
+  // Auto-salva no Firebase imediatamente (não depende do botão Salvar)
+  if (_db) {
+    (async () => {
+      if (!_fbAuthReady) {
+        await new Promise(resolve => {
+          const u = _auth.onAuthStateChanged(usr => { u(); if (usr) _fbAuthReady = true; resolve(); });
+        });
+      }
+      _db.ref('cinea/config/dept_resp').set({
+        hub:  localStorage.getItem('cinea_resp_hub')  || 'Em definição',
+        inov: localStorage.getItem('cinea_resp_inov') || 'Em definição',
+        tec:  localStorage.getItem('cinea_resp_tec')  || 'Em definição',
+      }).catch(e => console.warn('[CINEA] Erro ao salvar responsáveis:', e.message));
+    })();
+  }
   renderDeptHeader(dept);
   renderMeetingCards();
+}
+
+async function loadDeptRespFromFirebase() {
+  if (!_db) return;
+  if (!_fbAuthReady) {
+    await new Promise(resolve => {
+      const u = _auth.onAuthStateChanged(usr => { u(); if (usr) _fbAuthReady = true; resolve(); });
+    });
+  }
+  try {
+    const [respSnap, repoSnap] = await Promise.all([
+      _db.ref('cinea/config/dept_resp').once('value'),
+      _db.ref('cinea/config/gh_repo').once('value'),
+    ]);
+    const resp = respSnap.val();
+    if (resp && typeof resp === 'object') {
+      ['hub','inov','tec'].forEach(d => {
+        if (resp[d]) localStorage.setItem('cinea_resp_' + d, resp[d]);
+      });
+      renderAllDeptHeaders();
+      renderMeetingCards();
+    }
+    const repo = repoSnap.val();
+    if (repo && !localStorage.getItem('cinea_gh_repo')) {
+      localStorage.setItem('cinea_gh_repo', repo); // preenche se não havia local
+    }
+  } catch(e) { console.warn('[CINEA] loadDeptRespFromFirebase falhou:', e.message); }
 }
 
 function renderDeptHeader(dept) {
@@ -3443,7 +3485,8 @@ function deleteTask(dept, i) {
   localStorage.setItem('cinea_tasks_lixeira', JSON.stringify(lixeira));
   TASKS[dept].splice(i, 1);
   saveTasksToStorage();
-  saveTasksToFirebase(dept); // persiste remoção imediatamente no Firebase
+  saveTasksToFirebase(dept);
+  _salvarLixeiraFirebase(lixeira); // persiste lixeira no Firebase
   registrarLog('Moveu tarefa para lixeira: ' + tarefa.name + ' (' + dept + ')');
   renderTaskTable(dept);
   renderMemberChips();
@@ -3582,6 +3625,7 @@ renderIdeas();
 loadIdeasFromFirebase();         // atualiza ideias assincronamente do Firebase
 loadTasksFromFirebase();         // atualiza tarefas assincronamente do Firebase
 loadDeptMembersFromFirebase();   // atualiza membros assincronamente do Firebase
+loadDeptRespFromFirebase();      // atualiza responsáveis por setor do Firebase
 
 // ═══════════════════════ SENHA ADMIN (SHA-256) ═══════════════════════
 // Senha padrão inicial: cinea2026
@@ -5099,9 +5143,23 @@ function salvarConfigGH() {
     alert('Token inválido. Deve começar com ghp_ ou github_pat_'); return;
   }
   if (!pat.startsWith('•')) localStorage.setItem('cinea_gh_pat', pat);
-  if (repo) localStorage.setItem('cinea_gh_repo', repo);
+  if (repo) {
+    localStorage.setItem('cinea_gh_repo', repo);
+    // Repositório vai pro Firebase (PAT fica só local — segurança)
+    if (_db) {
+      (async () => {
+        if (!_fbAuthReady) {
+          await new Promise(resolve => {
+            const u = _auth.onAuthStateChanged(usr => { u(); if (usr) _fbAuthReady = true; resolve(); });
+          });
+        }
+        _db.ref('cinea/config/gh_repo').set(repo).catch(e =>
+          console.warn('[CINEA] Erro ao salvar gh_repo:', e.message));
+      })();
+    }
+  }
   const ghStatus = document.getElementById('gh-status');
-  if(ghStatus) ghStatus.textContent = '✅ Configuração salva localmente';
+  if(ghStatus) ghStatus.textContent = '✅ Configuração salva' + (_db ? ' e sincronizada' : ' localmente');
   if(!pat.startsWith('•')) document.getElementById('gh-pat-input').value = '•'.repeat(Math.min(pat.length,24));
 }
 // ════════════════════════════════════════════════════════
@@ -5179,9 +5237,32 @@ async function excluirDefinitivoReuniao(key) {
   carregarLixeiraReunioes();
 }
 
-function carregarLixeiraTarefas() {
+// ── Lixeira de tarefas no Firebase ───────────────────────────
+async function _salvarLixeiraFirebase(lixeira) {
+  if (!_db) return;
+  if (!_fbAuthReady) {
+    await new Promise(resolve => {
+      const u = _auth.onAuthStateChanged(usr => { u(); if (usr) _fbAuthReady = true; resolve(); });
+    });
+  }
+  _db.ref('cinea/tasks_lixeira').set(lixeira.length ? lixeira : null)
+    .catch(e => console.warn('[CINEA] Erro ao salvar lixeira:', e.message));
+}
+
+async function carregarLixeiraTarefas() {
   const cont = document.getElementById('lixeira-content');
-  const lixeira = JSON.parse(localStorage.getItem('cinea_tasks_lixeira') || '[]');
+  // Tenta carregar do Firebase primeiro; fallback para localStorage
+  let lixeira = JSON.parse(localStorage.getItem('cinea_tasks_lixeira') || '[]');
+  if (_db && _fbAuthReady) {
+    try {
+      const snap = await _db.ref('cinea/tasks_lixeira').once('value');
+      const fbData = snap.val();
+      if (Array.isArray(fbData) && fbData.length > 0) {
+        lixeira = fbData;
+        localStorage.setItem('cinea_tasks_lixeira', JSON.stringify(lixeira));
+      }
+    } catch(e) { /* usa localStorage como fallback */ }
+  }
   if (!lixeira.length) { cont.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:30px">Lixeira vazia 🎉</div>'; return; }
   const deptNames = { hub:'Hub de Integração', inov:'Inovação Pedagógica', tec:'Tecnologias' };
   cont.innerHTML = lixeira.map((t, idx) => {
@@ -5208,9 +5289,10 @@ function restaurarTarefa(idx) {
   const { dept, deletadoEm, deletadoPor, ...tarefa } = t;
   TASKS[dept].push(tarefa);
   saveTasksToStorage();
-  saveTasksToFirebase(dept); // persiste restauração imediatamente no Firebase
+  saveTasksToFirebase(dept);
   lixeira.splice(idx, 1);
   localStorage.setItem('cinea_tasks_lixeira', JSON.stringify(lixeira));
+  _salvarLixeiraFirebase(lixeira); // persiste lixeira atualizada no Firebase
   registrarLog('Restaurou tarefa da lixeira: ' + tarefa.name + ' (' + dept + ')');
   carregarLixeiraTarefas();
   renderTaskTable(dept);
@@ -5223,12 +5305,14 @@ function excluirDefinitivoTarefa(idx) {
   const lixeira = JSON.parse(localStorage.getItem('cinea_tasks_lixeira') || '[]');
   lixeira.splice(idx, 1);
   localStorage.setItem('cinea_tasks_lixeira', JSON.stringify(lixeira));
+  _salvarLixeiraFirebase(lixeira); // persiste exclusão no Firebase
   carregarLixeiraTarefas();
 }
 
 async function limparLixeiraTotal() {
   if (!confirm('Esvaziar toda a lixeira? Reuniões e tarefas serão excluídas permanentemente.')) return;
   await _db.ref('cinea/meetings_lixeira').remove().catch(()=>{});
+  await _db.ref('cinea/tasks_lixeira').remove().catch(()=>{}); // limpa lixeira de tarefas no Firebase
   localStorage.removeItem('cinea_tasks_lixeira');
   registrarLog('Esvaziou a lixeira completa');
   lixeiraAba(_lxAbaAtiva);
