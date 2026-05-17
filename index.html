@@ -3149,20 +3149,31 @@ const ATIV_STATUS = {
 function renderAtividadesSetor(dept) {
   const tbody = document.getElementById('ativ-tbody-' + dept);
   if (!tbody) return;
-  const tasks = TASKS[dept] || [];
+  const tasks  = TASKS[dept] || [];
+  const logado = !!_currentUser;
   if (tasks.length === 0) {
     tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--text3);font-size:0.78rem;padding:20px">
       Nenhuma atividade cadastrada. Adicione tarefas em <strong style="color:var(--text2)">Equipe &amp; Tarefas</strong>.
     </td></tr>`;
     return;
   }
-  tbody.innerHTML = tasks.map(t => {
-    const st = ATIV_STATUS[t.status] || ATIV_STATUS['Pendente'];
+  tbody.innerHTML = tasks.map((t, i) => {
+    const st   = ATIV_STATUS[t.status] || ATIV_STATUS['Pendente'];
     const resp = t.assignees.filter(a => a !== 'A definir').join(', ') || '—';
+    const statusCell = logado
+      ? `<select onchange="changeTaskStatus('${dept}',${i},this.value)"
+           class="status-pill ${st.cls}"
+           style="border:none;cursor:pointer;font-family:'DM Sans',sans-serif;
+                  font-size:0.72rem;appearance:none;outline:none;background:transparent;">
+           ${['Em andamento','Concluída','Pendente','Bloqueada']
+               .map(s => `<option value="${s}"${t.status===s?' selected':''}>${s==='Em andamento'?'● Andamento':s==='Concluída'?'● Concluída':s==='Pendente'?'● Pendente':'● Bloqueada'}</option>`)
+               .join('')}
+         </select>`
+      : `<span class="status-pill ${st.cls}">${st.label}</span>`;
     return `<tr>
-      <td style="font-size:0.78rem">${t.name}</td>
-      <td style="font-size:0.72rem;color:var(--text3)">${resp}</td>
-      <td><span class="status-pill ${st.cls}">${st.label}</span></td>
+      <td style="font-size:0.78rem">${escapeHtml(t.name)}</td>
+      <td style="font-size:0.72rem;color:var(--text3)">${escapeHtml(resp)}</td>
+      <td>${statusCell}</td>
     </tr>`;
   }).join('');
 }
@@ -3191,11 +3202,24 @@ function renderMeetingCards() {
     const tasks    = TASKS[dept] || [];
     const itens = tasks.length === 0
       ? `<div style="font-size:0.78rem;color:var(--text3);padding:8px 0">Nenhuma tarefa cadastrada.</div>`
-      : tasks.map(t => {
+      : tasks.map((t, i) => {
           const dot = MEETING_DOT_COLOR[t.status] || 'var(--gold)';
-          return `<div class="gap-item">
-            <div class="gap-dot" style="background:${dot};margin-top:5px"></div>
-            <span style="font-size:0.78rem;color:var(--text2);line-height:1.4">${escapeHtml(t.name)}</span>
+          const statusEl = logado
+            ? `<select onchange="changeTaskStatus('${dept}',${i},this.value)"
+                 style="background:transparent;border:none;font-family:'DM Sans',sans-serif;
+                        font-size:0.68rem;color:${dot};cursor:pointer;appearance:none;outline:none;
+                        padding:0;margin-top:1px;max-width:110px">
+                 ${['Em andamento','Concluída','Pendente','Bloqueada']
+                     .map(s => `<option value="${s}"${t.status===s?' selected':''}>${s}</option>`)
+                     .join('')}
+               </select>`
+            : `<span style="font-size:0.68rem;color:${dot}">${escapeHtml(t.status||'Pendente')}</span>`;
+          return `<div class="gap-item" style="align-items:flex-start">
+            <div class="gap-dot" style="background:${dot};margin-top:6px;flex-shrink:0"></div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:0.78rem;color:var(--text2);line-height:1.4">${escapeHtml(t.name)}</div>
+              ${statusEl}
+            </div>
           </div>`;
         }).join('');
 
@@ -3467,9 +3491,11 @@ function changeTaskStatus(dept, idx, val) {
   if (!_currentUser) { abrirLoginModal(); return; }
   TASKS[dept][idx].status = val;
   saveTasksToStorage();
-  saveTasksToFirebase(dept); // persiste mudança de status imediatamente no Firebase
-  renderAtividadesSetor(dept);
-  renderMeetingCards();
+  saveTasksToFirebase(dept); // persiste no Firebase imediatamente
+  // Sincroniza as 3 telas que exibem tarefas
+  renderTaskTable(dept);        // Equipe & Tarefas
+  renderAtividadesSetor(dept);  // Departamentos
+  renderMeetingCards();         // Reuniões
 }
 
 function addNewTask(dept) {
