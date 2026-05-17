@@ -5093,6 +5093,27 @@ function loadPbiState() {
   updatePbiEmbed();
 }
 
+// ── Restringe campo a números e exibe aviso se letras/símbolos forem digitados ──
+function somenteNumeros(el) {
+  const v     = el.value;
+  const clean = v.replace(/\D/g, '');
+  if (v !== clean) {
+    el.value = clean;
+    el.style.borderColor = 'var(--gold)';
+    const hint = document.getElementById(el.id + '-hint');
+    if (hint) {
+      hint.style.display = 'block';
+      clearTimeout(hint._hideTimer);
+      hint._hideTimer = setTimeout(() => {
+        hint.style.display  = 'none';
+        el.style.borderColor = '';
+      }, 2800);
+    }
+  } else if (!v) {
+    el.style.borderColor = '';
+  }
+}
+
 // ════════════════ SISTEMA DE USUÁRIOS ════════════════
 
 function abrirLoginModal() {
@@ -6832,8 +6853,10 @@ async function salvarFeedbackSugestao(key) {
       <div style="font-size:0.78rem;color:var(--text3);margin-top:6px">Informe sua matrícula cadastrada. A solicitação será enviada ao administrador somente se a matrícula existir no sistema.</div>
     </div>
     <label class="reuniao-label">Sua matrícula</label>
-    <input id="reset-req-mat" class="reuniao-input" type="text" placeholder="Ex: 12345678" style="margin-bottom:20px"
+    <input id="reset-req-mat" class="reuniao-input" type="text" placeholder="Somente números"
+           inputmode="numeric" oninput="somenteNumeros(this)" style="margin-bottom:4px"
            onkeydown="if(event.key==='Enter') enviarSolicitacaoReset()">
+    <div id="reset-req-mat-hint" style="display:none;font-size:0.72rem;color:var(--gold);margin-bottom:14px">⚠️ A matrícula é composta apenas por números</div>
     <button onclick="enviarSolicitacaoReset()" style="width:100%;padding:12px;background:var(--purple);border:none;border-radius:12px;color:#fff;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Enviar solicitação</button>
     <div id="reset-req-error" style="font-size:0.78rem;margin-top:10px;min-height:18px;text-align:center"></div>
     <button onclick="fecharSolicitarReset()" style="margin-top:12px;width:100%;background:transparent;border:none;color:var(--text3);font-size:0.77rem;cursor:pointer;font-family:'DM Sans',sans-serif">Voltar ao login</button>
@@ -6886,11 +6909,13 @@ async function salvarFeedbackSugestao(key) {
     </div>
     <div class="gate-notice">🔒 Acesso restrito à equipe CINEA</div>
     <div class="modal-label">Matrícula</div>
-    <input id="gate-mat" class="modal-input" type="text" placeholder="Sua matrícula"
-      autocomplete="username" autofocus
+    <input id="gate-mat" class="modal-input" type="text" placeholder="Somente números"
+      autocomplete="username" autofocus inputmode="numeric"
+      oninput="somenteNumeros(this)"
       onkeydown="if(event.key==='Enter')document.getElementById('gate-senha').focus()">
+    <div id="gate-mat-hint" style="display:none;font-size:0.72rem;color:var(--gold);margin-top:4px">⚠️ A matrícula é composta apenas por números</div>
     <div class="modal-label" style="margin-top:13px">Senha</div>
-    <input id="gate-senha" class="modal-input" type="password" placeholder="Sua senha"
+    <input id="gate-senha" class="modal-input" type="password" placeholder="Digite a sua senha"
       autocomplete="current-password"
       onkeydown="if(event.key==='Enter')fazerLoginGate()">
     <div style="display:flex;align-items:center;gap:8px;margin:14px 0 6px">
@@ -6913,9 +6938,11 @@ async function salvarFeedbackSugestao(key) {
       <div style="font-size:0.78rem;color:var(--text3);margin-top:4px">NED · PUC Minas</div>
     </div>
     <label class="reuniao-label">Matrícula</label>
-    <input id="login-matricula" class="reuniao-input" type="text" placeholder="Ex: 12345678" autocomplete="username" style="margin-bottom:14px">
+    <input id="login-matricula" class="reuniao-input" type="text" placeholder="Somente números" autocomplete="username"
+           inputmode="numeric" oninput="somenteNumeros(this)" style="margin-bottom:4px">
+    <div id="login-matricula-hint" style="display:none;font-size:0.72rem;color:var(--gold);margin-bottom:10px">⚠️ A matrícula é composta apenas por números</div>
     <label class="reuniao-label">Senha</label>
-    <input id="login-senha" class="reuniao-input" type="password" placeholder="••••••••" autocomplete="current-password" style="margin-bottom:20px"
+    <input id="login-senha" class="reuniao-input" type="password" placeholder="Digite a sua senha" autocomplete="current-password" style="margin-bottom:20px"
            onkeydown="if(event.key==='Enter') fazerLogin()">
     <button onclick="fazerLogin()" style="width:100%;padding:13px;background:var(--purple);border:none;border-radius:12px;color:#fff;font-size:0.92rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Entrar</button>
     <div id="login-error" style="font-size:0.78rem;color:var(--red);margin-top:12px;min-height:18px;text-align:center"></div>
@@ -6948,7 +6975,8 @@ async function salvarFeedbackSugestao(key) {
         </div>
         <div>
           <label class="reuniao-label">Matrícula</label>
-          <input id="new-user-mat" class="reuniao-input" placeholder="Ex: 12345678" style="margin:0">
+          <input id="new-user-mat" class="reuniao-input" placeholder="Somente números" inputmode="numeric" oninput="somenteNumeros(this)" style="margin:0">
+          <div id="new-user-mat-hint" style="display:none;font-size:0.7rem;color:var(--gold);margin-top:3px">⚠️ Apenas números</div>
         </div>
         <div>
           <label class="reuniao-label">Sigla (2 letras)</label>
