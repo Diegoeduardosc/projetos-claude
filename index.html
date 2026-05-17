@@ -1508,6 +1508,33 @@ body.light-mode .notif-bell-btn:hover { background: rgba(79,45,127,0.08); }
 }
 .notif-resolve-btn:hover { background: rgba(79,45,127,0.28); }
 .notif-empty { text-align: center; color: var(--text3); font-size: 0.78rem; padding: 20px 10px; }
+.notif-actions { display: flex; gap: 6px; margin-top: 6px; align-items: center; flex-wrap: wrap; }
+.notif-dismiss-btn {
+  background: transparent; border: 1px solid var(--border); border-radius: 6px;
+  padding: 3px 9px; font-size: 0.71rem; color: var(--text3); cursor: pointer;
+  font-family: 'DM Sans', sans-serif; transition: all 0.12s;
+}
+.notif-dismiss-btn:hover { background: rgba(231,76,60,0.08); border-color: var(--red); color: var(--red); }
+.notif-item-task  { border-left: 2px solid var(--gold); }
+.notif-item-meeting { border-left: 2px solid var(--purple-l); }
+.notif-item-aviso { border-left: 2px solid var(--cyan); background: rgba(0,180,204,0.04); }
+.notif-aviso-texto { font-style: italic; color: var(--text); margin-top: 4px; font-size: 0.75rem; }
+/* Botão broadcast */
+.notif-aviso-compose-btn {
+  background: rgba(0,180,204,0.1); border: 1px solid rgba(0,180,204,0.3);
+  border-radius: 8px; padding: 3px 9px; font-size: 0.7rem; color: var(--cyan);
+  cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+  display: flex; align-items: center; gap: 4px;
+}
+.notif-aviso-compose-btn:hover { background: rgba(0,180,204,0.18); }
+/* Textarea do aviso */
+.notif-aviso-textarea {
+  width: 100%; min-height: 72px; padding: 8px 10px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); font-size: 0.78rem; font-family: 'DM Sans', sans-serif;
+  resize: vertical; outline: none;
+}
+.notif-aviso-textarea:focus { border-color: var(--cyan); }
 
 /* ═══ SUGESTÕES ═══ */
 .sug-wrap {
@@ -1970,7 +1997,17 @@ body.edit-mode .user-mgmt-section { display: block; }
         <button class="notif-bell-btn" title="Notificações">🔔</button>
         <div class="notif-badge" id="notif-badge"></div>
         <div class="notif-dropdown-panel" id="notif-panel">
-          <div style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;padding:4px 4px 10px">Notificações</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 4px 10px">
+            <span style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px">Notificações</span>
+            <button id="notif-aviso-btn" class="notif-aviso-compose-btn" onclick="toggleAvisoCompose(event)" title="Enviar aviso a todos" style="display:none">📢 Aviso</button>
+          </div>
+          <div id="aviso-compose" style="display:none" onclick="event.stopPropagation()">
+            <textarea id="aviso-texto-input" class="notif-aviso-textarea" placeholder="Mensagem para todos os usuários..."></textarea>
+            <div style="display:flex;gap:6px;margin-top:6px">
+              <button class="notif-resolve-btn" style="flex:1" onclick="enviarAvisoGlobal()">📢 Enviar a todos</button>
+              <button class="notif-dismiss-btn" onclick="document.getElementById('aviso-compose').style.display='none'">Cancelar</button>
+            </div>
+          </div>
           <div id="notif-list"><div class="notif-empty">Sem notificações pendentes</div></div>
         </div>
       </div>
@@ -4044,6 +4081,7 @@ function deleteTask(dept, i) {
   saveTasksToFirebase(dept);
   _salvarLixeiraFirebase(lixeira); // persiste lixeira no Firebase
   registrarLog('Moveu tarefa para lixeira: ' + tarefa.name + ' (' + dept + ')');
+  notificarAdmin('task_delete', { nome_tarefa: tarefa.name, dept_label: DEPT_LABELS[dept] });
   renderTaskTable(dept);
   renderMemberChips();
   renderAtividadesSetor(dept);
@@ -4101,6 +4139,13 @@ function changeTaskStatus(dept, idx, val) {
   registrarLog(
     `Status alterado: "${tarefa.name}" (${DEPT_LABELS[dept]}) · ${anterior} → ${val}`
   );
+  // Notifica admin se for usuário comum
+  notificarAdmin('task_status', {
+    nome_tarefa: tarefa.name,
+    dept_label:  DEPT_LABELS[dept],
+    status_ant:  anterior,
+    status_novo: val
+  });
   // Sincroniza as 3 telas
   renderTaskTable(dept);
   renderAtividadesSetor(dept);
@@ -4127,6 +4172,7 @@ function addNewTask(dept) {
   saveTasksToStorage();
   saveTasksToFirebase(dept); // persiste imediatamente no Firebase
   registrarLog('Adicionou tarefa em ' + dept + ': ' + name);
+  notificarAdmin('task_nova', { nome_tarefa: name, dept_label: DEPT_LABELS[dept] });
   renderTaskTable(dept);
   renderMemberChips();
   renderAtividadesSetor(dept);
@@ -5218,7 +5264,10 @@ async function resetarSenhaUsuario(mat, nome) {
 // ════════ NOTIFICAÇÕES ════════
 function toggleNotifPanel(e) {
   e.stopPropagation();
-  document.getElementById('notif-bell-wrap')?.classList.toggle('open');
+  const wrap = document.getElementById('notif-bell-wrap');
+  const wasOpen = wrap?.classList.contains('open');
+  wrap?.classList.toggle('open');
+  if (!wasOpen) carregarNotificacoes(); // carrega ao abrir
 }
 document.addEventListener('click', () => {
   document.getElementById('notif-bell-wrap')?.classList.remove('open');
@@ -5226,33 +5275,166 @@ document.addEventListener('click', () => {
   document.querySelectorAll('.st-dropdown.open').forEach(el => el.classList.remove('open'));
 });
 
-async function carregarNotificacoes() {
+// ── Notifica o admin sobre eventos importantes (apenas usuários não-admin) ──────
+async function notificarAdmin(tipo, dados) {
+  if (!_db || !_currentUser || _currentUser.role === 'admin') return;
   try {
-    const snap  = await _db.ref('cinea/notificacoes').orderByChild('lido').equalTo(false).once('value');
-    const data  = snap.val() || {};
-    const items = Object.entries(data).sort((a,b) => (b[1].ts||'').localeCompare(a[1].ts||''));
+    await _db.ref('cinea/notificacoes').push({
+      tipo,
+      destinatario: 'admin',
+      lido: false,
+      ts: new Date().toISOString(),
+      autor: _currentUser.nome || _currentUser.matricula,
+      ...dados
+    });
+  } catch(e) {}
+}
+
+// ── Dispensa (marca como lida) uma notificação ──────────────────────────────────
+async function dispensarNotif(key) {
+  await _db.ref('cinea/notificacoes/' + key + '/lido').set(true).catch(() => {});
+  carregarNotificacoes();
+}
+
+// ── Broadcast: enviar aviso a todos os usuários ────────────────────────────────
+async function enviarAvisoGlobal() {
+  const texto = document.getElementById('aviso-texto-input')?.value?.trim();
+  if (!texto) { mostrarToast('⚠️ Atenção', 'Digite uma mensagem para enviar.'); return; }
+  if (!_currentUser || _currentUser.role !== 'admin') return;
+  try {
+    await _db.ref('cinea/notificacoes').push({
+      tipo: 'aviso',
+      destinatario: 'all',
+      texto,
+      autor: _currentUser.nome || _currentUser.matricula,
+      lido: false,
+      ts: new Date().toISOString()
+    });
+    registrarLog('Enviou aviso global: ' + texto.substring(0, 60));
+    document.getElementById('aviso-texto-input').value = '';
+    document.getElementById('aviso-compose').style.display = 'none';
+    mostrarToast('📢 Aviso enviado!', 'Todos os usuários logados serão notificados.');
+    carregarNotificacoes();
+  } catch(e) { mostrarToast('❌ Erro', 'Não foi possível enviar o aviso.'); }
+}
+function toggleAvisoCompose(e) {
+  e.stopPropagation();
+  const f = document.getElementById('aviso-compose');
+  if (!f) return;
+  const visible = f.style.display !== 'none';
+  f.style.display = visible ? 'none' : 'block';
+  if (!visible) setTimeout(() => document.getElementById('aviso-texto-input')?.focus(), 60);
+}
+
+async function carregarNotificacoes() {
+  if (!_currentUser || !_db) return;
+  try {
+    const isAdmin = _currentUser.role === 'admin';
+    const mat     = _currentUser.matricula;
+    const snap    = await _db.ref('cinea/notificacoes').orderByChild('lido').equalTo(false).once('value');
+    const allData = snap.val() || {};
+
+    // Filtra por papel
+    const items = Object.entries(allData).filter(([, n]) => {
+      if (isAdmin) {
+        // Admin vê tudo exceto respostas a sugestões de outros usuários
+        if (n.tipo === 'resposta_sugestao') return false;
+        // Avisos globais: admin também vê
+        return true;
+      } else {
+        // Usuário: vê avisos globais + respostas às suas próprias sugestões
+        if (n.tipo === 'aviso' && n.destinatario === 'all') return true;
+        if (n.tipo === 'resposta_sugestao' && n.matricula === mat) return true;
+        return false;
+      }
+    }).sort((a, b) => (b[1].ts || '').localeCompare(a[1].ts || ''));
+
     const badge = document.getElementById('notif-badge');
     const list  = document.getElementById('notif-list');
+    const avisoBtn = document.getElementById('notif-aviso-btn');
+    if (avisoBtn) avisoBtn.style.display = isAdmin ? 'flex' : 'none';
+
     if (!items.length) {
       if (badge) { badge.textContent = ''; badge.classList.remove('show'); }
-      if (list)  list.innerHTML = '<div class="notif-empty">Sem notificações pendentes 🎉</div>';
+      if (list)  list.innerHTML = '<div class="notif-empty">Sem notificações 🎉</div>';
       return;
     }
     if (badge) { badge.textContent = items.length; badge.classList.add('show'); }
+
     if (list) list.innerHTML = items.map(([key, n]) => {
-      const data_fmt = n.ts ? new Date(n.ts).toLocaleString('pt-BR') : '—';
+      const fmt = n.ts ? new Date(n.ts).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }) : '—';
+      const by  = n.autor ? `<strong>${n.autor}</strong>` : '';
+
       if (n.tipo === 'sugestao') {
         return `<div class="notif-item">
           <div class="notif-item-title">💡 ${n.ticket ? `<span class="ticket-code" style="font-size:0.62rem">${n.ticket}</span> ` : ''}Nova sugestão</div>
-          <div class="notif-item-sub">De: <strong>${n.autor||n.matricula||'—'}</strong> · ${data_fmt}</div>
-          <div class="notif-item-sub" style="margin-top:3px;font-style:italic">"${(n.preview||'').substring(0,80)}${(n.preview||'').length>80?'…':''}"</div>
-          <button class="notif-resolve-btn" onclick="verSugestaoNotif('${key}')">👁 Ver sugestão</button>
+          <div class="notif-item-sub">De: ${by||n.matricula||'—'} · ${fmt}</div>
+          <div class="notif-item-sub" style="margin-top:2px;font-style:italic">"${(n.preview||'').substring(0,80)}${(n.preview||'').length>80?'…':''}"</div>
+          <div class="notif-actions"><button class="notif-resolve-btn" onclick="verSugestaoNotif('${key}')">👁 Ver sugestão</button><button class="notif-dismiss-btn" onclick="dispensarNotif('${key}')">✕</button></div>
         </div>`;
       }
+      if (n.tipo === 'reset_senha') {
+        return `<div class="notif-item">
+          <div class="notif-item-title">🔑 Solicitação de reset de senha</div>
+          <div class="notif-item-sub">Matrícula: <strong>${n.matricula}</strong> · ${n.nome||'—'} · ${fmt}</div>
+          <div class="notif-actions"><button class="notif-resolve-btn" onclick="resolverReset('${key}','${n.matricula}','${n.nome||n.matricula}')">✔ Resetar senha agora</button></div>
+        </div>`;
+      }
+      if (n.tipo === 'task_nova') {
+        return `<div class="notif-item notif-item-task">
+          <div class="notif-item-title">✅ Nova tarefa criada</div>
+          <div class="notif-item-sub">${by} · ${n.dept_label||''} · ${fmt}</div>
+          <div class="notif-item-sub" style="margin-top:2px;color:var(--text)">"${n.nome_tarefa||''}"</div>
+          <div class="notif-actions"><button class="notif-dismiss-btn" onclick="dispensarNotif('${key}')">✕ Dispensar</button></div>
+        </div>`;
+      }
+      if (n.tipo === 'task_status') {
+        const reaberta = n.status_novo === 'Pendente' && n.status_ant === 'Concluída';
+        const icon = reaberta ? '↩' : '🔄';
+        const label = reaberta ? 'Tarefa reaberta' : `Status: ${n.status_ant||'?'} → ${n.status_novo||'?'}`;
+        return `<div class="notif-item notif-item-task">
+          <div class="notif-item-title">${icon} ${label}</div>
+          <div class="notif-item-sub">${by} · ${n.dept_label||''} · ${fmt}</div>
+          <div class="notif-item-sub" style="margin-top:2px;color:var(--text)">"${n.nome_tarefa||''}"</div>
+          <div class="notif-actions"><button class="notif-dismiss-btn" onclick="dispensarNotif('${key}')">✕ Dispensar</button></div>
+        </div>`;
+      }
+      if (n.tipo === 'task_delete') {
+        return `<div class="notif-item notif-item-task">
+          <div class="notif-item-title">🗑️ Tarefa movida para lixeira</div>
+          <div class="notif-item-sub">${by} · ${n.dept_label||''} · ${fmt}</div>
+          <div class="notif-item-sub" style="margin-top:2px;color:var(--text)">"${n.nome_tarefa||''}"</div>
+          <div class="notif-actions"><button class="notif-dismiss-btn" onclick="dispensarNotif('${key}')">✕ Dispensar</button></div>
+        </div>`;
+      }
+      if (n.tipo === 'meeting_nova') {
+        return `<div class="notif-item notif-item-meeting">
+          <div class="notif-item-title">📋 Nova ata de reunião</div>
+          <div class="notif-item-sub">${by} · ${n.data_reuniao||''} · ${fmt}</div>
+          <div class="notif-actions"><button class="notif-dismiss-btn" onclick="dispensarNotif('${key}')">✕ Dispensar</button></div>
+        </div>`;
+      }
+      if (n.tipo === 'aviso') {
+        return `<div class="notif-item notif-item-aviso">
+          <div class="notif-item-title">📢 Aviso de ${n.autor||'Administração'}</div>
+          <div class="notif-item-sub">${fmt}</div>
+          <div class="notif-item-sub notif-aviso-texto">"${n.texto||''}"</div>
+          <div class="notif-actions"><button class="notif-dismiss-btn" onclick="dispensarNotif('${key}')">✕ Dispensar</button></div>
+        </div>`;
+      }
+      if (n.tipo === 'resposta_sugestao') {
+        return `<div class="notif-item">
+          <div class="notif-item-title">✉️ ${n.ticket ? `<span class="ticket-code" style="font-size:0.62rem">${n.ticket}</span> ` : ''}Resposta ao seu ticket</div>
+          <div class="notif-item-sub">${fmt}</div>
+          <div class="notif-item-sub" style="margin-top:2px;font-style:italic">"${(n.feedback||n.preview||'').substring(0,80)}"</div>
+          <div class="notif-actions"><button class="notif-resolve-btn" onclick="dispensarNotif('${key}')">✔ OK, lido</button></div>
+        </div>`;
+      }
+      // fallback genérico
       return `<div class="notif-item">
-        <div class="notif-item-title">🔑 Solicitação de reset de senha</div>
-        <div class="notif-item-sub">Matrícula: <strong>${n.matricula}</strong> · ${n.nome||'—'} · ${data_fmt}</div>
-        <button class="notif-resolve-btn" onclick="resolverReset('${key}','${n.matricula}','${n.nome||n.matricula}')">✔ Resetar senha agora</button>
+        <div class="notif-item-title">${n.titulo || 'Notificação'}</div>
+        <div class="notif-item-sub">${fmt}</div>
+        <div class="notif-actions"><button class="notif-dismiss-btn" onclick="dispensarNotif('${key}')">✕</button></div>
       </div>`;
     }).join('');
   } catch(e) { console.warn('Notificações:', e); }
@@ -5498,6 +5680,7 @@ async function salvarReuniao() {
     await _db.ref('cinea/meetings/' + key).set(meeting);
     salvarNoGitHub(meeting, key).catch(e => console.warn('[GitHub backup]', e));
     registrarLog('Registrou/editou reunião: ' + (meeting.data||'?').split('-').reverse().join('/'));
+    notificarAdmin('meeting_nova', { data_reuniao: (meeting.data||'?').split('-').reverse().join('/') });
     fecharFormReuniao();
     carregarReunioes();
   } catch(e) { alert('Erro ao salvar: ' + e.message); }
@@ -6352,11 +6535,16 @@ function iniciarListenerNotificacoes() {
     if (!badge) return;
     let count = 0;
     if (isAdmin) {
-      // Admin vê tudo que está não lido
-      count = Object.values(data).filter(n => !n.lido).length;
+      // Admin vê tudo exceto respostas a sugestões de outros usuários
+      count = Object.values(data).filter(n => !n.lido && n.tipo !== 'resposta_sugestao').length;
     } else {
-      // Usuário comum: só notificações endereçadas a ele (ex: resposta de sugestão)
-      count = Object.values(data).filter(n => !n.lido && n.matricula === _currentUser.matricula && n.tipo === 'resposta_sugestao').length;
+      // Usuário comum: avisos globais + respostas às próprias sugestões
+      count = Object.values(data).filter(n =>
+        !n.lido && (
+          (n.tipo === 'aviso' && n.destinatario === 'all') ||
+          (n.tipo === 'resposta_sugestao' && n.matricula === _currentUser.matricula)
+        )
+      ).length;
     }
     if (count > 0) { badge.textContent = count; badge.classList.add('show'); }
     else           { badge.textContent = '';    badge.classList.remove('show'); }
