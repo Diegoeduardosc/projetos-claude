@@ -1042,15 +1042,55 @@ body:not(.user-logged-in) .add-task-row { display: none !important; }
   min-width: 130px;
 }
 .add-task-select:focus { border-color: var(--purple-l); }
-.add-task-select[multiple] {
-  min-width: 160px;
-  padding: 6px 8px;
-  max-height: 120px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--purple-l) transparent;
+/* ─── Member Picker (chips + dropdown) ─── */
+.member-picker { position: relative; display: inline-flex; flex-direction: column; }
+.member-picker-chips {
+  display: flex; flex-wrap: wrap; gap: 5px;
+  padding: 5px 8px; min-height: 36px; min-width: 175px;
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 10px; cursor: pointer; align-items: center;
+  transition: border-color 0.15s;
 }
-.add-task-select[multiple] option { padding: 3px 6px; border-radius: 4px; }
-.add-task-select[multiple] option:checked { background: rgba(79,45,127,0.35); color: var(--text); }
+.member-picker-chips:hover { border-color: rgba(255,255,255,0.15); }
+.member-chip-sel {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 7px; background: rgba(79,45,127,0.32);
+  border: 1px solid rgba(79,45,127,0.45); border-radius: 20px;
+  font-size: 0.71rem; color: var(--text); white-space: nowrap;
+}
+.member-chip-rm {
+  cursor: pointer; opacity: 0.5; font-size: 0.63rem;
+  line-height: 1; padding: 0 1px; transition: opacity 0.12s;
+}
+.member-chip-rm:hover { opacity: 1; }
+.picker-add-btn {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: none; border: 1px dashed var(--text3); border-radius: 20px;
+  color: var(--text3); font-size: 0.71rem; padding: 2px 9px;
+  cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+}
+.picker-add-btn:hover { border-color: var(--purple-l); color: var(--purple-l); }
+.member-picker-dd {
+  position: absolute; top: calc(100% + 5px); left: 0;
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 6px; z-index: 350;
+  min-width: 195px; max-height: 230px; overflow-y: auto;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.5); display: none;
+  scrollbar-width: thin; scrollbar-color: var(--purple-l) transparent;
+}
+.member-picker-dd.open { display: block; }
+.picker-opt {
+  padding: 6px 10px; border-radius: 6px; font-size: 0.78rem;
+  cursor: pointer; color: var(--text2); transition: background 0.1s;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.picker-opt:hover { background: rgba(79,45,127,0.22); color: var(--text); }
+.picker-opt.sel { color: var(--purple-l); font-weight: 500; }
+.picker-opt.sel::after { content: '✓'; font-size: 0.68rem; opacity: 0.8; }
+.picker-group-lbl {
+  font-size: 0.59rem; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 1.5px; padding: 5px 10px 2px;
+}
 .add-task-btn {
   padding: 8px 16px;
   background: linear-gradient(135deg, var(--purple), var(--purple-l));
@@ -2484,13 +2524,13 @@ body.edit-mode .user-mgmt-section { display: block; }
         <!-- HUB -->
         <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--pink);margin-bottom:8px;margin-top:4px">Hub de Integração</div>
         <table class="task-full-table" id="table-hub"></table>
-        <div class="add-task-row" style="align-items:flex-start">
-          <input class="add-task-input" id="hub-input" placeholder="Nova tarefa para o Hub..." style="align-self:center" />
-          <div style="display:flex;flex-direction:column;gap:3px">
-            <div style="font-size:0.67rem;color:var(--text3);padding-left:2px">Responsáveis (Ctrl+clique p/ múltiplos)</div>
-            <select class="add-task-select" id="hub-member-sel" multiple></select>
+        <div class="add-task-row">
+          <input class="add-task-input" id="hub-input" placeholder="Nova tarefa para o Hub..." />
+          <div class="member-picker">
+            <div class="member-picker-chips" id="ap-chips-hub"><button class="picker-add-btn">+ Responsável</button></div>
+            <div class="member-picker-dd" id="ap-dd-hub"></div>
           </div>
-          <button class="add-task-btn" onclick="addNewTask('hub')" style="align-self:flex-end">+ Adicionar</button>
+          <button class="add-task-btn" onclick="addNewTask('hub')">+ Adicionar</button>
         </div>
 
         <div style="height:1px;background:var(--border);margin:20px 0"></div>
@@ -2498,13 +2538,13 @@ body.edit-mode .user-mgmt-section { display: block; }
         <!-- INOVAÇÃO -->
         <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--purple-l);margin-bottom:8px">Inovação Pedagógica</div>
         <table class="task-full-table" id="table-inov"></table>
-        <div class="add-task-row" style="align-items:flex-start">
-          <input class="add-task-input" id="inov-input" placeholder="Nova tarefa para Inovação..." style="align-self:center" />
-          <div style="display:flex;flex-direction:column;gap:3px">
-            <div style="font-size:0.67rem;color:var(--text3);padding-left:2px">Responsáveis (Ctrl+clique p/ múltiplos)</div>
-            <select class="add-task-select" id="inov-member-sel" multiple></select>
+        <div class="add-task-row">
+          <input class="add-task-input" id="inov-input" placeholder="Nova tarefa para Inovação..." />
+          <div class="member-picker">
+            <div class="member-picker-chips" id="ap-chips-inov"><button class="picker-add-btn">+ Responsável</button></div>
+            <div class="member-picker-dd" id="ap-dd-inov"></div>
           </div>
-          <button class="add-task-btn" onclick="addNewTask('inov')" style="align-self:flex-end">+ Adicionar</button>
+          <button class="add-task-btn" onclick="addNewTask('inov')">+ Adicionar</button>
         </div>
 
         <div style="height:1px;background:var(--border);margin:20px 0"></div>
@@ -2512,13 +2552,13 @@ body.edit-mode .user-mgmt-section { display: block; }
         <!-- TECNOLOGIAS -->
         <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--cyan);margin-bottom:8px">Tecnologias & Aprendizagem</div>
         <table class="task-full-table" id="table-tec"></table>
-        <div class="add-task-row" style="align-items:flex-start">
-          <input class="add-task-input" id="tec-input" placeholder="Nova tarefa para Tecnologias..." style="align-self:center" />
-          <div style="display:flex;flex-direction:column;gap:3px">
-            <div style="font-size:0.67rem;color:var(--text3);padding-left:2px">Responsáveis (Ctrl+clique p/ múltiplos)</div>
-            <select class="add-task-select" id="tec-member-sel" multiple></select>
+        <div class="add-task-row">
+          <input class="add-task-input" id="tec-input" placeholder="Nova tarefa para Tecnologias..." />
+          <div class="member-picker">
+            <div class="member-picker-chips" id="ap-chips-tec"><button class="picker-add-btn">+ Responsável</button></div>
+            <div class="member-picker-dd" id="ap-dd-tec"></div>
           </div>
-          <button class="add-task-btn" onclick="addNewTask('tec')" style="align-self:flex-end">+ Adicionar</button>
+          <button class="add-task-btn" onclick="addNewTask('tec')">+ Adicionar</button>
         </div>
       </div>
     </div>
@@ -3118,30 +3158,129 @@ function renderTeamCards() {
   setTimeout(() => { renderMemberChips(); }, 0);
 }
 
-// ── Rebuilda os <select> de responsáveis dinamicamente ────────
-function updateMemberSelects() {
-  const allMembers = getAllMembersForTask();
-  ['hub','inov','tec'].forEach(dept => {
-    const sel = document.getElementById(dept + '-member-sel');
-    if (!sel) return;
-    const deptMembers = DEPT_MEMBERS[dept].filter(m => m !== 'A definir');
-    const outros = allMembers.filter(m => !deptMembers.includes(m));
-    // Multi-select: mostra TODOS os membros em optgroups
-    let html = '<option value="A definir">⏳ A definir</option>';
-    if (deptMembers.length) {
-      html += `<optgroup label="── ${DEPT_LABELS[dept]}">`;
-      deptMembers.forEach(m => { html += `<option value="${m}">${m}</option>`; });
-      html += '</optgroup>';
-    }
-    if (outros.length) {
-      html += `<optgroup label="── Outros membros">`;
-      outros.forEach(m => { html += `<option value="${m}">${m}</option>`; });
-      html += '</optgroup>';
-    }
-    sel.innerHTML = html;
-    sel.multiple = true;
-    sel.size = Math.min(5, deptMembers.length + outros.length + 1);
+// ════════════════════════════════════════════════════════
+//  MEMBER PICKER — chips + dropdown (add-task & edit-row)
+// ════════════════════════════════════════════════════════
+
+// Estado dos pickers de nova tarefa
+const _addPicker = { hub: new Set(), inov: new Set(), tec: new Set() };
+// Estado dos pickers de edição: chave = "dept_idx"
+const _editPicker = {};
+
+// ── Funções auxiliares ──
+function _pickerDDHtml(dept, selectedSet) {
+  const deptM  = DEPT_MEMBERS[dept].filter(m => m !== 'A definir');
+  const outros = getAllMembersForTask().filter(m => !deptM.includes(m));
+  const opt = (m, lbl, prefix) => {
+    const s = selectedSet.has(m);
+    return `<div class="picker-opt${s?' sel':''}" onclick="${prefix}('${dept}',${typeof selectedSet._idx!=='undefined'?selectedSet._idx+',':''}'${m}')">${lbl}</div>`;
+  };
+  let h = '';
+  if (deptM.length) {
+    h += `<div class="picker-group-lbl">${DEPT_LABELS[dept]}</div>`;
+    deptM.forEach(m => { h += opt(m, m, 'toggleAddPM'); });
+  }
+  if (outros.length) {
+    h += `<div class="picker-group-lbl">Outros membros</div>`;
+    outros.forEach(m => { h += opt(m, m, 'toggleAddPM'); });
+  }
+  h += `<div class="picker-group-lbl">──</div>`;
+  h += opt('A definir', '⏳ A definir', 'toggleAddPM');
+  return h;
+}
+
+// ── Add-task picker ──
+function renderAddPicker(dept) {
+  const chips = document.getElementById('ap-chips-' + dept);
+  const dd    = document.getElementById('ap-dd-' + dept);
+  if (!chips) return;
+  const sel = _addPicker[dept];
+  let h = '';
+  sel.forEach(m => {
+    h += `<span class="member-chip-sel">${m === 'A definir' ? '⏳ A definir' : m}<span class="member-chip-rm" onclick="event.stopPropagation();removeAddPM('${dept}','${m}')">✕</span></span>`;
   });
+  h += `<button class="picker-add-btn" onclick="openAddPD('${dept}',event)">${sel.size===0?'+ Responsável':'+ Adicionar'}</button>`;
+  chips.innerHTML = h;
+  if (!dd) return;
+  const deptM  = DEPT_MEMBERS[dept].filter(m => m !== 'A definir');
+  const outros = getAllMembersForTask().filter(m => !deptM.includes(m));
+  let dh = '';
+  const mopt = (m, lbl) => {
+    const s = sel.has(m);
+    return `<div class="picker-opt${s?' sel':''}" onclick="event.stopPropagation();toggleAddPM('${dept}','${m}')">${lbl}</div>`;
+  };
+  if (deptM.length)  { dh += `<div class="picker-group-lbl">${DEPT_LABELS[dept]}</div>`; deptM.forEach(m => { dh += mopt(m, m); }); }
+  if (outros.length) { dh += `<div class="picker-group-lbl">Outros membros</div>`;       outros.forEach(m => { dh += mopt(m, m); }); }
+  dh += `<div class="picker-group-lbl">──</div>${mopt('A definir','⏳ A definir')}`;
+  dd.innerHTML = dh;
+}
+function openAddPD(dept, e) {
+  e.stopPropagation();
+  const dd = document.getElementById('ap-dd-' + dept);
+  if (!dd) return;
+  document.querySelectorAll('.member-picker-dd.open').forEach(el => el.classList.remove('open'));
+  dd.classList.toggle('open');
+}
+function toggleAddPM(dept, m) {
+  if (_addPicker[dept].has(m)) _addPicker[dept].delete(m); else _addPicker[dept].add(m);
+  renderAddPicker(dept);
+}
+function removeAddPM(dept, m) { _addPicker[dept].delete(m); renderAddPicker(dept); }
+function clearAddPicker(dept) { _addPicker[dept].clear(); renderAddPicker(dept); }
+function getAddPM(dept) { return Array.from(_addPicker[dept]); }
+
+// ── Edit-row picker ──
+function renderEditPicker(dept, i) {
+  const key   = dept + '_' + i;
+  const chips = document.getElementById('ep-chips-' + key);
+  const dd    = document.getElementById('ep-dd-' + key);
+  if (!chips) return;
+  const sel = _editPicker[key] || new Set();
+  let h = '';
+  sel.forEach(m => {
+    h += `<span class="member-chip-sel">${m === 'A definir' ? '⏳ A definir' : m}<span class="member-chip-rm" onclick="event.stopPropagation();removeEditPM('${dept}',${i},'${m}')">✕</span></span>`;
+  });
+  h += `<button class="picker-add-btn" onclick="openEditPD('${dept}',${i},event)">${sel.size===0?'+ Responsável':'+ Adicionar'}</button>`;
+  chips.innerHTML = h;
+  if (!dd) return;
+  const deptM  = DEPT_MEMBERS[dept].filter(m => m !== 'A definir');
+  const outros = getAllMembersForTask().filter(m => !deptM.includes(m));
+  let dh = '';
+  const mopt = (m, lbl) => {
+    const s = sel.has(m);
+    return `<div class="picker-opt${s?' sel':''}" onclick="event.stopPropagation();toggleEditPM('${dept}',${i},'${m}')">${lbl}</div>`;
+  };
+  if (deptM.length)  { dh += `<div class="picker-group-lbl">${DEPT_LABELS[dept]}</div>`; deptM.forEach(m => { dh += mopt(m, m); }); }
+  if (outros.length) { dh += `<div class="picker-group-lbl">Outros membros</div>`;       outros.forEach(m => { dh += mopt(m, m); }); }
+  dh += `<div class="picker-group-lbl">──</div>${mopt('A definir','⏳ A definir')}`;
+  dd.innerHTML = dh;
+}
+function openEditPD(dept, i, e) {
+  e.stopPropagation();
+  const key = dept + '_' + i;
+  const dd  = document.getElementById('ep-dd-' + key);
+  if (!dd) return;
+  document.querySelectorAll('.member-picker-dd.open').forEach(el => el.classList.remove('open'));
+  dd.classList.toggle('open');
+}
+function toggleEditPM(dept, i, m) {
+  const key = dept + '_' + i;
+  if (!_editPicker[key]) _editPicker[key] = new Set();
+  if (_editPicker[key].has(m)) _editPicker[key].delete(m); else _editPicker[key].add(m);
+  renderEditPicker(dept, i);
+}
+function removeEditPM(dept, i, m) {
+  const key = dept + '_' + i;
+  _editPicker[key]?.delete(m);
+  renderEditPicker(dept, i);
+}
+function getEditPM(dept, i) {
+  return Array.from(_editPicker[dept + '_' + i] || new Set());
+}
+
+// ── Inicializa os member pickers de nova tarefa ────────
+function updateMemberSelects() {
+  ['hub','inov','tec'].forEach(dept => renderAddPicker(dept));
 }
 
 // ── Status unificado — mesma pill em TODAS as telas ──────────
@@ -3454,19 +3593,7 @@ function renderTaskTable(dept) {
   const tbody = document.createElement('tbody');
   TASKS[dept].forEach((task, i) => {
     const shared = task.assignees.length > 1;
-    // Mostra toda a equipe no select de edição (não só o depto)
-    const allForTask = ['A definir', ...getAllMembersForTask()];
-    const deptM = DEPT_MEMBERS[dept].filter(m => m !== 'A definir');
-    const memberOpts = [
-      `<optgroup label="── ${DEPT_LABELS[dept]}">`,
-      ...deptM.map(m => `<option value="${m}"${task.assignees.includes(m)?' selected':''}>${m}</option>`),
-      '</optgroup>',
-      `<optgroup label="── Outros membros">`,
-      ...getAllMembersForTask().filter(m => !deptM.includes(m)).map(m =>
-        `<option value="${m}"${task.assignees.includes(m)?' selected':''}>${m}</option>`),
-      '</optgroup>',
-      `<option value="A definir"${task.assignees.includes('A definir')?' selected':''}>⏳ A definir</option>`,
-    ].join('');
+    const key = dept + '_' + i;
     const row = document.createElement('tr');
     row.id = `row-${dept}-${i}`;
     row.innerHTML = `
@@ -3482,7 +3609,10 @@ function renderTaskTable(dept) {
           ).join('')}</div>
           ${shared?'<span class="shared-tag" style="margin-top:4px;display:inline-flex">⟳ Compartilhada</span>':''}
         </div>
-        <select class="assignees-edit-${dept}-${i} add-task-select" multiple style="display:none;min-height:70px;width:100%">${memberOpts}</select>
+        <div class="assignees-edit-${dept}-${i} member-picker" style="display:none">
+          <div class="member-picker-chips" id="ep-chips-${key}"><button class="picker-add-btn">+ Responsável</button></div>
+          <div class="member-picker-dd" id="ep-dd-${key}"></div>
+        </div>
       </td>
       <td>${renderStatusPill(dept, i, task.status || 'Pendente', logado)}</td>
       <td style="white-space:nowrap">
@@ -3498,20 +3628,24 @@ function renderTaskTable(dept) {
 
 function startEdit(dept, i) {
   if (!_currentUser) { abrirLoginModal(); return; }
+  // Inicializa o edit picker com os responsáveis atuais da tarefa
+  _editPicker[dept + '_' + i] = new Set(TASKS[dept][i].assignees);
   document.querySelector(`.task-name-view-${dept}-${i}`).style.display = 'none';
   document.querySelector(`.task-name-edit-${dept}-${i}`).style.display = 'block';
   document.querySelector(`.assignees-view-${dept}-${i}`).style.display = 'none';
-  document.querySelector(`.assignees-edit-${dept}-${i}`).style.display = 'block';
+  document.querySelector(`.assignees-edit-${dept}-${i}`).style.display = 'flex';
+  renderEditPicker(dept, i);
   document.getElementById(`btn-edit-${dept}-${i}`).style.display = 'none';
   document.getElementById(`btn-save-${dept}-${i}`).style.display = 'inline';
 }
 
 function saveEdit(dept, i) {
-  const nameEl = document.querySelector(`.task-name-edit-${dept}-${i}`);
-  const selEl  = document.querySelector(`.assignees-edit-${dept}-${i}`);
-  const newName = nameEl.value.trim();
-  const newAssignees = Array.from(selEl.selectedOptions).map(o => o.value);
-  if (!newName || newAssignees.length === 0) return;
+  const nameEl      = document.querySelector(`.task-name-edit-${dept}-${i}`);
+  const newName     = nameEl.value.trim();
+  const newAssignees = getEditPM(dept, i);
+  if (!newName || newAssignees.length === 0) {
+    mostrarToast('⚠️ Adicione ao menos um responsável.', ''); return;
+  }
   TASKS[dept][i].name = newName;
   TASKS[dept][i].assignees = newAssignees;
   saveTasksToStorage();
@@ -3599,17 +3733,16 @@ function changeTaskStatus(dept, idx, val) {
 
 function addNewTask(dept) {
   if (!_currentUser) { abrirLoginModal(); return; }
-  const inp = document.getElementById(dept+'-input');
-  const sel = document.getElementById(dept+'-member-sel');
-  const name = inp.value.trim();
-  const assignees = Array.from(sel.selectedOptions).map(o => o.value).filter(Boolean);
+  const inp      = document.getElementById(dept+'-input');
+  const name     = inp.value.trim();
+  const assignees = getAddPM(dept);
   if (!name || assignees.length === 0) {
     mostrarToast('⚠️ Preencha o nome e selecione ao menos um responsável.', '');
     return;
   }
   TASKS[dept].push({name, assignees, status:'Pendente'});
   inp.value = '';
-  Array.from(sel.options).forEach(o => { o.selected = false; }); // deseleciona multi-select
+  clearAddPicker(dept);
   saveTasksToStorage();
   saveTasksToFirebase(dept); // persiste imediatamente no Firebase
   registrarLog('Adicionou tarefa em ' + dept + ': ' + name);
@@ -4705,6 +4838,7 @@ function toggleNotifPanel(e) {
 }
 document.addEventListener('click', () => {
   document.getElementById('notif-bell-wrap')?.classList.remove('open');
+  document.querySelectorAll('.member-picker-dd.open').forEach(el => el.classList.remove('open'));
 });
 
 async function carregarNotificacoes() {
