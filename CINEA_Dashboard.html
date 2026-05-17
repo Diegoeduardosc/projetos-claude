@@ -1338,22 +1338,57 @@ body.light-mode .notif-bell-btn:hover { background: rgba(79,45,127,0.08); }
 .notif-empty { text-align: center; color: var(--text3); font-size: 0.78rem; padding: 20px 10px; }
 
 /* ═══ SUGESTÕES ═══ */
+.sug-wrap {
+  position: relative;
+  display: none;
+  flex-shrink: 0;
+}
+body.user-logged-in .sug-wrap { display: flex; }
 .sug-btn {
   width: 32px; height: 32px;
   background: transparent;
   border: 1px solid var(--border);
   border-radius: 50%;
   cursor: pointer;
-  display: none;
+  display: flex;
   align-items: center; justify-content: center;
   font-size: 1rem;
   color: var(--text2);
   transition: background 0.15s, border-color 0.15s;
-  flex-shrink: 0;
 }
 .sug-btn:hover { background: rgba(245,166,35,0.12); border-color: rgba(245,166,35,0.35); }
-body.user-logged-in .sug-btn { display: flex; }
 body.light-mode .sug-btn:hover { background: rgba(245,166,35,0.1); }
+.sug-notif-badge {
+  position: absolute; top: -3px; right: -3px;
+  background: var(--gold); color: #000;
+  font-size: 0.52rem; font-weight: 700;
+  min-width: 15px; height: 15px; border-radius: 8px;
+  display: none; align-items: center; justify-content: center;
+  padding: 0 3px;
+}
+.sug-notif-badge.show { display: flex; }
+
+/* Tabs do modal de sugestão */
+.sug-tab-bar { display: flex; gap: 6px; margin-bottom: 18px; }
+.sug-tab {
+  flex: 1; padding: 8px 0; border-radius: 10px; border: 1px solid var(--border);
+  background: transparent; color: var(--text2); font-family: 'DM Sans', sans-serif;
+  font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+}
+.sug-tab.active { background: var(--purple); border-color: var(--purple); color: #fff; }
+.sug-tab:not(.active):hover { background: rgba(255,255,255,0.05); }
+
+/* Cartões de sugestão do usuário */
+.minha-sug-card {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;
+}
+.minha-sug-card:last-child { margin-bottom: 0; }
+.minha-sug-feedback {
+  background: rgba(79,45,127,0.08); border: 1px solid rgba(79,45,127,0.2);
+  border-radius: 8px; padding: 8px 12px; font-size: 0.75rem;
+  color: var(--text2); margin-top: 8px; line-height: 1.5;
+}
 
 .lixeira-topbar-btn {
   width: 32px; height: 32px;
@@ -1696,7 +1731,10 @@ body.edit-mode .user-mgmt-section { display: block; }
     <div class="topbar-right">
       <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Alternar tema claro/escuro">🌙</button>
       <!-- Sugestões de melhorias (todos os logados) -->
-      <button class="sug-btn" id="sug-btn" onclick="abrirSugestaoModal()" title="Sugestões de melhorias">💡</button>
+      <div class="sug-wrap" id="sug-wrap">
+        <button class="sug-btn" id="sug-btn" onclick="abrirSugestaoModal()" title="Sugestões de melhorias">💡</button>
+        <div class="sug-notif-badge" id="sug-notif-badge"></div>
+      </div>
       <!-- Lixeira (todos os logados) -->
       <button class="lixeira-topbar-btn" id="lixeira-topbar-btn" onclick="abrirLixeira()" title="Lixeira">🗑️</button>
       <!-- Sino de notificações (admin) -->
@@ -3995,7 +4033,7 @@ function atualizarTopbarUser() {
     if (editBtn)   editBtn.style.display   = 'flex';
     // Sino de notificações: só admin
     if (bellWrap)  bellWrap.classList.toggle('visible', isAdmin);
-    if (isAdmin)   carregarNotificacoes();
+    if (isAdmin) { carregarNotificacoes(); iniciarListenerSugestoes(); }
     iniciarListenerMeetings();
   } else {
     if (loginBtn)  loginBtn.style.display = 'flex';
@@ -4003,6 +4041,7 @@ function atualizarTopbarUser() {
     if (editBtn)   editBtn.style.display  = 'none';
     if (bellWrap)  bellWrap.classList.remove('visible');
     pararListenerMeetings();
+    pararListenerSugestoes();
   }
   // Classe no body controla visibilidade de elementos que exigem login
   document.body.classList.toggle('user-logged-in', !!_currentUser);
@@ -4121,13 +4160,31 @@ async function carregarNotificacoes() {
       return;
     }
     if (badge) { badge.textContent = items.length; badge.classList.add('show'); }
-    if (list)  list.innerHTML = items.map(([key, n]) => `
-      <div class="notif-item">
+    if (list) list.innerHTML = items.map(([key, n]) => {
+      const data_fmt = n.ts ? new Date(n.ts).toLocaleString('pt-BR') : '—';
+      if (n.tipo === 'sugestao') {
+        return `<div class="notif-item">
+          <div class="notif-item-title">💡 Nova sugestão de melhoria</div>
+          <div class="notif-item-sub">De: <strong>${n.autor||n.matricula||'—'}</strong> · ${data_fmt}</div>
+          <div class="notif-item-sub" style="margin-top:3px;font-style:italic">"${(n.preview||'').substring(0,80)}${(n.preview||'').length>80?'…':''}"</div>
+          <button class="notif-resolve-btn" onclick="verSugestaoNotif('${key}')">👁 Ver sugestão</button>
+        </div>`;
+      }
+      return `<div class="notif-item">
         <div class="notif-item-title">🔑 Solicitação de reset de senha</div>
-        <div class="notif-item-sub">Matrícula: <strong>${n.matricula}</strong> · ${n.nome||'—'} · ${n.ts ? new Date(n.ts).toLocaleString('pt-BR') : '—'}</div>
+        <div class="notif-item-sub">Matrícula: <strong>${n.matricula}</strong> · ${n.nome||'—'} · ${data_fmt}</div>
         <button class="notif-resolve-btn" onclick="resolverReset('${key}','${n.matricula}','${n.nome||n.matricula}')">✔ Resetar senha agora</button>
-      </div>`).join('');
+      </div>`;
+    }).join('');
   } catch(e) { console.warn('Notificações:', e); }
+}
+
+async function verSugestaoNotif(notifKey) {
+  // Marca como lida e abre painel admin
+  await _db.ref('cinea/notificacoes/' + notifKey + '/lido').set(true).catch(()=>{});
+  document.getElementById('notif-bell-wrap')?.classList.remove('open');
+  await carregarNotificacoes();
+  await abrirSugestoesAdmin();
 }
 
 async function resolverReset(notifKey, mat, nome) {
@@ -4925,18 +4982,56 @@ const _SUG_STATUS = {
   descartada:    { label: 'Descartada',    cls: 'descartada' },
 };
 
-function abrirSugestaoModal() {
+function abrirSugestaoModal(abaInicial) {
   if (!_currentUser) { abrirLoginModal(); return; }
   document.getElementById('sug-autor-nome').textContent = _currentUser.nome || _currentUser.matricula;
   document.getElementById('sug-texto').value = '';
   document.getElementById('sug-categoria').value = 'interface';
-  const m = document.getElementById('sug-modal');
-  m.style.display = 'flex';
-  requestAnimationFrame(() => document.getElementById('sug-texto').focus());
+  document.getElementById('sug-modal').style.display = 'flex';
+  mudarTabSug(abaInicial || 'nova');
 }
 
 function fecharSugestaoModal() {
   document.getElementById('sug-modal').style.display = 'none';
+}
+
+function mudarTabSug(aba) {
+  document.getElementById('sug-tab-nova').classList.toggle('active', aba === 'nova');
+  document.getElementById('sug-tab-minhas').classList.toggle('active', aba === 'minhas');
+  document.getElementById('sug-panel-nova').style.display   = aba === 'nova'   ? 'block' : 'none';
+  document.getElementById('sug-panel-minhas').style.display = aba === 'minhas' ? 'block' : 'none';
+  if (aba === 'minhas') carregarMinhasSugestoes();
+  else requestAnimationFrame(() => document.getElementById('sug-texto')?.focus());
+}
+
+async function carregarMinhasSugestoes() {
+  if (!_currentUser) return;
+  const listEl = document.getElementById('sug-minhas-list');
+  listEl.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:30px">Carregando...</div>';
+  try {
+    const snap = await _db.ref('cinea/sugestoes').orderByChild('matricula').equalTo(_currentUser.matricula).once('value');
+    const data = snap.val() || {};
+    const entradas = Object.entries(data).sort((a,b) => (b[1].ts||'').localeCompare(a[1].ts||''));
+    if (!entradas.length) {
+      listEl.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:40px">Você ainda não enviou nenhuma sugestão.<br><span style="font-size:0.75rem;opacity:0.7">Clique em ✍️ Nova sugestão para começar.</span></div>';
+      return;
+    }
+    listEl.innerHTML = entradas.map(([key, s]) => {
+      const st     = _SUG_STATUS[s.status] || _SUG_STATUS.nova;
+      const cat    = _CATEGORIAS[s.categoria] || s.categoria || '—';
+      const data_f = s.ts ? new Date(s.ts).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+      return `<div class="minha-sug-card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+          <span class="sug-status ${st.cls}">${st.label}</span>
+          <span style="font-size:0.68rem;color:var(--text3)">${cat} · ${data_f}</span>
+        </div>
+        <div style="font-size:0.8rem;color:var(--text);line-height:1.5;margin-bottom:${s.feedback?'8px':'0'}">${escapeHtml(s.texto||'')}</div>
+        ${s.feedback ? `<div class="minha-sug-feedback"><strong style="color:var(--purple-l)">💬 Feedback do admin:</strong><br>${escapeHtml(s.feedback)}</div>` : ''}
+      </div>`;
+    }).join('');
+  } catch(e) {
+    listEl.innerHTML = '<div style="text-align:center;color:var(--red);font-size:0.82rem;padding:30px">Erro ao carregar sugestões.</div>';
+  }
 }
 
 async function enviarSugestao() {
@@ -4950,23 +5045,54 @@ async function enviarSugestao() {
 
   try {
     await _db.ref('cinea/sugestoes').push({
-      autor:      _currentUser.nome || _currentUser.matricula,
-      matricula:  _currentUser.matricula,
+      autor:     _currentUser.nome || _currentUser.matricula,
+      matricula: _currentUser.matricula,
       categoria,
       texto,
-      ts:         new Date().toISOString(),
-      status:     'nova',
-      feedback:   '',
+      ts:        new Date().toISOString(),
+      status:    'nova',
+      feedback:  '',
     });
+    // Notifica admin via sino 🔔
+    await _db.ref('cinea/notificacoes').push({
+      tipo:      'sugestao',
+      autor:     _currentUser.nome || _currentUser.matricula,
+      matricula: _currentUser.matricula,
+      preview:   texto.substring(0, 120),
+      ts:        new Date().toISOString(),
+      lido:      false,
+    }).catch(() => {});
+
     registrarLog('Enviou sugestão de melhoria · categoria: ' + (_CATEGORIAS[categoria] || categoria));
-    fecharSugestaoModal();
-    mostrarToast('💡 Sugestão enviada!', 'Obrigado pela contribuição. O admin vai analisar em breve.');
+    document.getElementById('sug-texto').value = '';
+    mostrarToast('💡 Sugestão enviada!', 'Obrigado! Clique em "Minhas sugestões" para acompanhar o status.');
+    mudarTabSug('minhas'); // leva o usuário para ver o que enviou
   } catch(e) {
     alert('Erro ao enviar sugestão. Verifique a conexão e tente novamente.');
     console.error(e);
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = 'Enviar 💡'; }
   }
+}
+
+// Badge no 💡 para admin: conta sugestões "nova" em tempo real
+let _sugListenerRef = null;
+function iniciarListenerSugestoes() {
+  if (_sugListenerRef || !_currentUser || _currentUser.role !== 'admin') return;
+  _sugListenerRef = _db.ref('cinea/sugestoes');
+  _sugListenerRef.on('value', snap => {
+    const data = snap.val() || {};
+    const novas = Object.values(data).filter(s => s.status === 'nova').length;
+    const badge = document.getElementById('sug-notif-badge');
+    if (!badge) return;
+    if (novas > 0) { badge.textContent = novas; badge.classList.add('show'); }
+    else           { badge.textContent = '';    badge.classList.remove('show'); }
+  });
+}
+function pararListenerSugestoes() {
+  if (_sugListenerRef) { _sugListenerRef.off(); _sugListenerRef = null; }
+  const badge = document.getElementById('sug-notif-badge');
+  if (badge) { badge.textContent = ''; badge.classList.remove('show'); }
 }
 
 // ── Admin: abrir painel ──────────────────
@@ -5318,37 +5444,51 @@ async function salvarFeedbackSugestao(key) {
   </div>
 </div>
 
-<!-- ═══════════════════ MODAL SUGESTÃO (envio) ═══════════════════ -->
+<!-- ═══════════════════ MODAL SUGESTÃO (envio + minhas) ═══════════════════ -->
 <div id="sug-modal" onclick="if(event.target===this)fecharSugestaoModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:600;align-items:center;justify-content:center;padding:20px">
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:480px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-      <div>
-        <div style="font-size:1.05rem;font-weight:700;color:var(--text)">💡 Sugestão de Melhoria</div>
-        <div style="font-size:0.72rem;color:var(--text3);margin-top:2px">Sua ideia vai direto para o admin</div>
-      </div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:520px;max-height:88vh;display:flex;flex-direction:column">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-shrink:0">
+      <div style="font-size:1.05rem;font-weight:700;color:var(--text)">💡 Sugestões de Melhoria</div>
       <button onclick="fecharSugestaoModal()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text2);width:32px;height:32px;cursor:pointer;font-size:1rem">✕</button>
     </div>
 
-    <div style="margin-bottom:14px">
-      <label style="font-size:0.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Categoria</label>
-      <select id="sug-categoria" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;padding:10px 12px;appearance:none;cursor:pointer">
-        <option value="interface">🎨 Interface / Visual</option>
-        <option value="funcionalidade">⚙️ Funcionalidade nova</option>
-        <option value="dados">📊 Dados / KPIs</option>
-        <option value="workflow">🔄 Workflow / Processo</option>
-        <option value="outro">💬 Outro</option>
-      </select>
+    <!-- Abas -->
+    <div class="sug-tab-bar" style="flex-shrink:0">
+      <button class="sug-tab active" id="sug-tab-nova"   onclick="mudarTabSug('nova')">✍️ Nova sugestão</button>
+      <button class="sug-tab"        id="sug-tab-minhas" onclick="mudarTabSug('minhas')">📋 Minhas sugestões</button>
     </div>
 
-    <div style="margin-bottom:20px">
-      <label style="font-size:0.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Descrição da sugestão</label>
-      <textarea id="sug-texto" placeholder="Descreva sua ideia de melhoria..." style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;padding:12px;resize:vertical;min-height:110px;line-height:1.5"></textarea>
+    <!-- Painel: Nova sugestão -->
+    <div id="sug-panel-nova" style="overflow-y:auto;flex:1">
+      <div style="margin-bottom:14px">
+        <label style="font-size:0.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Categoria</label>
+        <select id="sug-categoria" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;padding:10px 12px;appearance:none;cursor:pointer">
+          <option value="interface">🎨 Interface / Visual</option>
+          <option value="funcionalidade">⚙️ Funcionalidade nova</option>
+          <option value="dados">📊 Dados / KPIs</option>
+          <option value="workflow">🔄 Workflow / Processo</option>
+          <option value="outro">💬 Outro</option>
+        </select>
+      </div>
+      <div style="margin-bottom:20px">
+        <label style="font-size:0.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Descrição da sugestão</label>
+        <textarea id="sug-texto" placeholder="Descreva sua ideia de melhoria..." style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;padding:12px;resize:vertical;min-height:110px;line-height:1.5"></textarea>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:0.72rem;color:var(--text3)">Enviando como: <strong id="sug-autor-nome" style="color:var(--text2)">—</strong></div>
+        <button onclick="enviarSugestao()" style="background:linear-gradient(135deg,var(--gold),#e8950f);border:none;border-radius:10px;color:#000;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:700;padding:10px 22px;cursor:pointer;transition:opacity 0.15s">Enviar 💡</button>
+      </div>
     </div>
 
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div id="sug-autor-label" style="font-size:0.72rem;color:var(--text3)">Enviando como: <strong id="sug-autor-nome" style="color:var(--text2)">—</strong></div>
-      <button onclick="enviarSugestao()" style="background:linear-gradient(135deg,var(--gold),#e8950f);border:none;border-radius:10px;color:#000;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:700;padding:10px 22px;cursor:pointer;transition:opacity 0.15s">Enviar 💡</button>
+    <!-- Painel: Minhas sugestões -->
+    <div id="sug-panel-minhas" style="display:none;overflow-y:auto;flex:1">
+      <div id="sug-minhas-list">
+        <div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:40px">Carregando...</div>
+      </div>
     </div>
+
   </div>
 </div>
 
