@@ -5304,22 +5304,58 @@ async function fazerLogin() {
 
 // ── Login pelo portão de entrada ──────────────────────────────────────────────
 async function fazerLoginGate() {
-  const mat    = document.getElementById('gate-mat').value.trim();
-  const senha  = document.getElementById('gate-senha').value;
-  const errEl  = document.getElementById('gate-error');
+  const mat     = document.getElementById('gate-mat').value.trim();
+  const senha   = document.getElementById('gate-senha').value;
+  const errEl   = document.getElementById('gate-error');
   const lembrar = document.getElementById('gate-lembrar')?.checked;
-  if (!mat || !senha) { errEl.textContent = 'Preencha matrícula e senha.'; return; }
+  if (!mat || !senha) { errEl.style.color = ''; errEl.textContent = 'Preencha o código de pessoa e a senha.'; return; }
+
+  // ── Rate limit: bloqueia após 3 tentativas erradas (janela de 30 min) ────────
+  const _rlKey  = 'cinea_falhas_' + sanitizarMat(mat);
+  const _agora  = Date.now();
+  const _JANELA = 30 * 60 * 1000;
+  let _rl = {};
+  try { _rl = JSON.parse(localStorage.getItem(_rlKey) || '{}'); } catch {}
+  if (!_rl.inicio || (_agora - _rl.inicio) > _JANELA) _rl = { count: 0, inicio: _agora };
+
+  function _redirecionarReset() {
+    abrirSolicitarResetGate();
+    setTimeout(() => { const el = document.getElementById('reset-req-mat'); if (el) el.value = mat; }, 120);
+  }
+
+  if (_rl.count >= 3) {
+    errEl.style.color = 'var(--gold)';
+    errEl.textContent = '🔒 Acesso bloqueado. Redefina sua senha para continuar.';
+    setTimeout(_redirecionarReset, 900);
+    return;
+  }
+
+  errEl.style.color = '';
   errEl.textContent = 'Verificando…';
   try {
     const hash = await sha256(senha);
     const snap = await _db.ref('cinea/users/' + sanitizarMat(mat)).once('value');
     const u = snap.val();
     if (!u || u.senha_hash !== hash) {
-      errEl.textContent = '❌ Matrícula ou senha incorretos.';
+      _rl.count++;
+      localStorage.setItem(_rlKey, JSON.stringify(_rl));
       document.getElementById('gate-senha').value = '';
       setTimeout(() => document.getElementById('gate-mat').select(), 50);
+      const restantes = 3 - _rl.count;
+      if (restantes <= 0) {
+        errEl.style.color = 'var(--gold)';
+        errEl.textContent = '🔒 3 tentativas incorretas. Abrindo redefinição de senha…';
+        setTimeout(_redirecionarReset, 1600);
+      } else {
+        errEl.style.color = 'var(--red)';
+        errEl.textContent = `❌ Senha incorreta. ${restantes} tentativa${restantes !== 1 ? 's' : ''} restante${restantes !== 1 ? 's' : ''}.`;
+      }
       return;
     }
+    // Sucesso: limpa contador de falhas
+    localStorage.removeItem(_rlKey);
+    errEl.style.color = '';
+    errEl.textContent = '';
     _currentUser = { matricula: mat, nome: u.nome, sigla: (u.sigla || mat.slice(0,2)).toUpperCase(), role: u.role || 'membro' };
     const sessJSON = JSON.stringify(_currentUser);
     sessionStorage.setItem('cinea_session', sessJSON);
@@ -5333,6 +5369,7 @@ async function fazerLoginGate() {
     _db.ref('cinea/acessos').push({ matricula: mat, nome: u.nome, role: u.role, ts: new Date().toISOString() }).catch(() => {});
     registrarLog('Acessou o portal');
   } catch(e) {
+    errEl.style.color = 'var(--red)';
     errEl.textContent = '❌ Erro de conexão. Tente novamente.';
     console.warn('Gate login error:', e);
   }
