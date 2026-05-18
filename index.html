@@ -2037,7 +2037,7 @@ body.edit-mode .user-mgmt-section { display: block; }
       <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Alternar tema claro/escuro">🌙</button>
       <!-- Sugestões de melhorias (todos os logados) -->
       <div class="sug-wrap" id="sug-wrap">
-        <button class="sug-btn" id="sug-btn" onclick="abrirSugestaoModal()" title="Sugestões de melhorias">💡</button>
+        <button class="sug-btn" id="sug-btn" onclick="_currentUser?.role==='admin'?abrirSugestoesAdmin():abrirSugestaoModal()" title="Sugestões de melhorias">💡</button>
         <div class="sug-notif-badge" id="sug-notif-badge"></div>
       </div>
       <!-- Lixeira (todos os logados) -->
@@ -2072,12 +2072,11 @@ body.edit-mode .user-mgmt-section { display: block; }
         </div>
         <div class="user-dropdown" id="user-dropdown">
           <div class="user-dd-item" id="dd-gerenciar" onclick="abrirGerenciarUsuarios()" style="display:none">👥 Gerenciar equipe</div>
-          <div class="user-dd-item" id="dd-sugestoes" onclick="abrirSugestoesAdmin()" style="display:none">💡 Sugestões recebidas</div>
           <div class="user-dd-item" id="dd-log" onclick="abrirLog()" style="display:none">📋 Log de atividades</div>
           <div class="user-dd-item" id="dd-senha" onclick="abrirModal()" style="display:none">🔑 Alterar senha admin</div>
           <div class="user-dd-divider"></div>
           <div class="user-dd-item" id="dd-changelog" onclick="abrirChangelog()">🚀 Melhorias &amp; Versões <span id="cl-badge" class="cl-dd-badge"></span></div>
-          <div class="user-dd-item dd-mob-only" onclick="abrirSugestaoModal()">💡 Enviar sugestão</div>
+          <div class="user-dd-item dd-mob-only" onclick="_currentUser?.role==='admin'?abrirSugestoesAdmin():abrirSugestaoModal()">💡 Sugestões</div>
           <div class="user-dd-item dd-mob-only" id="dd-lixeira-mob" onclick="abrirLixeira()" style="display:none">🗑️ Lixeira</div>
           <div class="user-dd-item" id="dd-trocar-senha" onclick="abrirTrocarSenha()">🔑 Trocar minha senha</div>
           <div class="user-dd-item danger" onclick="fazerLogout()">🚪 Sair</div>
@@ -5396,7 +5395,6 @@ function atualizarTopbarUser() {
   const nameEl     = document.getElementById('topbar-user-name');
   const roleEl     = document.getElementById('topbar-user-role');
   const ddGer      = document.getElementById('dd-gerenciar');
-  const ddSug      = document.getElementById('dd-sugestoes');
   const ddLog      = document.getElementById('dd-log');
   const ddSenha    = document.getElementById('dd-senha');
   const editBtn    = document.getElementById('edit-mode-btn');
@@ -5412,7 +5410,6 @@ function atualizarTopbarUser() {
     if (nameEl)       nameEl.textContent          = _currentUser.nome;
     if (roleEl)       roleEl.textContent          = isAdmin ? 'Admin · CINEA' : 'Equipe CINEA';
     if (ddGer)        ddGer.style.display         = isAdmin ? 'flex' : 'none';
-    if (ddSug)        ddSug.style.display         = isAdmin ? 'flex' : 'none';
     if (ddLog)        ddLog.style.display         = isAdmin ? 'flex' : 'none';
     if (ddSenha)      ddSenha.style.display       = isAdmin ? 'flex' : 'none';
     if (lixeiraBtn)   lixeiraBtn.style.display    = isAdmin ? 'flex' : 'none';
