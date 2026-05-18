@@ -7300,12 +7300,12 @@ async function salvarFeedbackSugestao(key) {
       <div class="gate-org">PUC Minas · NED</div>
     </div>
     <div class="gate-notice">🔒 Acesso restrito à equipe CINEA</div>
-    <div class="modal-label">Matrícula</div>
-    <input id="gate-mat" class="modal-input" type="text" placeholder="Somente números"
+    <div class="modal-label">Código de Pessoa</div>
+    <input id="gate-mat" class="modal-input" type="text" placeholder="Informe seu código de pessoa"
       autocomplete="username" autofocus inputmode="numeric"
       oninput="somenteNumeros(this)"
       onkeydown="if(event.key==='Enter')document.getElementById('gate-senha').focus()">
-    <div id="gate-mat-hint" style="display:none;font-size:0.72rem;color:var(--gold);margin-top:4px">⚠️ A matrícula é composta apenas por números</div>
+    <div id="gate-mat-hint" style="display:none;font-size:0.72rem;color:var(--gold);margin-top:4px">⚠️ O código de pessoa é composto apenas por números</div>
     <div class="modal-label" style="margin-top:13px">Senha</div>
     <div class="pw-wrap">
       <input id="gate-senha" class="modal-input" type="password" placeholder="Digite a sua senha"
