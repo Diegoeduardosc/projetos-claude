@@ -2682,18 +2682,18 @@ body.edit-mode .user-mgmt-section { display: block; }
 
         <!-- Lista de reuniões (desbloqueada) -->
         <div id="reunioes-list" style="display:none">
-          <!-- Filtros de atas -->
-          <div class="reunioes-filtro">
-            <input class="filtro-input filtro-input-text" id="filtro-texto" type="text" placeholder="🔍 Buscar por palavra-chave..." oninput="filtrarReunioes()">
-            <input class="filtro-input filtro-input-date" id="filtro-de"   type="date" title="Data inicial" onchange="filtrarReunioes()">
-            <input class="filtro-input filtro-input-date" id="filtro-ate"  type="date" title="Data final"   onchange="filtrarReunioes()">
-            <select class="filtro-select" id="filtro-participante" onchange="filtrarReunioes()">
-              <option value="">👥 Todos os participantes</option>
-            </select>
-            <button class="filtro-clear-btn" onclick="limparFiltros()">✕ Limpar</button>
-            <span class="filtro-count" id="filtro-count"></span>
+          <!-- Apenas a ata mais recente -->
+          <div id="ultima-ata-wrap"></div>
+          <!-- Botão histórico -->
+          <div id="historico-btn-wrap" style="display:none;margin-top:10px">
+            <button onclick="abrirHistorico()" style="display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.8rem;padding:9px 16px;cursor:pointer;width:100%;transition:background 0.15s"
+              onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background='var(--card)'">
+              <span>📋 Ver histórico completo</span>
+              <span id="historico-count-badge" style="background:rgba(79,45,127,0.2);border-radius:20px;padding:1px 10px;font-size:0.72rem;color:var(--purple-l);font-weight:600"></span>
+              <span style="margin-left:auto;color:var(--text3);font-size:0.75rem">→</span>
+            </button>
           </div>
-          <div id="reunioes-empty" style="text-align:center;color:var(--text3);font-size:0.82rem;padding:36px;background:var(--card);border:1px solid var(--border);border-radius:16px">
+          <div id="reunioes-empty" style="display:none;text-align:center;color:var(--text3);font-size:0.82rem;padding:36px;background:var(--card);border:1px solid var(--border);border-radius:16px">
             Nenhuma reunião registrada ainda. Clique em <strong style="color:var(--text2)">+ Nova Reunião</strong> para começar.
           </div>
         </div>
@@ -2916,6 +2916,34 @@ body.edit-mode .user-mgmt-section { display: block; }
         <div class="modal-error" id="chg-error"></div>
         <button class="modal-btn" onclick="salvarNovaSenha()">Salvar nova senha</button>
         <button class="modal-btn secondary" onclick="toggleChangePass()">Voltar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL HISTÓRICO DE REUNIÕES -->
+  <div id="historico-reunioes-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:600;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:760px;max-height:88vh;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+        <div>
+          <div style="font-size:1rem;font-weight:700;color:var(--text)">📋 Histórico de Reuniões</div>
+          <div style="font-size:0.72rem;color:var(--text3);margin-top:3px">Todas as atas registradas</div>
+        </div>
+        <button onclick="fecharHistorico()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text2);width:32px;height:32px;cursor:pointer;font-size:1rem">✕</button>
+      </div>
+      <!-- Filtros -->
+      <div class="reunioes-filtro" style="flex-shrink:0">
+        <input class="filtro-input filtro-input-text" id="filtro-texto" type="text" placeholder="🔍 Buscar por palavra-chave..." oninput="filtrarReunioes()">
+        <input class="filtro-input filtro-input-date" id="filtro-de"  type="date" title="Data inicial" onchange="filtrarReunioes()">
+        <input class="filtro-input filtro-input-date" id="filtro-ate" type="date" title="Data final"   onchange="filtrarReunioes()">
+        <select class="filtro-select" id="filtro-participante" onchange="filtrarReunioes()">
+          <option value="">👥 Todos os participantes</option>
+        </select>
+        <button class="filtro-clear-btn" onclick="limparFiltros()">✕ Limpar</button>
+        <span class="filtro-count" id="filtro-count"></span>
+      </div>
+      <!-- Lista completa -->
+      <div id="historico-list" style="overflow-y:auto;flex:1">
+        <div id="historico-empty" style="display:none;text-align:center;color:var(--text3);font-size:0.82rem;padding:36px">Nenhuma ata encontrada.</div>
       </div>
     </div>
   </div>
@@ -6346,64 +6374,127 @@ function renderizarReunioes(data) {
     }
   }
 
-  // Popula dropdown de participantes (sem duplicatas)
-  const sel = document.getElementById('filtro-participante');
-  if (sel && sel.options.length === 1) { // só repopula se vazio
-    EQUIPE_CINEA.forEach(p => {
-      const opt = document.createElement('option');
-      opt.value = p.nome; opt.textContent = p.nome;
-      sel.appendChild(opt);
-    });
+  renderizarEntradasFiltradas();
+  // Se o modal de histórico estiver aberto, atualiza também
+  if (document.getElementById('historico-reunioes-modal')?.style.display === 'flex') {
+    renderHistoricoFiltrado();
   }
-
-  renderizarEntradasFiltradas();
 }
 
-function filtrarReunioes() { renderizarEntradasFiltradas(); }
+let _ataAberta = null;
 
-function limparFiltros() {
-  ['filtro-texto','filtro-de','filtro-ate'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  const sel = document.getElementById('filtro-participante');
-  if (sel) sel.value = '';
-  renderizarEntradasFiltradas();
+function _buildAtaItem(key, m, aberta, isAdmin) {
+  const dataFmt = m.data ? m.data.split('-').reverse().join('/') : '—';
+  const nPart   = (m.participantes||[]).length;
+  return `<div class="ata-item">
+    <div class="ata-header" onclick="toggleAta('${key}')">
+      <div class="ata-header-left">
+        <span class="ata-data-pill">📅 ${dataFmt}</span>
+        <div class="ata-meta">
+          ${m.horario      ? `<span>⏰ ${m.horario}</span>` : ''}
+          ${nPart          ? `<span>👥 ${nPart} participante${nPart!==1?'s':''}</span>` : ''}
+          ${m.registradoPor? `<span>✍️ ${escapeHtml(m.registradoPor)}</span>` : ''}
+        </div>
+      </div>
+      <span class="ata-chevron ${aberta?'open':''}" id="ata-chev-${key}">▼</span>
+    </div>
+    <div class="ata-body ${aberta?'open':''}" id="ata-body-${key}">
+      ${m.participantes?.length?`<div class="reunion-section-lbl">Participantes</div><div class="reunion-tags">${m.participantes.map(p=>`<span class="reunion-tag">${escapeHtml(p)}</span>`).join('')}</div>`:''}
+      ${m.pauta    ?`<div class="reunion-section-lbl">Pauta</div><div class="reunion-text">${m.pauta.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>`:''}
+      ${m.resumo   ?`<div class="reunion-section-lbl">Resumo</div><div class="reunion-text">${m.resumo.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>`:''}
+      ${m.decisoes ?`<div class="reunion-section-lbl">Decisões / Próximos passos</div><div class="reunion-text">${m.decisoes.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>`:''}
+      <div class="ata-actions">
+        <button class="reunion-action-btn"    onclick="editarReuniao('${key}')">✎ Editar</button>
+        <button class="reunion-action-btn dl" onclick="downloadReuniao('${key}')">⬇ Word</button>
+        ${isAdmin?`<button class="reunion-action-btn del" onclick="deletarReuniao('${key}')">✕ Apagar</button>`:''}
+      </div>
+    </div>
+  </div>`;
 }
-
-let _ataAberta = null; // chave da ata atualmente expandida
 
 function toggleAta(key) {
   const body    = document.getElementById('ata-body-' + key);
   const chevron = document.getElementById('ata-chev-' + key);
   if (!body) return;
   const abrindo = !body.classList.contains('open');
-  // Fecha a anterior se houver
   if (_ataAberta && _ataAberta !== key) {
-    const prevBody = document.getElementById('ata-body-' + _ataAberta);
-    const prevChev = document.getElementById('ata-chev-' + _ataAberta);
-    prevBody?.classList.remove('open');
-    prevChev?.classList.remove('open');
+    document.getElementById('ata-body-' + _ataAberta)?.classList.remove('open');
+    document.getElementById('ata-chev-' + _ataAberta)?.classList.remove('open');
   }
   body.classList.toggle('open', abrindo);
   chevron?.classList.toggle('open', abrindo);
   _ataAberta = abrindo ? key : null;
 }
 
+// Renderiza apenas a ata mais recente na página principal
 function renderizarEntradasFiltradas() {
-  const list  = document.getElementById('reunioes-list');
-  const empty = document.getElementById('reunioes-empty');
-  if (!list) return;
+  const wrap      = document.getElementById('ultima-ata-wrap');
+  const empty     = document.getElementById('reunioes-empty');
+  const histBtn   = document.getElementById('historico-btn-wrap');
+  const histBadge = document.getElementById('historico-count-badge');
+  if (!wrap) return;
 
-  // Remove atas antigas
-  list.querySelectorAll('.ata-item').forEach(c => c.remove());
+  const total   = Object.keys(_meetingsCache).length;
+  const entries = Object.entries(_meetingsCache)
+    .sort((a,b) => (b[1].data||'').localeCompare(a[1].data||''));
 
-  // Lê filtros
+  if (!total) {
+    wrap.innerHTML = '';
+    if (empty)   empty.style.display   = 'block';
+    if (histBtn) histBtn.style.display = 'none';
+    return;
+  }
+  if (empty)   empty.style.display   = 'none';
+
+  const isAdmin = _currentUser?.role === 'admin';
+  const [key, m] = entries[0];
+  _ataAberta = key;
+  wrap.innerHTML = _buildAtaItem(key, m, true, isAdmin);
+
+  // Botão histórico aparece se houver mais de 1 ata
+  if (histBtn) histBtn.style.display = total > 1 ? 'block' : 'none';
+  if (histBadge) {
+    const outras = total - 1;
+    histBadge.textContent = outras > 0 ? `+ ${outras} ata${outras!==1?'s':''}` : '';
+  }
+}
+
+// Abre modal com histórico completo
+function abrirHistorico() {
+  const modal = document.getElementById('historico-reunioes-modal');
+  if (modal) modal.style.display = 'flex';
+  // Popula dropdown de participantes se ainda vazio
+  const sel = document.getElementById('filtro-participante');
+  if (sel && sel.options.length === 1) {
+    EQUIPE_CINEA.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.nome; opt.textContent = p.nome;
+      sel.appendChild(opt);
+    });
+  }
+  renderHistoricoFiltrado();
+}
+
+function fecharHistorico() {
+  const modal = document.getElementById('historico-reunioes-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+// Renderiza lista filtrada dentro do modal de histórico
+function renderHistoricoFiltrado() {
+  const container = document.getElementById('historico-list');
+  const empty     = document.getElementById('historico-empty');
+  const countEl   = document.getElementById('filtro-count');
+  if (!container) return;
+
+  container.querySelectorAll('.ata-item').forEach(c => c.remove());
+
   const texto = (document.getElementById('filtro-texto')?.value || '').toLowerCase().trim();
   const de    =  document.getElementById('filtro-de')?.value   || '';
   const ate   =  document.getElementById('filtro-ate')?.value  || '';
   const part  =  document.getElementById('filtro-participante')?.value || '';
+  const total = Object.keys(_meetingsCache).length;
 
-  const total   = Object.keys(_meetingsCache).length;
   const entries = Object.entries(_meetingsCache)
     .filter(([, m]) => {
       if (texto && !`${m.pauta||''} ${m.resumo||''} ${m.decisoes||''}`.toLowerCase().includes(texto)) return false;
@@ -6414,53 +6505,33 @@ function renderizarEntradasFiltradas() {
     })
     .sort((a,b) => (b[1].data||'').localeCompare(a[1].data||''));
 
-  // Contador
-  const countEl = document.getElementById('filtro-count');
   if (countEl) {
     const temFiltro = texto || de || ate || part;
     countEl.textContent = temFiltro
-      ? `${entries.length} de ${total} ata${total !== 1 ? 's' : ''}`
-      : (total ? `${total} ata${total !== 1 ? 's' : ''}` : '');
+      ? `${entries.length} de ${total} ata${total!==1?'s':''}`
+      : (total ? `${total} ata${total!==1?'s':''}` : '');
   }
 
   if (!entries.length) { if (empty) empty.style.display = 'block'; return; }
   if (empty) empty.style.display = 'none';
 
   const isAdmin = _currentUser?.role === 'admin';
-
-  entries.forEach(([key, m], idx) => {
-    const dataFmt  = m.data ? m.data.split('-').reverse().join('/') : '—';
-    const nPart    = (m.participantes||[]).length;
-    const aberta   = _ataAberta === key || (idx === 0 && !_ataAberta);
-    if (idx === 0 && !_ataAberta) _ataAberta = key; // abre a mais recente por padrão
-
-    const item = document.createElement('div');
-    item.className = 'ata-item';
-    item.innerHTML = `
-      <div class="ata-header" onclick="toggleAta('${key}')">
-        <div class="ata-header-left">
-          <span class="ata-data-pill">📅 ${dataFmt}</span>
-          <div class="ata-meta">
-            ${m.horario ? `<span>⏰ ${m.horario}</span>` : ''}
-            ${nPart     ? `<span>👥 ${nPart} participante${nPart !== 1 ? 's' : ''}</span>` : ''}
-            ${m.registradoPor ? `<span>✍️ ${escapeHtml(m.registradoPor)}</span>` : ''}
-          </div>
-        </div>
-        <span class="ata-chevron ${aberta ? 'open' : ''}" id="ata-chev-${key}">▼</span>
-      </div>
-      <div class="ata-body ${aberta ? 'open' : ''}" id="ata-body-${key}">
-        ${m.participantes?.length ? `<div class="reunion-section-lbl">Participantes</div><div class="reunion-tags">${m.participantes.map(p=>`<span class="reunion-tag">${escapeHtml(p)}</span>`).join('')}</div>` : ''}
-        ${m.pauta    ? `<div class="reunion-section-lbl">Pauta</div><div class="reunion-text">${m.pauta.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>` : ''}
-        ${m.resumo   ? `<div class="reunion-section-lbl">Resumo</div><div class="reunion-text">${m.resumo.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>` : ''}
-        ${m.decisoes ? `<div class="reunion-section-lbl">Decisões / Próximos passos</div><div class="reunion-text">${m.decisoes.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>` : ''}
-        <div class="ata-actions">
-          <button class="reunion-action-btn"    onclick="editarReuniao('${key}')">✎ Editar</button>
-          <button class="reunion-action-btn dl" onclick="downloadReuniao('${key}')">⬇ Word</button>
-          ${isAdmin ? `<button class="reunion-action-btn del" onclick="deletarReuniao('${key}')">✕ Apagar</button>` : ''}
-        </div>
-      </div>`;
-    list.insertBefore(item, empty || null);
+  entries.forEach(([key, m]) => {
+    const div = document.createElement('div');
+    div.innerHTML = _buildAtaItem(key, m, false, isAdmin);
+    container.insertBefore(div.firstElementChild, empty || null);
   });
+}
+
+function filtrarReunioes() { renderHistoricoFiltrado(); }
+
+function limparFiltros() {
+  ['filtro-texto','filtro-de','filtro-ate'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const sel = document.getElementById('filtro-participante');
+  if (sel) sel.value = '';
+  renderHistoricoFiltrado();
 }
 
 async function deletarReuniao(key) {
