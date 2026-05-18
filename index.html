@@ -864,9 +864,8 @@ body.edit-mode .idea-tag { cursor: text; }
 /* ─── RESPONSIVE 600px (smartphone) ─── */
 @media (max-width: 600px) {
   /* Esconde botões secundários do topbar — ficam no menu do usuário */
-  .sug-wrap       { display: none !important; }
   .lixeira-topbar-btn { display: none !important; }
-  /* Mostra itens mobile-only no dropdown */
+  /* Mostra itens mobile-only no dropdown (lixeira admin) */
   .dd-mob-only    { display: flex !important; }
   /* Chip de usuário: oculta cargo para economizar espaço */
   .user-chip-role { display: none; }
@@ -2199,7 +2198,6 @@ body.edit-mode .user-mgmt-section { display: block; }
           <div class="user-dd-item" id="dd-senha" onclick="abrirModal()" style="display:none">🔑 Alterar senha admin</div>
           <div class="user-dd-divider"></div>
           <div class="user-dd-item" id="dd-changelog" onclick="abrirChangelog()">🚀 Melhorias &amp; Versões <span id="cl-badge" class="cl-dd-badge"></span></div>
-          <div class="user-dd-item dd-mob-only" onclick="_currentUser?.role==='admin'?abrirSugestoesAdmin():abrirSugestaoModal()">💡 Sugestões</div>
           <div class="user-dd-item dd-mob-only" id="dd-lixeira-mob" onclick="abrirLixeira()" style="display:none">🗑️ Lixeira</div>
           <div class="user-dd-item" id="dd-trocar-senha" onclick="abrirTrocarSenha()">🔑 Trocar minha senha</div>
           <div class="user-dd-item danger" onclick="fazerLogout()">🚪 Sair</div>
