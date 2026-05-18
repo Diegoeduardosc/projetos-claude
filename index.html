@@ -2827,6 +2827,25 @@ body.edit-mode .user-mgmt-section { display: block; }
     </div>
   </div>
 
+  <!-- MODAL ARQUIVAR TAREFA -->
+  <div class="modal-overlay" id="modal-arquivar-confirm" style="display:none;z-index:3000">
+    <div class="modal-box" style="max-width:380px;text-align:center">
+      <div style="font-size:2rem;margin-bottom:8px">📦</div>
+      <div class="modal-logo" style="font-size:1.05rem;margin-bottom:4px">Arquivar tarefa?</div>
+      <div class="modal-sub" style="margin-bottom:16px;font-size:0.82rem;color:var(--text3)">
+        Tarefa: <strong id="arquivar-task-nome" style="color:var(--text2)"></strong>
+      </div>
+      <p style="font-size:0.81rem;color:var(--text2);margin-bottom:20px;line-height:1.5">
+        Deseja mover esta tarefa para o <strong>arquivo de concluídas</strong>?<br>
+        Ela ficará registrada no final da tela e pode ser restaurada a qualquer momento.
+      </p>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button class="modal-btn" style="flex:1;max-width:160px" onclick="_confirmarArquivar(true)">📦 Sim, arquivar</button>
+        <button class="modal-btn secondary" style="flex:1;max-width:160px" onclick="_confirmarArquivar(false)">Não, manter aqui</button>
+      </div>
+    </div>
+  </div>
+
   <div class="edit-hint-bar">✏️ <strong style="color:var(--purple-l)">Modo Edição ativo</strong> &nbsp;·&nbsp; Clique em qualquer valor ou texto para editar &nbsp;·&nbsp; Clique nos <span style="color:var(--gold)">●</span> status para alternar &nbsp;·&nbsp; Clique nos pontos coloridos da reunião para mudar status &nbsp;·&nbsp; Pressione <kbd style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1px 6px">✓ Salvar</kbd> quando terminar</div>
 </main>
 
@@ -3615,6 +3634,15 @@ function openStDD(pillEl) {
 // Fecha pelo elemento mais próximo na árvore — sem getElementById
 function pickStatus(dept, idx, val) {
   event.target.closest('.st-dropdown')?.classList.remove('open');
+  // Se selecionou Concluída e a tarefa ainda não estava Concluída → perguntar sobre arquivamento
+  if (val === 'Concluída' && (TASKS[dept]?.[idx]?.status || 'Pendente') !== 'Concluída') {
+    _pendingConcluida = { dept, idx };
+    const modal = document.getElementById('modal-arquivar-confirm');
+    const nome  = document.getElementById('arquivar-task-nome');
+    if (nome)  nome.textContent  = TASKS[dept][idx].name;
+    if (modal) modal.style.display = 'flex';
+    return;
+  }
   changeTaskStatus(dept, idx, val);
 }
 function renderAtividadesSetor(dept) {
@@ -3906,7 +3934,8 @@ function renderTaskTable(dept) {
   tbl.innerHTML = '<thead><tr><th style="width:38%">Tarefa</th><th>Responsáveis</th><th>Status</th><th style="width:108px">Ações</th></tr></thead>';
   const tbody   = document.createElement('tbody');
   const fixas   = TASKS[dept].map((t,i)=>({t,i})).filter(({t}) => t.tipo === 'fixa');
-  const regulares = TASKS[dept].map((t,i)=>({t,i})).filter(({t}) => t.tipo !== 'fixa' && t.status !== 'Concluída');
+  // Tarefas arquivadas (concluída + arquivada=true) saem da tabela principal
+  const regulares = TASKS[dept].map((t,i)=>({t,i})).filter(({t}) => t.tipo !== 'fixa' && !(t.status === 'Concluída' && t.arquivada));
 
   function addSepRow(label, color) {
     const sr = document.createElement('tr');
@@ -3948,6 +3977,7 @@ function renderTaskTable(dept) {
         <button onclick="startEdit('${dept}',${i})" id="btn-edit-${dept}-${i}" style="background:rgba(79,45,127,0.2);border:1px solid rgba(79,45,127,0.3);border-radius:6px;color:var(--purple-l);font-size:0.72rem;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif">Editar</button>
         <button onclick="saveEdit('${dept}',${i})" id="btn-save-${dept}-${i}" style="display:none;background:rgba(39,174,96,0.15);border:1px solid rgba(39,174,96,0.3);border-radius:6px;color:var(--green);font-size:0.72rem;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif">Salvar</button>
         <button class="tipo-btn${etipo==='fixa'?' ativa':''}" id="btn-etipo-${key}" onclick="toggleEditTipo('${dept}',${i})" style="display:none;padding:2px 7px;font-size:0.68rem">${etipo==='fixa'?'🔄 Fixa':'○ Normal'}</button>
+        ${(task.status === 'Concluída' && !task.arquivada) ? `<button onclick="arquivarTarefa('${dept}',${i})" title="Mover para o arquivo" style="background:rgba(39,174,96,0.12);border:1px solid rgba(39,174,96,0.3);border-radius:6px;color:var(--green);font-size:0.72rem;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-left:2px">📦 Arquivar</button>` : ''}
         <button onclick="deleteTask('${dept}',${i})" style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.2);border-radius:6px;color:var(--red);font-size:0.72rem;padding:3px 7px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-left:2px">✕</button>
       </td>
     `;
@@ -3978,19 +4008,68 @@ function atualizarResumoTarefas() {
   document.querySelectorAll('.resumo-pessoas').forEach(el=> el.textContent = pessoas);
 }
 
-// ── Seção Concluídos ──────────────────────────────────────────
-let _concluidosOpen = true;
+// ── Seção Arquivo de Concluídos ───────────────────────────────
+let _concluidosOpen  = true;
+let _pendingConcluida = null; // { dept, idx } — aguardando confirmação de arquivamento
+
+/* Chamado pelos botões do modal de arquivamento */
+function _confirmarArquivar(arquivar) {
+  const modal = document.getElementById('modal-arquivar-confirm');
+  if (modal) modal.style.display = 'none';
+  if (!_pendingConcluida) return;
+  const { dept, idx } = _pendingConcluida;
+  _pendingConcluida = null;
+  // Marca a tarefa como Concluída primeiro
+  changeTaskStatus(dept, idx, 'Concluída');
+  if (arquivar) {
+    // Pequeno delay para garantir que o status já foi salvo antes de marcar arquivada
+    setTimeout(() => arquivarTarefa(dept, idx), 80);
+  }
+  // Se não arquivar, a tarefa fica na tabela principal com o botão "📦 Arquivar"
+}
+
+/* Arquiva uma tarefa Concluída (move para a seção de arquivo) */
+async function arquivarTarefa(dept, idx) {
+  if (!TASKS[dept]?.[idx]) return;
+  TASKS[dept][idx].arquivada    = true;
+  TASKS[dept][idx].arquivadaEm  = new Date().toISOString();
+  salvarTasksLocal();
+  if (_db) {
+    try { await _db.ref('cinea/tasks/' + dept).set(TASKS[dept]); } catch(e) {}
+  }
+  renderTaskTable(dept);
+  renderConcluidos();
+  mostrarToast('📦 Tarefa arquivada', 'A tarefa foi movida para o arquivo de concluídas.');
+}
+
+/* Restaura uma tarefa arquivada de volta para Em andamento */
+async function desarquivarTarefa(dept, idx) {
+  if (!TASKS[dept]?.[idx]) return;
+  TASKS[dept][idx].arquivada   = false;
+  TASKS[dept][idx].arquivadaEm = null;
+  TASKS[dept][idx].status      = 'Em andamento';
+  salvarTasksLocal();
+  if (_db) {
+    try { await _db.ref('cinea/tasks/' + dept).set(TASKS[dept]); } catch(e) {}
+  }
+  renderTaskTable(dept);
+  renderConcluidos();
+  mostrarToast('↩ Tarefa restaurada', 'A tarefa voltou para "Em andamento" no dashboard.');
+}
+
+/* Renderiza o arquivo de tarefas concluídas (t.arquivada === true) */
 function renderConcluidos() {
   const el = document.getElementById('concluidos-section');
   if (!el) return;
   const DEPT_COLOR = { hub: 'var(--pink)', inov: 'var(--purple-l)', tec: 'var(--cyan)' };
   const logado = !!_currentUser;
-  // Coleta tarefas concluídas por depto mantendo o índice original
+
+  // Coleta apenas tarefas com arquivada=true
   const grupos = [];
   ['hub','inov','tec'].forEach(dept => {
     const lista = TASKS[dept]
       .map((t,i) => ({...t, _dept: dept, _idx: i}))
-      .filter(t => t.status === 'Concluída' && t.tipo !== 'fixa'); // fixas nunca vão para concluídos
+      .filter(t => t.status === 'Concluída' && t.arquivada && t.tipo !== 'fixa');
     if (lista.length) grupos.push({ dept, tasks: lista });
   });
   const total = grupos.reduce((s,g) => s + g.tasks.length, 0);
@@ -3999,7 +4078,7 @@ function renderConcluidos() {
   let html = `<div class="card" style="margin-top:16px;border-color:rgba(39,174,96,0.22)">
     <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:2px 0 6px" onclick="toggleConcluidos()">
       <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--green)">✅ Concluídos</span>
+        <span style="font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--green)">📦 Tarefas Arquivadas</span>
         <span style="background:rgba(39,174,96,0.15);color:var(--green);border-radius:20px;padding:2px 10px;font-size:0.72rem;font-weight:600">${total}</span>
       </div>
       <span id="concl-chevron" style="color:var(--text3);font-size:0.75rem;transition:transform 0.2s">${_concluidosOpen?'▲':'▼'}</span>
@@ -4012,16 +4091,20 @@ function renderConcluidos() {
     tasks.forEach(task => {
       const pillCls = PILL_CLASS[dept];
       const shared  = task.assignees.length > 1;
-      html += `<tr style="opacity:0.65">
-        <td style="width:38%"><span style="color:var(--text2);font-size:0.79rem;text-decoration:line-through">${task.name}</span></td>
+      const dtArq   = task.arquivadaEm ? new Date(task.arquivadaEm).toLocaleDateString('pt-BR') : '';
+      html += `<tr style="opacity:0.6">
+        <td style="width:38%">
+          <span style="color:var(--text2);font-size:0.79rem;text-decoration:line-through">${escapeHtml(task.name)}</span>
+          ${dtArq ? `<div style="font-size:0.68rem;color:var(--text3);margin-top:2px">arquivada em ${dtArq}</div>` : ''}
+        </td>
         <td>
           <div class="assignee-pills">${task.assignees.map(a =>
-            `<span class="assignee-pill ${pillCls}">${a}</span>`).join('')}</div>
+            `<span class="assignee-pill ${pillCls}">${escapeHtml(a)}</span>`).join('')}</div>
           ${shared?'<span class="shared-tag" style="margin-top:4px;display:inline-flex">⟳ Compartilhada</span>':''}
         </td>
         <td><span class="st-pill sp-concluida">● Concluída</span></td>
         <td style="white-space:nowrap">
-          ${logado?`<button onclick="changeTaskStatus('${dept}',${task._idx},'Pendente')" style="background:rgba(107,95,133,0.15);border:1px solid rgba(107,95,133,0.3);border-radius:6px;color:var(--text2);font-size:0.72rem;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif">↩ Re-abrir</button>`:''}
+          ${logado ? `<button onclick="desarquivarTarefa('${dept}',${task._idx})" title="Restaurar tarefa para Em andamento" style="background:rgba(107,95,133,0.15);border:1px solid rgba(107,95,133,0.3);border-radius:6px;color:var(--text2);font-size:0.72rem;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif">↩ Restaurar</button>` : ''}
         </td>
       </tr>`;
     });
