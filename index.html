@@ -6605,25 +6605,56 @@ async function carregarMinhasSugestoes() {
       listEl.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:40px">Você ainda não enviou nenhuma sugestão.<br><span style="font-size:0.75rem;opacity:0.7">Clique em ✍️ Nova sugestão para começar.</span></div>';
       return;
     }
-    listEl.innerHTML = entradas.map(([key, s]) => {
-      const st     = _SUG_STATUS[s.status] || _SUG_STATUS.nova;
-      const cat    = _CATEGORIAS[s.categoria] || s.categoria || '—';
-      const data_f = s.ts ? new Date(s.ts).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
-      return `<div class="minha-sug-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            ${s.ticket ? `<span class="ticket-code">${s.ticket}</span>` : ''}
-            <span class="sug-status ${st.cls}">${st.label}</span>
-          </div>
-          <span style="font-size:0.65rem;color:var(--text3)">${cat} · ${data_f}</span>
+    const _CONCLUIDO = ['implementada', 'descartada'];
+    const ativas     = entradas.filter(([,s]) => !_CONCLUIDO.includes(s.status));
+    const concluidas = entradas.filter(([,s]) =>  _CONCLUIDO.includes(s.status));
+    let html = '';
+    if (ativas.length > 0) {
+      html += ativas.map(([,s]) => renderMinhaSugCard(s)).join('');
+    } else {
+      html += '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:20px 0">Nenhuma sugestão em andamento. 🎉</div>';
+    }
+    if (concluidas.length > 0) {
+      html += `<div id="minhas-concluidas-wrap" style="margin-top:12px">
+        <button onclick="toggleMinhasConcluidas()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:600;padding:9px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+          <span>📁 Concluídas <span style="background:var(--border);border-radius:10px;padding:1px 8px;font-size:0.7rem;font-weight:700;margin-left:6px">${concluidas.length}</span></span>
+          <span id="minhas-concluidas-chevron" style="font-size:0.75rem;transition:transform 0.2s">▼</span>
+        </button>
+        <div id="minhas-concluidas-list" style="display:none;margin-top:8px">
+          ${concluidas.map(([,s]) => renderMinhaSugCard(s)).join('')}
         </div>
-        <div style="font-size:0.8rem;color:var(--text);line-height:1.5;margin-bottom:${s.feedback?'8px':'0'}">${escapeHtml(s.texto||'')}</div>
-        ${s.feedback ? `<div class="minha-sug-feedback"><strong style="color:var(--purple-l)">💬 Feedback do admin:</strong><br>${escapeHtml(s.feedback)}</div>` : ''}
       </div>`;
-    }).join('');
+    }
+    listEl.innerHTML = html;
   } catch(e) {
     listEl.innerHTML = '<div style="text-align:center;color:var(--red);font-size:0.82rem;padding:30px">Erro ao carregar sugestões.</div>';
   }
+}
+
+function renderMinhaSugCard(s) {
+  const st    = _SUG_STATUS[s.status] || _SUG_STATUS.nova;
+  const cat   = _CATEGORIAS[s.categoria] || s.categoria || '—';
+  const data_f = s.ts ? new Date(s.ts).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+  return `<div class="minha-sug-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        ${s.ticket ? `<span class="ticket-code">${s.ticket}</span>` : ''}
+        <span class="sug-status ${st.cls}">${st.label}</span>
+      </div>
+      <span style="font-size:0.65rem;color:var(--text3)">${cat} · ${data_f}</span>
+    </div>
+    <div style="font-size:0.8rem;color:var(--text);line-height:1.5;margin-bottom:${s.feedback?'8px':'0'}">${escapeHtml(s.texto||'')}</div>
+    ${s.feedback ? `<div class="minha-sug-feedback"><strong style="color:var(--purple-l)">💬 Feedback do admin:</strong><br>${escapeHtml(s.feedback)}</div>` : ''}
+  </div>`;
+}
+
+function toggleMinhasConcluidas() {
+  const list = document.getElementById('minhas-concluidas-list');
+  const chev = document.getElementById('minhas-concluidas-chevron');
+  if (!list) return;
+  const open = list.style.display !== 'none';
+  list.style.display = open ? 'none' : 'block';
+  if (chev) chev.style.transform = open ? '' : 'rotate(180deg)';
 }
 
 async function gerarTicketSugestao() {
@@ -6919,55 +6950,113 @@ async function carregarSugestoes() {
   }
 }
 
+// ── Renderiza card de sugestão (visão admin) — reutilizado na lista ativa e concluída ──
+function renderSugCard(key, s, isConcluida) {
+  const st       = _SUG_STATUS[s.status] || _SUG_STATUS.nova;
+  const catLabel = _CATEGORIAS[s.categoria] || s.categoria || '—';
+  const data     = s.ts ? new Date(s.ts).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+  const acoes    = isConcluida
+    ? `<div class="sug-action-row">
+        <button class="sug-act-btn analise"  onclick="reabrirSugestao('${key}')">🔄 Reabrir</button>
+        <button class="sug-act-btn save-fb"  onclick="salvarFeedbackSugestao('${key}')">💾 Salvar feedback</button>
+       </div>`
+    : `<div class="sug-action-row">
+        <button class="sug-act-btn analise"      onclick="atualizarSugestao('${key}','analise')">🔍 Em análise</button>
+        <button class="sug-act-btn implementada" onclick="atualizarSugestao('${key}','implementada')">✅ Implementada</button>
+        <button class="sug-act-btn descartada"   onclick="atualizarSugestao('${key}','descartada')">❌ Descartar</button>
+        <button class="sug-act-btn save-fb"      onclick="salvarFeedbackSugestao('${key}')">💾 Salvar feedback</button>
+       </div>`;
+  return `<div class="sug-card" id="sugcard-${key}">
+    <div class="sug-card-header">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+          ${s.ticket ? `<span class="ticket-code">${s.ticket}</span>` : ''}
+          <span class="sug-status ${st.cls}">${st.label}</span>
+          <span style="font-size:0.72rem;color:var(--text3)">${catLabel}</span>
+        </div>
+        <div class="sug-card-meta">👤 ${s.autor || '—'} · ${data}</div>
+      </div>
+    </div>
+    <div class="sug-card-text">${escapeHtml(s.texto || '')}</div>
+    ${s.feedback ? `<div style="background:rgba(79,45,127,0.08);border:1px solid rgba(79,45,127,0.2);border-radius:8px;padding:8px 12px;font-size:0.75rem;color:var(--text2);margin-bottom:10px">
+      <strong style="color:var(--purple-l)">Feedback do admin:</strong><br>${escapeHtml(s.feedback)}
+    </div>` : ''}
+    <textarea class="sug-feedback-area" id="sug-fb-${key}" placeholder="Escreva um feedback para o solicitante (opcional)...">${escapeHtml(s.feedback || '')}</textarea>
+    ${acoes}
+  </div>`;
+}
+
+function toggleSugConcluidas() {
+  const list = document.getElementById('sug-concluidas-list');
+  const chev = document.getElementById('sug-concluidas-chevron');
+  if (!list) return;
+  const open = list.style.display !== 'none';
+  list.style.display = open ? 'none' : 'block';
+  if (chev) chev.style.transform = open ? '' : 'rotate(180deg)';
+}
+
+async function reabrirSugestao(key) {
+  if (!_currentUser || _currentUser.role !== 'admin') return;
+  if (!confirm('Reabrir esta sugestão? O status voltará para "Nova".')) return;
+  try {
+    await _db.ref('cinea/sugestoes/' + key).update({ status: 'nova', resolvidoPor: null, resolvidoEm: null });
+    _sugestoesCache[key] = { ..._sugestoesCache[key], status: 'nova', resolvidoPor: null, resolvidoEm: null };
+    registrarLog('Reabriu sugestão: ' + (_sugestoesCache[key]?.ticket || key));
+    filtrarSugestoes();
+    mostrarToast('🔄 Sugestão reaberta', 'Status voltou para Nova — agora visível na lista principal.');
+  } catch(e) {
+    alert('Erro ao reabrir sugestão.');
+    console.error(e);
+  }
+}
+
 function filtrarSugestoes() {
-  const filtro = document.getElementById('sug-admin-filtro').value;
-  const listEl = document.getElementById('sug-admin-list');
+  const filtro  = document.getElementById('sug-admin-filtro').value;
+  const listEl  = document.getElementById('sug-admin-list');
   const countEl = document.getElementById('sug-admin-count');
 
-  // Ordena do mais recente para o mais antigo
-  const entradas = Object.entries(_sugestoesCache)
-    .sort((a,b) => (b[1].ts||'').localeCompare(a[1].ts||''))
-    .filter(([,v]) => !filtro || v.status === filtro);
+  const _CONCLUIDO = ['implementada', 'descartada'];
+  const todas  = Object.entries(_sugestoesCache).sort((a,b) => (b[1].ts||'').localeCompare(a[1].ts||''));
+  const total  = todas.length;
+  const filtradas = todas.filter(([,v]) => !filtro || v.status === filtro);
 
-  if (entradas.length === 0) {
-    const total = Object.keys(_sugestoesCache).length;
+  if (filtradas.length === 0) {
     countEl.textContent = total + ' sugestão(ões) no total';
     listEl.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:40px">Nenhuma sugestão ' + (filtro ? 'com esse status' : 'recebida ainda') + '.</div>';
     return;
   }
 
-  const total = Object.keys(_sugestoesCache).length;
-  countEl.textContent = entradas.length + ' exibida(s) · ' + total + ' total';
+  // Com filtro específico: exibe todas as correspondentes sem separação
+  if (filtro) {
+    const isConcl = _CONCLUIDO.includes(filtro);
+    countEl.textContent = filtradas.length + ' exibida(s) · ' + total + ' total';
+    listEl.innerHTML = filtradas.map(([key, s]) => renderSugCard(key, s, isConcl)).join('');
+    return;
+  }
 
-  listEl.innerHTML = entradas.map(([key, s]) => {
-    const st    = _SUG_STATUS[s.status] || _SUG_STATUS.nova;
-    const catLabel = _CATEGORIAS[s.categoria] || s.categoria || '—';
-    const data  = s.ts ? new Date(s.ts).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+  // Sem filtro: separa ativas das concluídas
+  const ativas     = filtradas.filter(([,v]) => !_CONCLUIDO.includes(v.status));
+  const concluidas = filtradas.filter(([,v]) =>  _CONCLUIDO.includes(v.status));
+  countEl.textContent = ativas.length + ' em aberto · ' + concluidas.length + ' concluída(s) · ' + total + ' total';
 
-    return `<div class="sug-card" id="sugcard-${key}">
-      <div class="sug-card-header">
-        <div style="flex:1">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
-            ${s.ticket ? `<span class="ticket-code">${s.ticket}</span>` : ''}
-            <span class="sug-status ${st.cls}">${st.label}</span>
-            <span style="font-size:0.72rem;color:var(--text3)">${catLabel}</span>
-          </div>
-          <div class="sug-card-meta">👤 ${s.autor || '—'} · ${data}</div>
-        </div>
-      </div>
-      <div class="sug-card-text">${escapeHtml(s.texto || '')}</div>
-      ${s.feedback ? `<div style="background:rgba(79,45,127,0.08);border:1px solid rgba(79,45,127,0.2);border-radius:8px;padding:8px 12px;font-size:0.75rem;color:var(--text2);margin-bottom:10px">
-        <strong style="color:var(--purple-l)">Feedback do admin:</strong><br>${escapeHtml(s.feedback)}
-      </div>` : ''}
-      <textarea class="sug-feedback-area" id="sug-fb-${key}" placeholder="Escreva um feedback para o solicitante (opcional)...">${escapeHtml(s.feedback || '')}</textarea>
-      <div class="sug-action-row">
-        <button class="sug-act-btn analise"     onclick="atualizarSugestao('${key}','analise')">🔍 Em análise</button>
-        <button class="sug-act-btn implementada" onclick="atualizarSugestao('${key}','implementada')">✅ Implementada</button>
-        <button class="sug-act-btn descartada"  onclick="atualizarSugestao('${key}','descartada')">❌ Descartar</button>
-        <button class="sug-act-btn save-fb"     onclick="salvarFeedbackSugestao('${key}')">💾 Salvar feedback</button>
+  let html = '';
+  if (ativas.length === 0) {
+    html += '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:20px 0">Nenhuma sugestão em aberto no momento. 🎉</div>';
+  } else {
+    html += ativas.map(([key, s]) => renderSugCard(key, s, false)).join('');
+  }
+  if (concluidas.length > 0) {
+    html += `<div id="sug-concluidas-wrap" style="margin-top:16px">
+      <button onclick="toggleSugConcluidas()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:600;padding:10px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+        <span>📁 Concluídas <span style="background:var(--border);border-radius:10px;padding:1px 8px;font-size:0.7rem;font-weight:700;margin-left:6px">${concluidas.length}</span></span>
+        <span id="sug-concluidas-chevron" style="font-size:0.75rem;transition:transform 0.2s">▼</span>
+      </button>
+      <div id="sug-concluidas-list" style="display:none;margin-top:8px">
+        ${concluidas.map(([key, s]) => renderSugCard(key, s, true)).join('')}
       </div>
     </div>`;
-  }).join('');
+  }
+  listEl.innerHTML = html;
 }
 
 function escapeHtml(str) {
