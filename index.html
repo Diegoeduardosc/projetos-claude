@@ -5573,21 +5573,22 @@ async function carregarListaUsuarios() {
     }
     container.innerHTML = entries.map(([mat, u]) => {
       const isSelf = mat === _currentUser?.matricula;
+      const editBtn   = `<button onclick="editarUsuarioInline('${mat}')" style="background:rgba(79,45,127,0.1);border:1px solid rgba(79,45,127,0.3);border-radius:8px;padding:5px 10px;font-size:0.72rem;color:var(--purple-l);cursor:pointer;font-family:'DM Sans',sans-serif">✏️ Editar</button>`;
       const removeBtn = isSelf
         ? `<span title="Você não pode remover sua própria conta" style="background:rgba(107,95,133,0.08);border:1px solid rgba(107,95,133,0.15);border-radius:8px;padding:5px 10px;font-size:0.72rem;color:var(--text3);font-family:'DM Sans',sans-serif;cursor:not-allowed;user-select:none">🔒 Você</span>`
         : `<button onclick="removerUsuario('${mat}','${u.nome||mat}')" style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.25);border-radius:8px;padding:5px 10px;font-size:0.72rem;color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif">✕ Remover</button>`;
       const resetBtn = isSelf
         ? ''
-        : `<button onclick="resetarSenhaUsuario('${mat}','${u.nome||mat}')" style="background:rgba(0,180,204,0.08);border:1px solid rgba(0,180,204,0.25);border-radius:8px;padding:5px 10px;font-size:0.72rem;color:var(--cyan);cursor:pointer;font-family:'DM Sans',sans-serif" title="Resetar senha para a matrícula">🔄 Resetar</button>`;
-      return `<div class="user-mgmt-row">
+        : `<button onclick="resetarSenhaUsuario('${mat}','${u.nome||mat}')" style="background:rgba(0,180,204,0.08);border:1px solid rgba(0,180,204,0.25);border-radius:8px;padding:5px 10px;font-size:0.72rem;color:var(--cyan);cursor:pointer;font-family:'DM Sans',sans-serif" title="Resetar senha para o código de pessoa">🔄 Resetar</button>`;
+      return `<div class="user-mgmt-row" id="user-row-${mat}">
         <div style="display:flex;align-items:center;gap:10px">
           <div style="width:32px;height:32px;border-radius:50%;background:${isSelf?'linear-gradient(135deg,var(--pink),var(--pink-l))':'linear-gradient(135deg,var(--purple),var(--purple-l))'};display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;color:#fff;flex-shrink:0">${(u.sigla||mat.slice(0,2)).toUpperCase()}</div>
           <div>
-            <div style="font-size:0.82rem;font-weight:600;color:var(--text)">${u.nome||mat}${isSelf?' <span style="font-size:0.65rem;color:var(--text3);font-weight:400">(você)</span>':''}</div>
-            <div style="font-size:0.68rem;color:var(--text3)">Mat: ${mat} · ${u.role==='admin'?'👑 Admin':'Membro'}</div>
+            <div style="font-size:0.82rem;font-weight:600;color:var(--text)">${escapeHtml(u.nome||mat)}${isSelf?' <span style="font-size:0.65rem;color:var(--text3);font-weight:400">(você)</span>':''}</div>
+            <div style="font-size:0.68rem;color:var(--text3)">Cód: ${mat} · ${u.role==='admin'?'👑 Admin':'Membro'}</div>
           </div>
         </div>
-        <div style="display:flex;gap:6px">${resetBtn}${removeBtn}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">${editBtn}${resetBtn}${removeBtn}</div>
       </div>`;
     }).join('');
   } catch(e) {
@@ -5616,6 +5617,86 @@ async function adicionarUsuario() {
     setTimeout(() => { errEl.textContent = ''; errEl.style.color = 'var(--red)'; }, 2500);
     carregarListaUsuarios();
   } catch(e) { errEl.textContent = '❌ Erro: ' + e.message; }
+}
+
+async function editarUsuarioInline(mat) {
+  if (!_currentUser || _currentUser.role !== 'admin') return;
+  const row = document.getElementById('user-row-' + mat);
+  if (!row) return;
+  // Busca dados atuais do Firebase
+  const snap = await _db.ref('cinea/users/' + sanitizarMat(mat)).once('value');
+  const u = snap.val();
+  if (!u) return;
+  const isSelf = mat === _currentUser?.matricula;
+  row.innerHTML = `
+    <div style="width:100%">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div>
+          <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">Nome</div>
+          <input id="edit-nome-${mat}" class="reuniao-input" value="${escapeHtml(u.nome||'')}" placeholder="Nome completo" style="margin:0;width:100%">
+        </div>
+        <div>
+          <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">Código de Pessoa</div>
+          <input id="edit-mat-${mat}" class="reuniao-input" value="${mat}" placeholder="Somente números" inputmode="numeric"
+            oninput="this.value=this.value.replace(/\\D/g,'')" style="margin:0;width:100%"
+            ${isSelf ? 'readonly title="Não é possível alterar seu próprio código"' : ''}>
+        </div>
+        <div>
+          <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">Sigla (2-3 letras)</div>
+          <input id="edit-sigla-${mat}" class="reuniao-input" value="${escapeHtml(u.sigla||'')}" placeholder="Ex: RO" maxlength="3" style="margin:0;width:100%;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div>
+          <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">Perfil</div>
+          <select id="edit-role-${mat}" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;padding:11px 12px;outline:none" ${isSelf?'disabled title="Você não pode alterar seu próprio perfil"':''}>
+            <option value="membro" ${u.role!=='admin'?'selected':''}>Membro</option>
+            <option value="admin"  ${u.role==='admin'?'selected':''}>👑 Admin</option>
+          </select>
+        </div>
+      </div>
+      <div id="edit-error-${mat}" style="font-size:0.73rem;color:var(--red);min-height:16px;margin-bottom:6px"></div>
+      <div style="display:flex;gap:8px">
+        <button onclick="salvarEdicaoUsuario('${mat}')" style="background:var(--purple);border:none;border-radius:8px;color:#fff;font-family:'DM Sans',sans-serif;font-size:0.78rem;font-weight:600;padding:7px 16px;cursor:pointer">💾 Salvar</button>
+        <button onclick="carregarListaUsuarios()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.78rem;padding:7px 14px;cursor:pointer">Cancelar</button>
+      </div>
+    </div>`;
+}
+
+async function salvarEdicaoUsuario(matAtual) {
+  if (!_currentUser || _currentUser.role !== 'admin') return;
+  const errEl   = document.getElementById('edit-error-' + matAtual);
+  const nome    = document.getElementById('edit-nome-'  + matAtual)?.value.trim();
+  const novaMat = document.getElementById('edit-mat-'   + matAtual)?.value.trim();
+  const sigla   = document.getElementById('edit-sigla-' + matAtual)?.value.trim().toUpperCase();
+  const role    = document.getElementById('edit-role-'  + matAtual)?.value || 'membro';
+  if (!nome)    { errEl.textContent = 'Nome é obrigatório.'; return; }
+  if (!novaMat) { errEl.textContent = 'Código de pessoa é obrigatório.'; return; }
+  if (!sigla || sigla.length < 2) { errEl.textContent = 'Sigla deve ter 2-3 letras.'; return; }
+  errEl.style.color = 'var(--text3)'; errEl.textContent = 'Salvando…';
+  try {
+    const snap = await _db.ref('cinea/users/' + sanitizarMat(matAtual)).once('value');
+    const dadosAtuais = snap.val() || {};
+    const dadosNovos  = { ...dadosAtuais, nome, sigla, role };
+    if (novaMat !== matAtual) {
+      // Código de pessoa mudou: verifica se novo código já existe
+      const snapNovo = await _db.ref('cinea/users/' + sanitizarMat(novaMat)).once('value');
+      if (snapNovo.exists()) { errEl.style.color='var(--red)'; errEl.textContent = '❌ Esse código de pessoa já está cadastrado.'; return; }
+      await _db.ref('cinea/users/' + sanitizarMat(novaMat)).set(dadosNovos);
+      await _db.ref('cinea/users/' + sanitizarMat(matAtual)).remove();
+    } else {
+      await _db.ref('cinea/users/' + sanitizarMat(matAtual)).update({ nome, sigla, role });
+    }
+    // Se editou o próprio usuário (exceto código, que é bloqueado), atualiza sessão local
+    if (matAtual === _currentUser.matricula) {
+      _currentUser = { ..._currentUser, nome, sigla };
+      const sessJSON = JSON.stringify(_currentUser);
+      sessionStorage.setItem('cinea_session', sessJSON);
+      if (localStorage.getItem('cinea_session')) localStorage.setItem('cinea_session', sessJSON);
+      atualizarTopbarUser();
+    }
+    registrarLog(`Editou cadastro de usuário: ${nome} (${novaMat !== matAtual ? matAtual + ' → ' + novaMat : novaMat})`);
+    mostrarToast('✅ Cadastro atualizado', nome + ' foi atualizado com sucesso.');
+    carregarListaUsuarios();
+  } catch(e) { errEl.style.color='var(--red)'; errEl.textContent = '❌ Erro: ' + e.message; }
 }
 
 async function removerUsuario(mat, nome) {
