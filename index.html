@@ -1952,15 +1952,15 @@ body.edit-mode .user-mgmt-section { display: block; }
     <div class="nav-label">Visão Geral</div>
     <div class="nav-item active" onclick="showPage('overview',this)">
       <div class="nav-dot" style="background:var(--purple-l)"></div>
-      Dashboard Geral
+      <span class="nav-item-text">Dashboard Geral</span>
     </div>
     <div class="nav-item" onclick="showPage('roadmap',this)">
       <div class="nav-dot" style="background:var(--gold)"></div>
-      Roadmap BI
+      <span class="nav-item-text">Roadmap BI</span>
     </div>
     <div class="nav-item" onclick="showPage('ideas',this)">
       <div class="nav-dot" style="background:var(--pink)"></div>
-      Ideias de Implantação
+      <span class="nav-item-text">Ideias de Implantação</span>
     </div>
   </div>
 
@@ -1968,15 +1968,15 @@ body.edit-mode .user-mgmt-section { display: block; }
     <div class="nav-label">Departamentos</div>
     <div class="nav-item" onclick="showPage('hub',this)">
       <div class="nav-dot" style="background:var(--pink)"></div>
-      Hub de Integração
+      <span class="nav-item-text">Hub de Integração</span>
     </div>
     <div class="nav-item" onclick="showPage('inov',this)">
       <div class="nav-dot" style="background:var(--purple-l)"></div>
-      Inovação Pedagógica
+      <span class="nav-item-text">Inovação Pedagógica</span>
     </div>
     <div class="nav-item" onclick="showPage('tec',this)">
       <div class="nav-dot" style="background:var(--cyan)"></div>
-      Tecnologias & Aprendizagem
+      <span class="nav-item-text">Tecnologias &amp; Aprendizagem</span>
     </div>
   </div>
 
@@ -1984,15 +1984,15 @@ body.edit-mode .user-mgmt-section { display: block; }
     <div class="nav-label">Operacional</div>
     <div class="nav-item" onclick="showPage('tarefas',this)">
       <div class="nav-dot" style="background:var(--gold)"></div>
-      Tarefas
+      <span class="nav-item-text">Tarefas</span>
     </div>
     <div class="nav-item" onclick="showPage('equipe',this)">
       <div class="nav-dot" style="background:var(--pink-l)"></div>
-      Equipe
+      <span class="nav-item-text">Equipe</span>
     </div>
     <div class="nav-item" onclick="showPage('meeting',this)">
       <div class="nav-dot" style="background:var(--green)"></div>
-      Reuniões
+      <span class="nav-item-text">Reuniões</span>
     </div>
   </div>
 
@@ -2483,7 +2483,7 @@ body.edit-mode .user-mgmt-section { display: block; }
             <div class="kpi-top"><span class="kpi-name">Satisfação dos cursos atendidos</span><div class="kpi-vals"><span class="kpi-cur">0</span><span class="kpi-sep">/</span><span class="kpi-tgt" data-sync="hub_t3">85%</span><span class="kpi-pct" style="background:rgba(231,76,60,0.1);color:var(--red)">0%</span></div></div>
             <div class="kpi-track"><div class="kpi-fill" style="width:0%;background:linear-gradient(90deg,var(--pink),var(--pink-l))"></div></div>
           </div>
-          <div style="margin-top:14px;padding:10px 12px;background:rgba(233,30,140,0.06);border:1px solid rgba(233,30,140,0.15);border-radius:10px;font-size:0.75rem;color:var(--text3)">
+          <div class="dept-data-hint" style="margin-top:14px;padding:10px 12px;background:rgba(233,30,140,0.06);border:1px solid rgba(233,30,140,0.15);border-radius:10px;font-size:0.75rem;color:var(--text3)">
             ℹ️ Dados serão preenchidos por Rosimeire via planilha no OneDrive
           </div>
         </div>
@@ -2528,7 +2528,7 @@ body.edit-mode .user-mgmt-section { display: block; }
             <div class="kpi-top"><span class="kpi-name">Materiais pedagógicos produzidos</span><div class="kpi-vals"><span class="kpi-cur">0</span><span class="kpi-sep">/</span><span class="kpi-tgt">10</span><span class="kpi-pct" style="background:rgba(231,76,60,0.1);color:var(--red)">0%</span></div></div>
             <div class="kpi-track"><div class="kpi-fill" style="width:0%;background:linear-gradient(90deg,var(--purple),var(--purple-l))"></div></div>
           </div>
-          <div style="margin-top:14px;padding:10px 12px;background:rgba(79,45,127,0.1);border:1px solid rgba(79,45,127,0.25);border-radius:10px;font-size:0.75rem;color:var(--text3)">
+          <div class="dept-data-hint" style="margin-top:14px;padding:10px 12px;background:rgba(79,45,127,0.1);border:1px solid rgba(79,45,127,0.25);border-radius:10px;font-size:0.75rem;color:var(--text3)">
             ℹ️ Dados serão preenchidos por Cláudia via planilha no OneDrive
           </div>
         </div>
@@ -2572,7 +2572,7 @@ body.edit-mode .user-mgmt-section { display: block; }
             <div class="kpi-top"><span class="kpi-name">Acessos ao Guia do Professor</span><div class="kpi-vals"><span class="kpi-cur">0</span><span class="kpi-sep">/</span><span class="kpi-tgt" data-sync="tec_t3">1.000</span><span class="kpi-pct" style="background:rgba(231,76,60,0.1);color:var(--red)">0%</span></div></div>
             <div class="kpi-track"><div class="kpi-fill" style="width:0%;background:linear-gradient(90deg,var(--cyan),var(--cyan-l))"></div></div>
           </div>
-          <div style="margin-top:14px;padding:10px 12px;background:rgba(0,180,204,0.06);border:1px solid rgba(0,180,204,0.2);border-radius:10px;font-size:0.75rem;color:var(--text3)">
+          <div class="dept-data-hint" style="margin-top:14px;padding:10px 12px;background:rgba(0,180,204,0.06);border:1px solid rgba(0,180,204,0.2);border-radius:10px;font-size:0.75rem;color:var(--text3)">
             ℹ️ Dados serão preenchidos por Jefferson via planilha no OneDrive
           </div>
         </div>
@@ -3820,7 +3820,7 @@ function renderDeptHeader(dept) {
       .join('');
     el.innerHTML = `
       <div>
-        <div style="font-size:0.65rem;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Responsável pelo setor</div>
+        <div class="dept-resp-label" style="font-size:0.65rem;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Responsável pelo setor</div>
         <select onchange="setDeptResp('${dept}', this.value)"
           style="background:var(--card2);border:1px solid var(--border);border-radius:10px;
                  color:${resp === 'Em definição' ? 'var(--text3)' : colorVar};font-family:'DM Sans',sans-serif;font-size:0.88rem;
@@ -3829,6 +3829,17 @@ function renderDeptHeader(dept) {
         </select>
       </div>
       <div class="avatar ${color}" style="transition:background 0.2s;${resp === 'Em definição' ? 'opacity:0.45' : ''}">${escapeHtml(info.sigla)}</div>`;
+    // Restaura rótulo editado e reaplica edit mode se ativo (elemento gerado dinamicamente)
+    const labelEl = el.querySelector('.dept-resp-label');
+    if (labelEl) {
+      const saved = localStorage.getItem('cinea_dept_resp_label');
+      if (saved) labelEl.textContent = saved;
+      if (editModeActive) {
+        labelEl.contentEditable = 'plaintext-only';
+        labelEl.classList.add('ed');
+        labelEl.oninput = () => localStorage.setItem('cinea_dept_resp_label', labelEl.textContent.trim());
+      }
+    }
   } else {
     // Exibição estática (não logado)
     el.innerHTML = `
@@ -4403,7 +4414,11 @@ const TEXT_ED_SELS = [
   // .idea-title / .idea-desc / .idea-tag / .idea-num são gerenciados pelo renderIdeas() diretamente
   '.ck-text', '.gauge-label',
   '.sidebar-brand', '.sidebar-sub',
-  '.sidebar-gestor-label', '.sidebar-gestor-avatar', '.sidebar-gestor-name', '.sidebar-gestor-role'
+  '.sidebar-gestor-label', '.sidebar-gestor-avatar', '.sidebar-gestor-name', '.sidebar-gestor-role',
+  // Rótulos de métricas, cabeçalhos de seção e textos de aviso dos departamentos
+  '.stat-label', '.card-title', '.dept-data-hint',
+  // Navegação lateral
+  '.nav-label', '.nav-item-text'
 ];
 
 function toggleEditMode() {
