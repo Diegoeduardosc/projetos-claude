@@ -2722,16 +2722,7 @@ body.edit-mode .user-mgmt-section { display: block; }
         <!-- Logado -->
         <div id="mural-content" style="display:none">
           <div class="mural-grid" id="mural-grid"></div>
-          <div class="mural-input-row">
-            <textarea class="mural-textarea" id="mural-texto" placeholder="Escreva seu ponto…" maxlength="300"
-              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();adicionarPostIt();}"></textarea>
-            <select class="mural-cat-select" id="mural-cat">
-              <option value="ideia">💡 Ideia</option>
-              <option value="problema">🔴 Problema</option>
-              <option value="proposta">✅ Proposta</option>
-            </select>
-            <button class="mural-send-btn" onclick="adicionarPostIt()">Enviar</button>
-          </div>
+          <!-- inputs inline por coluna — campo global removido -->
         </div>
       </div>
 
@@ -6561,8 +6552,13 @@ function _renderMuralDados(data) {
     const lista = items.filter(([,v]) => v.categoria === cat);
     return `<div class="mural-col">
       <div class="mural-col-header" style="color:${info.cor}">
-        ${info.label}
-        <span style="background:rgba(255,255,255,0.05);border-radius:20px;padding:1px 8px;font-size:0.67rem;color:var(--text3);margin-left:auto">${lista.length}</span>
+        <span>${info.label}</span>
+        <div style="display:flex;align-items:center;gap:6px;margin-left:auto">
+          <span style="background:rgba(255,255,255,0.05);border-radius:20px;padding:1px 8px;font-size:0.67rem;color:var(--text3)">${lista.length}</span>
+          <button onclick="toggleInputMural('${cat}')" title="Adicionar ponto"
+            style="width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:var(--text2);font-size:1rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;font-family:'DM Sans',sans-serif"
+            onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.07)'">+</button>
+        </div>
       </div>
       ${lista.length
         ? lista.map(([key, p]) => `
@@ -6571,12 +6567,49 @@ function _renderMuralDados(data) {
               <div>${escapeHtml(p.texto || '')}</div>
               ${isAdmin ? `<button class="mural-postit-del" onclick="deletarPostIt('${key}')" title="Remover">✕</button>` : ''}
             </div>`).join('')
-        : `<div class="mural-empty">Nenhum ponto ainda</div>`
+        : `<div class="mural-empty" id="mural-empty-${cat}">Nenhum ponto ainda</div>`
       }
+      <div id="mural-input-${cat}" style="display:none;margin-top:8px">
+        <textarea id="mural-ta-${cat}" class="mural-textarea" placeholder="Escreva aqui…" maxlength="300"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();adicionarPostItCat('${cat}');}"></textarea>
+        <div style="display:flex;gap:6px;margin-top:6px;justify-content:flex-end">
+          <button onclick="toggleInputMural('${cat}')"
+            style="background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text3);font-family:'DM Sans',sans-serif;font-size:0.75rem;padding:5px 12px;cursor:pointer">Cancelar</button>
+          <button onclick="adicionarPostItCat('${cat}')"
+            style="background:var(--purple);border:none;border-radius:8px;color:#fff;font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:600;padding:5px 14px;cursor:pointer">Enviar</button>
+        </div>
+      </div>
     </div>`;
   }).join('');
 }
 
+function toggleInputMural(cat) {
+  const wrap = document.getElementById('mural-input-' + cat);
+  const ta   = document.getElementById('mural-ta-'    + cat);
+  if (!wrap) return;
+  const abrindo = wrap.style.display === 'none';
+  wrap.style.display = abrindo ? 'block' : 'none';
+  if (abrindo && ta) { ta.value = ''; setTimeout(() => ta.focus(), 60); }
+}
+
+async function adicionarPostItCat(cat) {
+  if (!_currentUser) return;
+  const ta    = document.getElementById('mural-ta-' + cat);
+  const texto = ta?.value.trim();
+  if (!texto) { ta?.focus(); return; }
+  try {
+    await _db.ref('cinea/mural/' + _muralHoje()).push({
+      texto,
+      categoria: cat,
+      autor: _currentUser.nome || _currentUser.matricula,
+      ts: new Date().toISOString()
+    });
+    if (ta) ta.value = '';
+    document.getElementById('mural-input-' + cat).style.display = 'none';
+  } catch(e) { mostrarToast('❌ Erro', 'Não foi possível enviar. Tente novamente.'); }
+}
+
+// mantida por compatibilidade mas não usada diretamente na UI
 async function adicionarPostIt() {
   if (!_currentUser) return;
   const textoEl = document.getElementById('mural-texto');
