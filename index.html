@@ -5295,6 +5295,7 @@ async function fazerLogin() {
     atualizarTopbarUser();
     // Registra acesso no Firebase
     _db.ref('cinea/acessos').push({ matricula: mat, nome: u.nome, role: u.role, ts: new Date().toISOString() }).catch(()=>{});
+    registrarLog('Acessou o portal');
   } catch(e) {
     errEl.textContent = '❌ Erro de conexão. Tente novamente.';
     console.warn('Login error:', e);
@@ -5330,6 +5331,7 @@ async function fazerLoginGate() {
     setTimeout(() => { gate.style.display = 'none'; gate.classList.remove('gate-hiding'); }, 380);
     atualizarTopbarUser();
     _db.ref('cinea/acessos').push({ matricula: mat, nome: u.nome, role: u.role, ts: new Date().toISOString() }).catch(() => {});
+    registrarLog('Acessou o portal');
   } catch(e) {
     errEl.textContent = '❌ Erro de conexão. Tente novamente.';
     console.warn('Gate login error:', e);
@@ -5876,6 +5878,8 @@ async function enviarSolicitacaoReset() {
 }
 
 // ════════ LOG DE ATIVIDADES ════════
+let _logCache = []; // mantém os itens carregados para o download CSV
+
 async function registrarLog(acao) {
   if (!_currentUser) return;
   try {
@@ -5904,6 +5908,7 @@ async function carregarLog() {
     const snap  = await _db.ref('cinea/auditoria').orderByChild('ts').limitToLast(100).once('value');
     const data  = snap.val() || {};
     const items = Object.values(data).sort((a,b) => (b.ts||'').localeCompare(a.ts||''));
+    _logCache = items;
     if (!items.length) { list.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:30px">Nenhuma atividade registrada.</div>'; return; }
     list.innerHTML = `
       <table style="width:100%;border-collapse:collapse;font-size:0.78rem">
@@ -5925,9 +5930,30 @@ async function carregarLog() {
       </table>`;
   } catch(e) { list.innerHTML = '<div style="text-align:center;color:var(--red);font-size:0.82rem;padding:30px">Erro ao carregar log.</div>'; }
 }
+function downloadLog() {
+  if (!_logCache.length) { mostrarToast('⚠️ Log vazio', 'Nenhuma atividade para baixar.'); return; }
+  const header = ['Usuário', 'Código', 'Perfil', 'Ação', 'Data/Hora'];
+  const rows = _logCache.map(i => [
+    `"${(i.nome||'').replace(/"/g,'""')}"`,
+    `"${i.matricula||''}"`,
+    `"${i.role === 'admin' ? 'Admin' : 'Membro'}"`,
+    `"${(i.acao||'').replace(/"/g,'""')}"`,
+    `"${i.ts ? new Date(i.ts).toLocaleString('pt-BR') : '—'}"`
+  ].join(';'));
+  const csv  = [header.join(';'), ...rows].join('\r\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `cinea_log_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 async function limparLog() {
   if (!confirm('Apagar todo o histórico de atividades permanentemente?')) return;
   await _db.ref('cinea/auditoria').remove();
+  _logCache = [];
   carregarLog();
 }
 
@@ -7252,6 +7278,7 @@ async function salvarFeedbackSugestao(key) {
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-shrink:0">
       <div style="font-size:1rem;font-weight:700;color:var(--text)">📋 Log de Atividades</div>
       <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="downloadLog()" style="background:rgba(39,174,96,0.08);border:1px solid rgba(39,174,96,0.25);border-radius:8px;padding:5px 12px;font-size:0.72rem;color:var(--green);cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Baixar CSV</button>
         <button onclick="limparLog()" style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:8px;padding:5px 12px;font-size:0.72rem;color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif">🗑 Limpar log</button>
         <button onclick="fecharLog()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text2);width:32px;height:32px;cursor:pointer">✕</button>
       </div>
