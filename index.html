@@ -2631,24 +2631,6 @@ body.edit-mode .user-mgmt-section { display: block; }
           </div>
         </div>
 
-        <!-- Configuração GitHub backup (edit mode) -->
-        <div id="gh-config-section" style="display:none;margin-top:16px">
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px">
-            <div style="font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:12px">☁️ Backup · Repositório GitHub Privado</div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
-              <div style="flex:1;min-width:200px">
-                <div style="font-size:0.7rem;color:var(--text3);margin-bottom:4px">Personal Access Token</div>
-                <input id="gh-pat-input" type="password" placeholder="ghp_xxxxxxxxxxxx" class="reuniao-input" style="margin-top:0;width:100%">
-              </div>
-              <div style="flex:1;min-width:160px">
-                <div style="font-size:0.7rem;color:var(--text3);margin-bottom:4px">Repositório (usuario/repo)</div>
-                <input id="gh-repo-input" type="text" placeholder="Diegoeduardosc/cinea-reunioes" class="reuniao-input" style="margin-top:0;width:100%">
-              </div>
-              <button onclick="salvarConfigGH()" style="height:40px;padding:0 16px;background:rgba(79,45,127,0.3);border:1px solid var(--purple-l);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.78rem;cursor:pointer;white-space:nowrap">Salvar</button>
-            </div>
-            <div id="gh-status" style="font-size:0.7rem;color:var(--text3);margin-top:8px"></div>
-          </div>
-        </div>
       </div>
 
       <!-- ═══ TAREFAS POR DEPARTAMENTO ═══ -->
@@ -2668,6 +2650,25 @@ body.edit-mode .user-mgmt-section { display: block; }
           <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--text2)"><div style="width:10px;height:10px;border-radius:50%;background:var(--green)"></div>Concluída</div>
           <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--text2)"><div style="width:10px;height:10px;border-radius:50%;background:var(--gold)"></div>Em andamento</div>
           <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--text2)"><div style="width:10px;height:10px;border-radius:50%;background:var(--red)"></div>Pendente / Bloqueada</div>
+        </div>
+      </div>
+
+      <!-- Configuração GitHub backup (edit mode) — exibido abaixo da legenda -->
+      <div id="gh-config-section" style="display:none;margin-top:16px">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px">
+          <div style="font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:12px">☁️ Backup · Repositório GitHub Privado</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+            <div style="flex:1;min-width:200px">
+              <div style="font-size:0.7rem;color:var(--text3);margin-bottom:4px">Personal Access Token</div>
+              <input id="gh-pat-input" type="password" placeholder="ghp_xxxxxxxxxxxx" class="reuniao-input" style="margin-top:0;width:100%">
+            </div>
+            <div style="flex:1;min-width:160px">
+              <div style="font-size:0.7rem;color:var(--text3);margin-bottom:4px">Repositório (usuario/repo)</div>
+              <input id="gh-repo-input" type="text" placeholder="Diegoeduardosc/cinea-reunioes" class="reuniao-input" style="margin-top:0;width:100%">
+            </div>
+            <button onclick="salvarConfigGH()" style="height:40px;padding:0 16px;background:rgba(79,45,127,0.3);border:1px solid var(--purple-l);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.78rem;cursor:pointer;white-space:nowrap">Salvar</button>
+          </div>
+          <div id="gh-status" style="font-size:0.7rem;color:var(--text3);margin-top:8px"></div>
         </div>
       </div>
     </div>
