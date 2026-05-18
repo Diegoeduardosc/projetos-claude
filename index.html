@@ -5458,24 +5458,37 @@ async function fazerLoginGate() {
   }
 
   errEl.style.color = '';
-  errEl.textContent = 'Verificando…';
+  errEl.textContent = 'Conectando…';
   try {
-    // Aguarda autenticação anônima — obrigatória pelas regras do Firebase
+    // ── Garante autenticação anônima antes de qualquer leitura ──────────────
     if (!_fbAuthReady) {
-      errEl.textContent = 'Conectando…';
-      await new Promise(resolve => {
-        const _unsub = _auth.onAuthStateChanged(user => {
-          _unsub();
-          if (user) _fbAuthReady = true;
-          resolve();
+      try {
+        await Promise.race([
+          _auth.signInAnonymously().then(() => { _fbAuthReady = true; }),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('auth_timeout')), 10000))
+        ]);
+      } catch(authErr) {
+        // Tenta onAuthStateChanged como fallback
+        await new Promise(resolve => {
+          const _unsub = _auth.onAuthStateChanged(user => {
+            _unsub(); if (user) _fbAuthReady = true; resolve();
+          });
+          setTimeout(resolve, 5000);
         });
-        // timeout de segurança: 8 s
-        setTimeout(resolve, 8000);
-      });
-      errEl.textContent = 'Verificando…';
+      }
     }
+    if (!_fbAuthReady) {
+      errEl.style.color = 'var(--red)';
+      errEl.textContent = '❌ Sem conexão com o servidor. Verifique sua internet e tente novamente.';
+      return;
+    }
+    errEl.textContent = 'Verificando…';
     const hash = await sha256(senha);
-    const snap = await _db.ref('cinea/users/' + sanitizarMat(mat)).once('value');
+    // Timeout de 12s na leitura do banco — evita travar indefinidamente
+    const snap = await Promise.race([
+      _db.ref('cinea/users/' + sanitizarMat(mat)).once('value'),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('db_timeout')), 12000))
+    ]);
     const u = snap.val();
     if (!u || u.senha_hash !== hash) {
       _rl.count++;
@@ -5511,7 +5524,11 @@ async function fazerLoginGate() {
     registrarLog('Acessou o portal');
   } catch(e) {
     errEl.style.color = 'var(--red)';
-    errEl.textContent = '❌ Erro de conexão. Tente novamente.';
+    if (e?.message === 'db_timeout' || e?.message === 'auth_timeout') {
+      errEl.textContent = '⏱ Conexão lenta. Verifique sua internet e tente novamente.';
+    } else {
+      errEl.textContent = '❌ Erro de conexão. Tente novamente.';
+    }
     console.warn('Gate login error:', e);
   }
 }
