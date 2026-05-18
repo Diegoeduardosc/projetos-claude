@@ -911,6 +911,7 @@ body.edit-mode .idea-tag { cursor: text; }
   background: var(--bg);
   display: flex; align-items: center; justify-content: center;
   padding: 20px;
+  overflow-y: auto;
 }
 #auth-gate::before {
   content: ''; position: absolute; inset: 0; pointer-events: none;
@@ -925,6 +926,10 @@ body.edit-mode .idea-tag { cursor: text; }
   position: relative; z-index: 1;
   box-shadow: 0 32px 80px rgba(0,0,0,0.55);
   animation: fadeUp 0.45s ease;
+}
+@media (max-width: 480px) {
+  .gate-card { padding: 30px 22px; border-radius: 18px; }
+  .gate-logo  { font-size: 2rem; }
 }
 .gate-logo-area { text-align: center; margin-bottom: 28px; }
 .gate-logo {
@@ -5455,6 +5460,20 @@ async function fazerLoginGate() {
   errEl.style.color = '';
   errEl.textContent = 'Verificando…';
   try {
+    // Aguarda autenticação anônima — obrigatória pelas regras do Firebase
+    if (!_fbAuthReady) {
+      errEl.textContent = 'Conectando…';
+      await new Promise(resolve => {
+        const _unsub = _auth.onAuthStateChanged(user => {
+          _unsub();
+          if (user) _fbAuthReady = true;
+          resolve();
+        });
+        // timeout de segurança: 8 s
+        setTimeout(resolve, 8000);
+      });
+      errEl.textContent = 'Verificando…';
+    }
     const hash = await sha256(senha);
     const snap = await _db.ref('cinea/users/' + sanitizarMat(mat)).once('value');
     const u = snap.val();
@@ -7154,9 +7173,23 @@ carregarSemestresFirebase();
 (async function restaurarSessao() {
   const raw = localStorage.getItem('cinea_session') || sessionStorage.getItem('cinea_session');
   if (!raw) return;
+  // Usa dados salvos imediatamente (sem esperar Firebase) para UI instantânea
+  try {
+    const salvoRapido = JSON.parse(raw);
+    if (salvoRapido?.matricula) { _currentUser = salvoRapido; atualizarTopbarUser(); }
+  } catch(_) {}
   try {
     const salvo = JSON.parse(raw);
     if (!salvo?.matricula) return;
+    // Aguarda autenticação anônima antes de consultar o Firebase
+    if (!_fbAuthReady) {
+      await new Promise(resolve => {
+        const _unsub = _auth.onAuthStateChanged(user => {
+          _unsub(); if (user) _fbAuthReady = true; resolve();
+        });
+        setTimeout(resolve, 6000); // timeout de segurança
+      });
+    }
     // Verifica silenciosamente se o usuário ainda existe no Firebase
     const snap = await _db.ref('cinea/users/' + sanitizarMat(salvo.matricula)).once('value');
     const u = snap.val();
