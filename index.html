@@ -1705,7 +1705,7 @@ body.light-mode .sug-btn:hover { background: rgba(245,166,35,0.1); }
   flex-shrink: 0;
 }
 .lixeira-topbar-btn:hover { background: rgba(231,76,60,0.12); border-color: rgba(231,76,60,0.35); }
-body.user-logged-in .lixeira-topbar-btn { display: flex; }
+/* lixeira-topbar-btn: visibilidade controlada via JS em atualizarTopbarUser (admin only) */
 body.light-mode .lixeira-topbar-btn:hover { background: rgba(231,76,60,0.09); }
 
 /* Status pills para sugestões */
@@ -2078,7 +2078,7 @@ body.edit-mode .user-mgmt-section { display: block; }
           <div class="user-dd-divider"></div>
           <div class="user-dd-item" id="dd-changelog" onclick="abrirChangelog()">🚀 Melhorias &amp; Versões <span id="cl-badge" class="cl-dd-badge"></span></div>
           <div class="user-dd-item dd-mob-only" onclick="abrirSugestaoModal()">💡 Enviar sugestão</div>
-          <div class="user-dd-item dd-mob-only" onclick="abrirLixeira()">🗑️ Lixeira</div>
+          <div class="user-dd-item dd-mob-only" id="dd-lixeira-mob" onclick="abrirLixeira()" style="display:none">🗑️ Lixeira</div>
           <div class="user-dd-item" id="dd-trocar-senha" onclick="abrirTrocarSenha()">🔑 Trocar minha senha</div>
           <div class="user-dd-item danger" onclick="fazerLogout()">🚪 Sair</div>
         </div>
@@ -5364,19 +5364,23 @@ function atualizarTopbarUser() {
   const ddSenha    = document.getElementById('dd-senha');
   const editBtn    = document.getElementById('edit-mode-btn');
   const bellWrap   = document.getElementById('notif-bell-wrap');
+  const lixeiraBtn = document.getElementById('lixeira-topbar-btn');
+  const ddLixeiraMob = document.getElementById('dd-lixeira-mob');
   const isAdmin    = _currentUser && _currentUser.role === 'admin';
 
   if (_currentUser) {
-    if (loginBtn)  loginBtn.style.display = 'none';
-    if (userChip)  userChip.style.display = 'flex';
-    if (avatar)    avatar.textContent      = _currentUser.sigla;
-    if (nameEl)    nameEl.textContent      = _currentUser.nome;
-    if (roleEl)    roleEl.textContent      = isAdmin ? 'Admin · CINEA' : 'Equipe CINEA';
-    if (ddGer)     ddGer.style.display     = isAdmin ? 'flex' : 'none';
-    if (ddSug)     ddSug.style.display     = isAdmin ? 'flex' : 'none';
-    if (ddLog)     ddLog.style.display     = isAdmin ? 'flex' : 'none';
-    if (ddSenha)   ddSenha.style.display   = isAdmin ? 'flex' : 'none';
-    if (editBtn)   editBtn.style.display   = 'flex';
+    if (loginBtn)     loginBtn.style.display     = 'none';
+    if (userChip)     userChip.style.display     = 'flex';
+    if (avatar)       avatar.textContent          = _currentUser.sigla;
+    if (nameEl)       nameEl.textContent          = _currentUser.nome;
+    if (roleEl)       roleEl.textContent          = isAdmin ? 'Admin · CINEA' : 'Equipe CINEA';
+    if (ddGer)        ddGer.style.display         = isAdmin ? 'flex' : 'none';
+    if (ddSug)        ddSug.style.display         = isAdmin ? 'flex' : 'none';
+    if (ddLog)        ddLog.style.display         = isAdmin ? 'flex' : 'none';
+    if (ddSenha)      ddSenha.style.display       = isAdmin ? 'flex' : 'none';
+    if (lixeiraBtn)   lixeiraBtn.style.display    = isAdmin ? 'flex' : 'none';
+    if (ddLixeiraMob) ddLixeiraMob.style.display  = isAdmin ? 'flex' : 'none';
+    if (editBtn)      editBtn.style.display       = 'flex';
     // Sino de notificações: visível para todos os usuários logados
     if (bellWrap)  bellWrap.classList.toggle('visible', !!_currentUser);
     pararListenerNotificacoes(); // garante clean start se trocou de usuário
@@ -6361,6 +6365,7 @@ function salvarConfigGH() {
 let _lxAbaAtiva = 'reunioes';
 
 function abrirLixeira() {
+  if (!_currentUser || _currentUser.role !== 'admin') return;
   fecharUserDropdown?.();
   document.getElementById('lixeira-modal').style.display = 'flex';
   lixeiraAba('reunioes');
