@@ -2693,8 +2693,6 @@ body.edit-mode .user-mgmt-section { display: block; }
             <button class="filtro-clear-btn" onclick="limparFiltros()">✕ Limpar</button>
             <span class="filtro-count" id="filtro-count"></span>
           </div>
-          <!-- Apenas a ata mais recente -->
-          <div id="ultima-ata-wrap"></div>
           <!-- Botão histórico -->
           <div id="historico-btn-wrap" style="display:none;margin-top:10px">
             <button onclick="abrirHistorico()" style="display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.8rem;padding:9px 16px;cursor:pointer;width:100%;transition:background 0.15s"
@@ -6426,13 +6424,11 @@ function toggleAta(key) {
   _ataAberta = abrindo ? key : null;
 }
 
-// Renderiza apenas a ata mais recente na página principal
+// Atualiza contador e botão de histórico (nenhuma ata é exibida diretamente na página)
 function renderizarEntradasFiltradas() {
-  const wrap      = document.getElementById('ultima-ata-wrap');
   const empty     = document.getElementById('reunioes-empty');
   const histBtn   = document.getElementById('historico-btn-wrap');
   const histBadge = document.getElementById('historico-count-badge');
-  if (!wrap) return;
 
   // Popula dropdown de participantes (sem duplicatas)
   const sel = document.getElementById('filtro-participante');
@@ -6444,7 +6440,7 @@ function renderizarEntradasFiltradas() {
     });
   }
 
-  // Aplica filtros para o contador e para selecionar a mais recente filtrada
+  // Aplica filtros para o contador
   const texto = (document.getElementById('filtro-texto')?.value || '').toLowerCase().trim();
   const de    =  document.getElementById('filtro-de')?.value   || '';
   const ate   =  document.getElementById('filtro-ate')?.value  || '';
@@ -6471,23 +6467,16 @@ function renderizarEntradasFiltradas() {
   }
 
   if (!total) {
-    wrap.innerHTML = '';
     if (empty)   empty.style.display   = 'block';
     if (histBtn) histBtn.style.display = 'none';
     return;
   }
-  if (empty)   empty.style.display   = 'none';
+  if (empty) empty.style.display = 'none';
 
-  const isAdmin = _currentUser?.role === 'admin';
-  const [key, m] = entries[0];
-  _ataAberta = key;
-  wrap.innerHTML = _buildAtaItem(key, m, true, isAdmin);
-
-  // Botão histórico aparece se houver mais de 1 ata
-  if (histBtn) histBtn.style.display = total > 1 ? 'block' : 'none';
+  // Botão histórico aparece sempre que houver atas
+  if (histBtn) histBtn.style.display = 'block';
   if (histBadge) {
-    const outras = total - 1;
-    histBadge.textContent = outras > 0 ? `+ ${outras} ata${outras!==1?'s':''}` : '';
+    histBadge.textContent = total > 0 ? `${total} ata${total!==1?'s':''}` : '';
   }
 }
 
