@@ -4029,31 +4029,39 @@ function _confirmarArquivar(arquivar) {
 }
 
 /* Arquiva uma tarefa Concluída (move para a seção de arquivo) */
-async function arquivarTarefa(dept, idx) {
+function arquivarTarefa(dept, idx) {
+  if (!_currentUser) { abrirLoginModal(); return; }
   if (!TASKS[dept]?.[idx]) return;
-  TASKS[dept][idx].arquivada    = true;
-  TASKS[dept][idx].arquivadaEm  = new Date().toISOString();
-  salvarTasksLocal();
-  if (_db) {
-    try { await _db.ref('cinea/tasks/' + dept).set(TASKS[dept]); } catch(e) {}
-  }
+  TASKS[dept][idx].arquivada   = true;
+  TASKS[dept][idx].arquivadaEm = new Date().toISOString();
+  saveTasksToStorage();
+  saveTasksToFirebase(dept);
+  registrarLog(`Tarefa arquivada: "${TASKS[dept][idx].name}" (${DEPT_LABELS[dept]})`);
   renderTaskTable(dept);
+  renderAtividadesSetor(dept);
+  renderMeetingCards();
   renderConcluidos();
+  atualizarResumoTarefas();
+  renderTeamCards();
   mostrarToast('📦 Tarefa arquivada', 'A tarefa foi movida para o arquivo de concluídas.');
 }
 
 /* Restaura uma tarefa arquivada de volta para Em andamento */
-async function desarquivarTarefa(dept, idx) {
+function desarquivarTarefa(dept, idx) {
+  if (!_currentUser) { abrirLoginModal(); return; }
   if (!TASKS[dept]?.[idx]) return;
   TASKS[dept][idx].arquivada   = false;
   TASKS[dept][idx].arquivadaEm = null;
   TASKS[dept][idx].status      = 'Em andamento';
-  salvarTasksLocal();
-  if (_db) {
-    try { await _db.ref('cinea/tasks/' + dept).set(TASKS[dept]); } catch(e) {}
-  }
+  saveTasksToStorage();
+  saveTasksToFirebase(dept);
+  registrarLog(`Tarefa restaurada: "${TASKS[dept][idx].name}" (${DEPT_LABELS[dept]})`);
   renderTaskTable(dept);
+  renderAtividadesSetor(dept);
+  renderMeetingCards();
   renderConcluidos();
+  atualizarResumoTarefas();
+  renderTeamCards();
   mostrarToast('↩ Tarefa restaurada', 'A tarefa voltou para "Em andamento" no dashboard.');
 }
 
