@@ -2682,6 +2682,17 @@ body.edit-mode .user-mgmt-section { display: block; }
 
         <!-- Lista de reuniões (desbloqueada) -->
         <div id="reunioes-list" style="display:none">
+          <!-- Filtros -->
+          <div class="reunioes-filtro">
+            <input class="filtro-input filtro-input-text" id="filtro-texto" type="text" placeholder="🔍 Buscar por palavra-chave..." oninput="filtrarReunioes()">
+            <input class="filtro-input filtro-input-date" id="filtro-de"  type="date" title="Data inicial" onchange="filtrarReunioes()">
+            <input class="filtro-input filtro-input-date" id="filtro-ate" type="date" title="Data final"   onchange="filtrarReunioes()">
+            <select class="filtro-select" id="filtro-participante" onchange="filtrarReunioes()">
+              <option value="">👥 Todos os participantes</option>
+            </select>
+            <button class="filtro-clear-btn" onclick="limparFiltros()">✕ Limpar</button>
+            <span class="filtro-count" id="filtro-count"></span>
+          </div>
           <!-- Apenas a ata mais recente -->
           <div id="ultima-ata-wrap"></div>
           <!-- Botão histórico -->
@@ -2929,17 +2940,6 @@ body.edit-mode .user-mgmt-section { display: block; }
           <div style="font-size:0.72rem;color:var(--text3);margin-top:3px">Todas as atas registradas</div>
         </div>
         <button onclick="fecharHistorico()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text2);width:32px;height:32px;cursor:pointer;font-size:1rem">✕</button>
-      </div>
-      <!-- Filtros -->
-      <div class="reunioes-filtro" style="flex-shrink:0">
-        <input class="filtro-input filtro-input-text" id="filtro-texto" type="text" placeholder="🔍 Buscar por palavra-chave..." oninput="filtrarReunioes()">
-        <input class="filtro-input filtro-input-date" id="filtro-de"  type="date" title="Data inicial" onchange="filtrarReunioes()">
-        <input class="filtro-input filtro-input-date" id="filtro-ate" type="date" title="Data final"   onchange="filtrarReunioes()">
-        <select class="filtro-select" id="filtro-participante" onchange="filtrarReunioes()">
-          <option value="">👥 Todos os participantes</option>
-        </select>
-        <button class="filtro-clear-btn" onclick="limparFiltros()">✕ Limpar</button>
-        <span class="filtro-count" id="filtro-count"></span>
       </div>
       <!-- Lista completa -->
       <div id="historico-list" style="overflow-y:auto;flex:1">
@@ -6434,9 +6434,41 @@ function renderizarEntradasFiltradas() {
   const histBadge = document.getElementById('historico-count-badge');
   if (!wrap) return;
 
+  // Popula dropdown de participantes (sem duplicatas)
+  const sel = document.getElementById('filtro-participante');
+  if (sel && sel.options.length === 1) {
+    EQUIPE_CINEA.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.nome; opt.textContent = p.nome;
+      sel.appendChild(opt);
+    });
+  }
+
+  // Aplica filtros para o contador e para selecionar a mais recente filtrada
+  const texto = (document.getElementById('filtro-texto')?.value || '').toLowerCase().trim();
+  const de    =  document.getElementById('filtro-de')?.value   || '';
+  const ate   =  document.getElementById('filtro-ate')?.value  || '';
+  const part  =  document.getElementById('filtro-participante')?.value || '';
+
   const total   = Object.keys(_meetingsCache).length;
   const entries = Object.entries(_meetingsCache)
+    .filter(([, m]) => {
+      if (texto && !`${m.pauta||''} ${m.resumo||''} ${m.decisoes||''}`.toLowerCase().includes(texto)) return false;
+      if (de  && (m.data||'') < de)  return false;
+      if (ate && (m.data||'') > ate) return false;
+      if (part && !(m.participantes||[]).includes(part)) return false;
+      return true;
+    })
     .sort((a,b) => (b[1].data||'').localeCompare(a[1].data||''));
+
+  // Contador
+  const countEl = document.getElementById('filtro-count');
+  if (countEl) {
+    const temFiltro = texto || de || ate || part;
+    countEl.textContent = temFiltro
+      ? `${entries.length} de ${total} ata${total!==1?'s':''}`
+      : (total ? `${total} ata${total!==1?'s':''}` : '');
+  }
 
   if (!total) {
     wrap.innerHTML = '';
@@ -6523,7 +6555,12 @@ function renderHistoricoFiltrado() {
   });
 }
 
-function filtrarReunioes() { renderHistoricoFiltrado(); }
+function filtrarReunioes() {
+  renderizarEntradasFiltradas();
+  if (document.getElementById('historico-reunioes-modal')?.style.display === 'flex') {
+    renderHistoricoFiltrado();
+  }
+}
 
 function limparFiltros() {
   ['filtro-texto','filtro-de','filtro-ate'].forEach(id => {
@@ -6531,7 +6568,7 @@ function limparFiltros() {
   });
   const sel = document.getElementById('filtro-participante');
   if (sel) sel.value = '';
-  renderHistoricoFiltrado();
+  filtrarReunioes();
 }
 
 async function deletarReuniao(key) {
