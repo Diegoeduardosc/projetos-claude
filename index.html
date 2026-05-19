@@ -3080,12 +3080,19 @@ _auth.signInAnonymously()
 // Monitora estado de conexão com o Firebase (com delay de 5s para evitar falsos positivos)
 let _fbConnected = null; // null=desconhecido, true=online, false=offline
 let _fbOfflineTimer = null;
+const _pendingSync = new Set(); // depts com alterações não sincronizadas
+
 _db.ref('.info/connected').on('value', snap => {
   const isConn = snap.val() === true;
   clearTimeout(_fbOfflineTimer);
   if (isConn) {
+    const voltou = _fbConnected === false;
     _fbConnected = true;
-    if (_fbConnected === false) setFbStatus('☁️ Firebase reconectado', 'var(--green)', 'var(--green)');
+    if (voltou) {
+      setFbStatus('☁️ Firebase reconectado', 'var(--green)', 'var(--green)');
+      // Sincroniza automaticamente o que ficou pendente
+      if (_pendingSync.size > 0) _sincronizarPendentes();
+    }
   } else {
     // Aguarda 5s antes de declarar offline (evita falso positivo na inicialização)
     _fbOfflineTimer = setTimeout(() => {
@@ -3094,6 +3101,28 @@ _db.ref('.info/connected').on('value', snap => {
     }, 5000);
   }
 });
+
+async function _sincronizarPendentes() {
+  const depts = [..._pendingSync];
+  mostrarToast('🔄 Sincronizando…', `Reenviando ${depts.length} alteração(ões) pendente(s) ao servidor.`);
+  let erros = 0;
+  for (const dept of depts) {
+    try {
+      if (dept === '__all__') {
+        await _db.ref('cinea/tasks').set({ hub: TASKS.hub, inov: TASKS.inov, tec: TASKS.tec });
+      } else {
+        await _db.ref('cinea/tasks/' + dept).set(TASKS[dept] || []);
+      }
+      _pendingSync.delete(dept);
+    } catch(e) { erros++; }
+  }
+  if (erros === 0) {
+    mostrarToast('✅ Sincronizado!', 'Todas as alterações pendentes foram enviadas ao servidor.');
+    setFbStatus('☁️ Firebase ativo', 'var(--green)', 'var(--green)');
+  } else {
+    mostrarToast('⚠️ Sincronização parcial', `${erros} alteração(ões) ainda pendente(s). Verifique a conexão.`);
+  }
+}
 
 // Formata data/hora atual como "16/05/2026 às 14:32"
 function _nowTs() {
@@ -3504,10 +3533,12 @@ async function saveTasksToFirebase(dept) {
     ]);
   } catch(e) {
     console.warn('[CINEA] Erro ao salvar tarefas no Firebase:', e.message);
+    // Guarda na fila de pendentes para reenvio automático ao reconectar
+    _pendingSync.add(dept || '__all__');
     if (e.message === 'fb_timeout' || _fbConnected === false) {
-      mostrarToast('📴 Sem conexão com o banco', 'Sua alteração foi salva localmente e NÃO está no servidor ainda. Reconecte e salve novamente.');
+      mostrarToast('📴 Salvo localmente', 'Sem conexão com o servidor. O sistema tentará reenviar automaticamente ao reconectar.');
     } else {
-      mostrarToast('⚠️ Erro ao salvar', 'Dados guardados localmente. Verifique sua conexão.');
+      mostrarToast('⚠️ Erro ao salvar', 'Guardado localmente. Tentativa automática de reenvio ao reconectar.');
     }
   }
 }
