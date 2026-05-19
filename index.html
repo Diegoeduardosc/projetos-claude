@@ -802,19 +802,54 @@ body.edit-mode .idea-tag { cursor: text; }
   justify-content: center;
   gap: 5px;
   cursor: pointer;
-  padding: 8px;
-  border-radius: 10px;
-  background: var(--card2);
-  border: 1px solid var(--border);
+  padding: 7px 6px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
   flex-shrink: 0;
+  transition: background 0.15s;
 }
+.hamburger:hover { background: var(--card2); }
 .hamburger span {
   display: block;
   width: 20px; height: 2px;
-  background: var(--text);
+  background: var(--text2);
   border-radius: 2px;
   transition: all 0.3s;
 }
+/* Wrapper título + botão editar no topbar */
+.topbar-title-wrap {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 0;
+}
+@media (max-width: 900px) {
+  .topbar-title-wrap { display: none; }
+}
+/* Botão de edição inline no topbar — só admin */
+.page-title-edit-btn {
+  display: none;
+  align-items: center;
+  padding: 3px 7px;
+  margin-left: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text3);
+  font-size: 0.72rem;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  vertical-align: middle;
+  line-height: 1;
+}
+.page-title-edit-btn:hover {
+  color: var(--purple-l);
+  border-color: rgba(107,63,160,0.35);
+  background: rgba(107,63,160,0.1);
+}
+body.admin-mode .page-title-edit-btn { display: inline-flex; }
 
 /* ─── SIDEBAR OVERLAY ─── */
 .sidebar-overlay {
@@ -2294,7 +2329,10 @@ body.admin-mode .bi-config-btn { display: inline-flex; }
     <div class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
       <span></span><span></span><span></span>
     </div>
-    <div class="topbar-title" id="page-title">Dashboard Geral</div>
+    <div class="topbar-title-wrap">
+      <div class="topbar-title" id="page-title">Dashboard Geral</div>
+      <button class="page-title-edit-btn" id="page-title-edit-btn" onclick="editarInfoPaginaAtual()" title="Editar banner informativo desta página">✏️ Editar info</button>
+    </div>
     <div class="topbar-right">
       <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Alternar tema claro/escuro">🌙</button>
       <!-- Sugestões de melhorias (todos os logados) -->
@@ -3552,7 +3590,10 @@ function toggleSidebar() {
   overlay.classList.toggle('active');
 }
 
+let _currentPageId = 'overview';
+
 function showPage(id, el) {
+  _currentPageId = id;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const pg = document.getElementById('page-' + id);
@@ -6682,10 +6723,20 @@ function _renderInfoBar(pageId, txt) {
     bar.classList.remove('visible');
   }
 }
+function editarInfoPaginaAtual() {
+  editarInfoPagina(_currentPageId || 'overview');
+}
+
 function editarInfoPagina(pageId) {
   _pageInfoEditando = pageId;
   const ta = document.getElementById('page-info-textarea');
   if (ta) ta.value = _pageInfoCache[pageId] || '';
+  // Mostra qual página está sendo editada no título do modal
+  const titleEl = document.querySelector('#page-info-modal [style*="font-size:1rem"]');
+  const pageNames = { overview:'Dashboard Geral', indicadores:'Indicadores', roadmap:'Roadmap BI',
+    ideas:'Ideias de Implantação', hub:'Hub de Integração', inov:'Inovação Pedagógica',
+    tec:'Tecnologias & Aprendizagem', meeting:'Reuniões', equipe:'Equipe', tarefas:'Tarefas' };
+  if (titleEl) titleEl.textContent = '✏️ Banner: ' + (pageNames[pageId] || pageId);
   document.getElementById('page-info-modal').style.display = 'flex';
   setTimeout(() => ta?.focus(), 80);
 }
