@@ -2074,6 +2074,113 @@ body.edit-mode .user-mgmt-section { display: block; }
   align-self: flex-start; flex-shrink: 0;
 }
 .notif-toast-close:hover { color: var(--text); }
+
+/* ─── INDICADORES · BI PANELS ─── */
+.bi-panels-grid { display: flex; flex-direction: column; gap: 24px; }
+.bi-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+}
+.bi-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.bi-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.bi-panel-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.bi-config-btn {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  background: rgba(79,45,127,0.14);
+  border: 1px solid rgba(79,45,127,0.3);
+  border-radius: 8px;
+  color: var(--purple-l);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.bi-config-btn:hover { background: rgba(79,45,127,0.26); border-color: rgba(79,45,127,0.5); }
+body.admin-mode .bi-config-btn { display: inline-flex; }
+.bi-iframe-wrap { width: 100%; height: 600px; position: relative; background: var(--bg2); }
+.bi-iframe-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
+.bi-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 320px;
+  gap: 14px;
+  color: var(--text3);
+  text-align: center;
+  padding: 32px;
+}
+.bi-placeholder svg { opacity: 0.18; width: 52px; height: 52px; }
+.bi-placeholder-title { font-size: 0.88rem; font-weight: 600; color: var(--text2); }
+.bi-placeholder-sub { font-size: 0.74rem; color: var(--text3); max-width: 280px; line-height: 1.6; }
+/* Modal BI config */
+.bi-url-input {
+  width: 100%;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-family: 'DM Mono', monospace;
+  padding: 10px 14px;
+  resize: vertical;
+  min-height: 72px;
+  outline: none;
+  transition: border-color 0.15s;
+  margin-bottom: 12px;
+}
+.bi-url-input:focus { border-color: var(--purple-l); }
+.bi-url-hint {
+  font-size: 0.72rem;
+  color: var(--text3);
+  line-height: 1.65;
+  margin-bottom: 16px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+}
+.bi-url-hint code {
+  background: var(--bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'DM Mono', monospace;
+  color: var(--cyan-l);
+  font-size: 0.7rem;
+}
+@media (max-width: 600px) {
+  .bi-iframe-wrap { height: 420px; }
+  .bi-panel-header { padding: 12px 14px; }
+}
+@media (max-width: 430px) {
+  .bi-iframe-wrap { height: 340px; }
+}
 </style>
 </head>
 <body>
@@ -2103,6 +2210,10 @@ body.edit-mode .user-mgmt-section { display: block; }
       <div class="nav-item active" onclick="showPage('overview',this)">
         <div class="nav-dot" style="background:var(--purple-l)"></div>
         <span class="nav-item-text">Dashboard Geral</span>
+      </div>
+      <div class="nav-item" onclick="showPage('indicadores',this)">
+        <div class="nav-dot" style="background:var(--cyan)"></div>
+        <span class="nav-item-text">Indicadores</span>
       </div>
       <div class="nav-item" onclick="showPage('roadmap',this)">
         <div class="nav-dot" style="background:var(--gold)"></div>
@@ -2968,6 +3079,93 @@ body.edit-mode .user-mgmt-section { display: block; }
       <div id="concluidos-section"></div>
     </div>
 
+    <!-- ═══════════════════════════════ INDICADORES ═══════════════════════════════ -->
+    <div class="page" id="page-indicadores">
+      <div class="page-info-bar" id="info-bar-indicadores"></div>
+      <div class="section-header" style="margin-bottom:24px">
+        <div class="section-sub">Painéis de inteligência · Power BI por departamento <button class="page-info-edit-btn" onclick="editarInfoPagina('indicadores')" title="Editar informação desta página">✏️ Info</button></div>
+      </div>
+
+      <div class="bi-panels-grid">
+
+        <!-- Hub de Integração -->
+        <div class="bi-panel" id="bi-panel-hub">
+          <div class="bi-panel-header">
+            <div class="bi-panel-title">
+              <div class="bi-panel-dot" style="background:var(--pink)"></div>
+              Hub de Integração
+            </div>
+            <button class="bi-config-btn" onclick="abrirConfigurarBi('hub')">
+              ⚙️ Configurar painel
+            </button>
+          </div>
+          <div class="bi-iframe-wrap" id="bi-wrap-hub">
+            <div class="bi-placeholder" id="bi-placeholder-hub">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="4"  y="30" width="8"  height="14" rx="2" fill="currentColor"/>
+                <rect x="16" y="20" width="8"  height="24" rx="2" fill="currentColor"/>
+                <rect x="28" y="10" width="8"  height="34" rx="2" fill="currentColor"/>
+                <rect x="40" y="4"  width="8"  height="40" rx="2" fill="currentColor"/>
+              </svg>
+              <div class="bi-placeholder-title">Painel não configurado</div>
+              <div class="bi-placeholder-sub" id="bi-placeholder-sub-hub">Aguardando configuração pelo administrador</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inovação Pedagógica -->
+        <div class="bi-panel" id="bi-panel-inov">
+          <div class="bi-panel-header">
+            <div class="bi-panel-title">
+              <div class="bi-panel-dot" style="background:var(--purple-l)"></div>
+              Inovação Pedagógica
+            </div>
+            <button class="bi-config-btn" onclick="abrirConfigurarBi('inov')">
+              ⚙️ Configurar painel
+            </button>
+          </div>
+          <div class="bi-iframe-wrap" id="bi-wrap-inov">
+            <div class="bi-placeholder" id="bi-placeholder-inov">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="4"  y="30" width="8"  height="14" rx="2" fill="currentColor"/>
+                <rect x="16" y="20" width="8"  height="24" rx="2" fill="currentColor"/>
+                <rect x="28" y="10" width="8"  height="34" rx="2" fill="currentColor"/>
+                <rect x="40" y="4"  width="8"  height="40" rx="2" fill="currentColor"/>
+              </svg>
+              <div class="bi-placeholder-title">Painel não configurado</div>
+              <div class="bi-placeholder-sub" id="bi-placeholder-sub-inov">Aguardando configuração pelo administrador</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tecnologias & Aprendizagem -->
+        <div class="bi-panel" id="bi-panel-tec">
+          <div class="bi-panel-header">
+            <div class="bi-panel-title">
+              <div class="bi-panel-dot" style="background:var(--cyan)"></div>
+              Tecnologias &amp; Aprendizagem
+            </div>
+            <button class="bi-config-btn" onclick="abrirConfigurarBi('tec')">
+              ⚙️ Configurar painel
+            </button>
+          </div>
+          <div class="bi-iframe-wrap" id="bi-wrap-tec">
+            <div class="bi-placeholder" id="bi-placeholder-tec">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="4"  y="30" width="8"  height="14" rx="2" fill="currentColor"/>
+                <rect x="16" y="20" width="8"  height="24" rx="2" fill="currentColor"/>
+                <rect x="28" y="10" width="8"  height="34" rx="2" fill="currentColor"/>
+                <rect x="40" y="4"  width="8"  height="40" rx="2" fill="currentColor"/>
+              </svg>
+              <div class="bi-placeholder-title">Painel não configurado</div>
+              <div class="bi-placeholder-sub" id="bi-placeholder-sub-tec">Aguardando configuração pelo administrador</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /page-indicadores -->
+
   </div><!-- /content -->
   <!-- MODAL SENHA ADMIN -->
   <div class="modal-overlay" id="modal-senha">
@@ -3048,6 +3246,28 @@ body.edit-mode .user-mgmt-section { display: block; }
         <button class="modal-btn" style="flex:1;max-width:160px" onclick="_confirmarArquivar(true)">📦 Sim, arquivar</button>
         <button class="modal-btn secondary" style="flex:1;max-width:160px" onclick="_confirmarArquivar(false)">Não, manter aqui</button>
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIGURAR PAINEL BI -->
+  <div id="bi-config-modal" onclick="if(event.target===this)fecharBiModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:700;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;max-width:540px;width:100%;position:relative;max-height:90vh;overflow-y:auto">
+      <button onclick="fecharBiModal()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text2);font-size:0.9rem;cursor:pointer;padding:4px 10px;border-radius:8px;line-height:1.4;transition:color 0.15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text2)'">✕</button>
+      <div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:4px" id="bi-config-modal-title">Configurar Painel</div>
+      <div style="font-size:0.75rem;color:var(--text3);margin-bottom:20px" id="bi-config-modal-sub">Cole o URL de incorporação do Power BI</div>
+      <div class="bi-url-hint">
+        📋 <strong style="color:var(--text2)">Como obter o URL:</strong><br><br>
+        1. Abra o relatório no <strong>Power BI Service</strong> (app.powerbi.com)<br>
+        2. Vá em <strong>Arquivo → Incorporar relatório → Site ou portal</strong><br>
+        3. Copie o valor do atributo <code>src="..."</code> do iframe gerado<br><br>
+        💡 Cole o URL completo ou o código HTML inteiro do iframe — o sistema extrai automaticamente.
+      </div>
+      <textarea id="bi-url-input" class="bi-url-input" placeholder="https://app.powerbi.com/reportEmbed?reportId=..." rows="4" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey))salvarBiUrl()"></textarea>
+      <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;align-items:center">
+        <button class="modal-btn secondary" onclick="fecharBiModal()" style="min-width:90px;font-size:0.78rem">Cancelar</button>
+        <button class="modal-btn" onclick="salvarBiUrl()" style="min-width:140px;font-size:0.8rem">💾 Salvar painel</button>
+      </div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:0.69rem;color:var(--text3)">Para remover o painel, limpe o campo de texto e clique em Salvar.</div>
     </div>
   </div>
 
@@ -3339,15 +3559,16 @@ function showPage(id, el) {
   if (pg) pg.classList.add('active');
   if (el) el.classList.add('active');
   const titles = {
-    overview:  'Dashboard Geral',
-    equipe:    'Equipe',
-    tarefas:   'Tarefas',
-    roadmap:   'Roadmap de Implantação BI',
-    ideas:     'Ideias de Implantação',
-    hub:       'Hub de Integração',
-    inov:      'Inovação Pedagógica',
-    tec:       'Tecnologias & Aprendizagem',
-    meeting:   'Reuniões',
+    overview:     'Dashboard Geral',
+    indicadores:  'Indicadores',
+    equipe:       'Equipe',
+    tarefas:      'Tarefas',
+    roadmap:      'Roadmap de Implantação BI',
+    ideas:        'Ideias de Implantação',
+    hub:          'Hub de Integração',
+    inov:         'Inovação Pedagógica',
+    tec:          'Tecnologias & Aprendizagem',
+    meeting:      'Reuniões',
   };
   // Mirror sidebar nav item text to page title; fall back to titles map
   const navText = el ? el.textContent.trim() : '';
@@ -3378,6 +3599,9 @@ function showPage(id, el) {
   }
   if (id === 'ideas') {
     renderIdeas();
+  }
+  if (id === 'indicadores') {
+    carregarBiUrls();
   }
   // Fecha sidebar no mobile ao navegar
   const sidebar = document.getElementById('sidebar');
@@ -6480,6 +6704,120 @@ async function salvarInfoPagina() {
     mostrarToast('✅ Informação salva', 'Visível para todos os membros.');
   } catch(e) {
     mostrarToast('⚠️ Erro ao salvar', 'Informação aplicada localmente.');
+  }
+}
+
+// ════════ INDICADORES · POWER BI ════════
+let _biUrls = { hub: '', inov: '', tec: '' };
+let _biUrlsCarregado = false;
+let _biEditingDept = null;
+const _BI_DEPT_NAMES = {
+  hub:  'Hub de Integração',
+  inov: 'Inovação Pedagógica',
+  tec:  'Tecnologias & Aprendizagem'
+};
+
+async function carregarBiUrls() {
+  // Atualiza o placeholder text para refletir se o usuário é admin
+  ['hub','inov','tec'].forEach(dept => {
+    const subEl = document.getElementById('bi-placeholder-sub-' + dept);
+    if (subEl && !_biUrls[dept]) {
+      const isAdmin = _currentUser?.role === 'admin';
+      subEl.textContent = isAdmin
+        ? 'Clique em "Configurar painel" para adicionar o URL do Power BI'
+        : 'Aguardando configuração pelo administrador';
+    }
+  });
+  // Só carrega do Firebase uma vez por sessão
+  if (_biUrlsCarregado) return;
+  if (!_db) return;
+  try {
+    const snap = await _db.ref('cinea/config/bi_urls').once('value');
+    const data = snap.val() || {};
+    _biUrls = { hub: data.hub || '', inov: data.inov || '', tec: data.tec || '' };
+    _biUrlsCarregado = true;
+    ['hub','inov','tec'].forEach(dept => _renderBiPanel(dept));
+  } catch(e) {
+    console.warn('[CINEA] Erro ao carregar URLs do BI:', e);
+  }
+}
+
+function _extractBiUrl(raw) {
+  if (!raw) return '';
+  const trimmed = raw.trim();
+  // Se for HTML de iframe, extrai o src
+  const m = trimmed.match(/src=["']([^"']+)["']/);
+  if (m) return m[1].trim();
+  return trimmed;
+}
+
+function _renderBiPanel(dept) {
+  const url = _biUrls[dept] || '';
+  const wrap = document.getElementById('bi-wrap-' + dept);
+  const placeholder = document.getElementById('bi-placeholder-' + dept);
+  if (!wrap) return;
+  // Remove iframe existente
+  const existing = wrap.querySelector('iframe');
+  if (existing) existing.remove();
+  if (url) {
+    if (placeholder) placeholder.style.display = 'none';
+    const iframe = document.createElement('iframe');
+    iframe.src = url;
+    iframe.allowFullscreen = true;
+    iframe.setAttribute('allow', 'fullscreen');
+    iframe.style.cssText = 'width:100%;height:100%;border:none;display:block';
+    iframe.title = _BI_DEPT_NAMES[dept] + ' · Power BI';
+    wrap.appendChild(iframe);
+  } else {
+    if (placeholder) {
+      placeholder.style.display = 'flex';
+      const subEl = document.getElementById('bi-placeholder-sub-' + dept);
+      if (subEl) {
+        const isAdmin = _currentUser?.role === 'admin';
+        subEl.textContent = isAdmin
+          ? 'Clique em "Configurar painel" para adicionar o URL do Power BI'
+          : 'Aguardando configuração pelo administrador';
+      }
+    }
+  }
+}
+
+function abrirConfigurarBi(dept) {
+  if (!_currentUser || _currentUser.role !== 'admin') return;
+  _biEditingDept = dept;
+  const modal  = document.getElementById('bi-config-modal');
+  const titleEl = document.getElementById('bi-config-modal-title');
+  const subEl  = document.getElementById('bi-config-modal-sub');
+  const input  = document.getElementById('bi-url-input');
+  if (!modal) return;
+  if (titleEl) titleEl.textContent = 'Configurar: ' + _BI_DEPT_NAMES[dept];
+  if (subEl)   subEl.textContent   = 'Cole o URL de incorporação do Power BI para ' + _BI_DEPT_NAMES[dept];
+  if (input)   input.value         = _biUrls[dept] || '';
+  modal.style.display = 'flex';
+  setTimeout(() => { if (input) input.focus(); }, 120);
+}
+
+function fecharBiModal() {
+  const modal = document.getElementById('bi-config-modal');
+  if (modal) modal.style.display = 'none';
+  _biEditingDept = null;
+}
+
+async function salvarBiUrl() {
+  if (!_biEditingDept) return;
+  const dept = _biEditingDept;
+  const raw  = document.getElementById('bi-url-input')?.value || '';
+  const url  = _extractBiUrl(raw);
+  _biUrls[dept] = url;
+  _renderBiPanel(dept);
+  fecharBiModal();
+  if (_db) {
+    try {
+      await _db.ref('cinea/config/bi_urls/' + dept).set(url || null);
+      mostrarToast('✅ Painel salvo!', `Painel de ${_BI_DEPT_NAMES[dept]} foi ${url ? 'configurado com sucesso' : 'removido'}.`);
+    } catch(e) {
+      mostrarToast('⚠️ Erro ao salvar', 'Não foi possível salvar no servidor. Tente novamente.');
+    }
   }
 }
 
