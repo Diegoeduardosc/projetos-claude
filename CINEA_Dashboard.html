@@ -7219,15 +7219,17 @@ async function salvarGsUrl() {
 // ════════════════════════════════════════════════
 const _ALL_PAGE_IDS = ['overview','indicadores','gsheets','roadmap','ideas','hub','inov','tec','tarefas','equipe','meeting'];
 
-async function carregarVisibilidade() {
-  if (!_db) return;
-  try {
-    const snap = await _db.ref('cinea/config/page_visibility').once('value');
+let _visListenerAtivo = false;
+function carregarVisibilidade() {
+  if (!_db || _visListenerAtivo) return;
+  _visListenerAtivo = true;
+  _db.ref('cinea/config/page_visibility').on('value', snap => {
     _pageVis = snap.val() || {};
     _applyVisibilidade();
-  } catch(e) {
-    console.warn('[CINEA] Erro ao carregar visibilidade:', e);
-  }
+  }, e => {
+    console.warn('[CINEA] Erro no listener de visibilidade:', e);
+    _visListenerAtivo = false; // permite nova tentativa
+  });
 }
 
 function _applyVisibilidade() {
