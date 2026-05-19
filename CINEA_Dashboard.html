@@ -2428,6 +2428,7 @@ body:not(.admin-mode) .nav-item-row.page-hidden { display: none; }
           <div class="user-dd-item" id="dd-gerenciar" onclick="abrirGerenciarUsuarios()" style="display:none">👥 Gerenciar equipe</div>
           <div class="user-dd-item" id="dd-log" onclick="abrirLog()" style="display:none">📋 Log de atividades</div>
           <div class="user-dd-item" id="dd-senha" onclick="abrirModal()" style="display:none">🔑 Alterar senha admin</div>
+          <div class="user-dd-item" id="dd-restaurar-vis" onclick="restaurarTodasPaginas()" style="display:none">👁 Restaurar visibilidade</div>
           <div class="user-dd-divider"></div>
           <div class="user-dd-item" id="dd-changelog" onclick="abrirChangelog()">🚀 Melhorias &amp; Versões <span id="cl-badge" class="cl-dd-badge"></span></div>
           <div class="user-dd-item dd-mob-only" id="dd-lixeira-mob" onclick="abrirLixeira()" style="display:none">🗑️ Lixeira</div>
@@ -6214,6 +6215,7 @@ function atualizarTopbarUser() {
   const ddGer      = document.getElementById('dd-gerenciar');
   const ddLog      = document.getElementById('dd-log');
   const ddSenha    = document.getElementById('dd-senha');
+  const ddRestVis  = document.getElementById('dd-restaurar-vis');
   const editBtn    = document.getElementById('edit-mode-btn');
   const bellWrap   = document.getElementById('notif-bell-wrap');
   const lixeiraBtn = document.getElementById('lixeira-topbar-btn');
@@ -6229,6 +6231,7 @@ function atualizarTopbarUser() {
     if (ddGer)        ddGer.style.display         = isAdmin ? 'flex' : 'none';
     if (ddLog)        ddLog.style.display         = isAdmin ? 'flex' : 'none';
     if (ddSenha)      ddSenha.style.display       = isAdmin ? 'flex' : 'none';
+    if (ddRestVis)    ddRestVis.style.display      = isAdmin ? 'flex' : 'none';
     if (lixeiraBtn)   lixeiraBtn.style.display    = isAdmin ? 'flex' : 'none';
     if (ddLixeiraMob) ddLixeiraMob.style.display  = isAdmin ? 'flex' : 'none';
     if (editBtn)      editBtn.style.display       = isAdmin ? 'flex' : 'none';
@@ -7236,22 +7239,32 @@ function _applyVisibilidade() {
     const btn = document.getElementById('vis-btn-' + id);
     if (btn) btn.title = isHidden ? '👁 Página oculta · clique para mostrar' : 'Ocultar esta página';
   });
+  // Se a página atualmente ativa ficou oculta e o usuário não é admin → redireciona para overview
+  const isAdmin = _currentUser && _currentUser.role === 'admin';
+  if (!isAdmin && _pageVis[_currentPageId] === false) {
+    const overviewEl = document.querySelector('.nav-item[onclick*="overview"]');
+    showPage('overview', overviewEl);
+  }
 }
 
 async function togglePageVisibility(pageId) {
   if (!_currentUser || _currentUser.role !== 'admin') return;
+  const _VIS_NOMES = { overview:'Dashboard Geral', indicadores:'Indicadores', gsheets:'Google Sheets',
+    roadmap:'Roadmap BI', ideas:'Ideias de Implantação', hub:'Hub de Integração',
+    inov:'Inovação Pedagógica', tec:'Tecnologias & Aprendizagem',
+    meeting:'Reuniões', equipe:'Equipe', tarefas:'Tarefas' };
+  const nomePagina = _VIS_NOMES[pageId] || pageId;
   const atualmenteOculta = _pageVis[pageId] === false;
+  // Confirmação antes de ocultar (não pede ao reativar)
+  if (!atualmenteOculta) {
+    if (!confirm(`Ocultar "${nomePagina}" para membros comuns?\n\nEsta página ficará invisível e inacessível para usuários não-admin até ser reativada.`)) return;
+  }
   if (atualmenteOculta) {
     delete _pageVis[pageId]; // torna visível
   } else {
     _pageVis[pageId] = false; // oculta
   }
   _applyVisibilidade();
-  const nomes = { overview:'Dashboard Geral', indicadores:'Indicadores', gsheets:'Google Sheets',
-    roadmap:'Roadmap BI', ideas:'Ideias de Implantação', hub:'Hub de Integração',
-    inov:'Inovação Pedagógica', tec:'Tecnologias & Aprendizagem',
-    meeting:'Reuniões', equipe:'Equipe', tarefas:'Tarefas' };
-  const nomePagina = nomes[pageId] || pageId;
   mostrarToast(
     atualmenteOculta ? '👁 Página visível' : '🚫 Página ocultada',
     atualmenteOculta
@@ -7263,6 +7276,26 @@ async function togglePageVisibility(pageId) {
       await _db.ref('cinea/config/page_visibility/' + pageId).set(atualmenteOculta ? null : false);
     } catch(e) {
       console.warn('[CINEA] Erro ao salvar visibilidade:', e);
+    }
+  }
+}
+
+async function restaurarTodasPaginas() {
+  if (!_currentUser || _currentUser.role !== 'admin') return;
+  const paginasOcultas = Object.keys(_pageVis).filter(k => _pageVis[k] === false);
+  if (paginasOcultas.length === 0) {
+    mostrarToast('ℹ️ Nenhuma página oculta', 'Todas as páginas já estão visíveis.');
+    return;
+  }
+  if (!confirm(`Restaurar visibilidade de ${paginasOcultas.length} página(s) oculta(s)?\n\nTodas as páginas voltarão a aparecer para os membros.`)) return;
+  _pageVis = {};
+  _applyVisibilidade();
+  mostrarToast('👁 Visibilidade restaurada', 'Todas as páginas estão visíveis novamente.');
+  if (_db) {
+    try {
+      await _db.ref('cinea/config/page_visibility').remove();
+    } catch(e) {
+      console.warn('[CINEA] Erro ao restaurar visibilidade:', e);
     }
   }
 }
