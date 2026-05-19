@@ -2370,6 +2370,10 @@ body:not(.admin-mode) .nav-item-row.page-hidden { display: none; }
         <span id="fb-status">Conectando...</span>
       </div>
       <div id="fb-sidebar-ts" style="font-size:0.6rem;font-weight:400;color:inherit;opacity:0.6;padding-left:2px;display:none">—</div>
+      <div id="fb-reload-hint" style="display:none;align-items:center;gap:6px;padding-top:2px;width:100%">
+        <span style="font-size:0.67rem;color:var(--red);line-height:1.4">Sem resposta do servidor.</span>
+        <button onclick="location.reload()" style="font-size:0.67rem;background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.35);color:var(--red);padding:2px 8px;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:background 0.15s" onmouseover="this.style.background='rgba(231,76,60,0.28)'" onmouseout="this.style.background='rgba(231,76,60,0.15)'">🔄 Recarregar</button>
+      </div>
     </div>
   </div>
 </aside>
@@ -3493,35 +3497,73 @@ const _db    = firebase.database();
 const _auth  = firebase.auth();
 const _CREF  = _db.ref('cinea/v1');   // raiz dos dados do dashboard
 
-// Autenticação anônima — habilita escrita nas regras do Firebase
-// (invisível para o usuário, acontece em background)
+// Autenticação anônima com retry automático (até 3 tentativas)
 let _fbAuthReady = false;
-_auth.signInAnonymously()
-  .then(() => { _fbAuthReady = true; })
-  .catch(e  => console.warn('[CINEA] Auth anônima falhou:', e));
+let _authRetryCount = 0;
 
-// Monitora estado de conexão com o Firebase (com delay de 5s para evitar falsos positivos)
+function _initAuth() {
+  _auth.signInAnonymously()
+    .then(() => {
+      _fbAuthReady = true;
+      _authRetryCount = 0;
+      console.log('[CINEA] Auth anônima OK' + (_authRetryCount > 0 ? ' (retry ' + _authRetryCount + ')' : ''));
+    })
+    .catch(e => {
+      console.warn('[CINEA] Auth anônima falhou (tentativa ' + (_authRetryCount + 1) + '):', e.message);
+      if (_authRetryCount < 3) {
+        _authRetryCount++;
+        const delay = _authRetryCount * 3000; // 3s, 6s, 9s
+        console.log('[CINEA] Tentando auth novamente em ' + delay / 1000 + 's...');
+        setTimeout(_initAuth, delay);
+      } else {
+        console.warn('[CINEA] Auth falhou após 3 tentativas. Continuando em modo somente-leitura.');
+      }
+    });
+}
+_initAuth();
+
+// Monitora estado de conexão com o Firebase
+// — 10s de delay antes de declarar offline (evita falsos positivos)
+// — após 10s offline: orienta o usuário a recarregar
 let _fbConnected = null; // null=desconhecido, true=online, false=offline
 let _fbOfflineTimer = null;
+let _fbReloadTimer  = null;
 const _pendingSync = new Set(); // depts com alterações não sincronizadas
+
+function _mostrarReloadHint(visivel) {
+  const el = document.getElementById('fb-reload-hint');
+  if (el) el.style.display = visivel ? 'flex' : 'none';
+}
 
 _db.ref('.info/connected').on('value', snap => {
   const isConn = snap.val() === true;
   clearTimeout(_fbOfflineTimer);
+  clearTimeout(_fbReloadTimer);
   if (isConn) {
     const voltou = _fbConnected === false;
     _fbConnected = true;
+    _mostrarReloadHint(false); // esconde hint de reload se estava visível
     if (voltou) {
       setFbStatus('☁️ Firebase reconectado', 'var(--green)', 'var(--green)');
+      const badge = document.getElementById('fb-badge');
+      if (badge) badge.className = 'live-badge';
       // Sincroniza automaticamente o que ficou pendente
       if (_pendingSync.size > 0) _sincronizarPendentes();
     }
   } else {
-    // Aguarda 5s antes de declarar offline (evita falso positivo na inicialização)
+    // 10s antes de declarar offline (evita falso positivo na inicialização)
     _fbOfflineTimer = setTimeout(() => {
       _fbConnected = false;
-      setFbStatus('⚠️ Sem conexão', 'var(--gold)', 'var(--gold)');
-    }, 5000);
+      setFbStatus('⚠️ Modo offline', 'var(--gold)', 'var(--gold)');
+      const badge = document.getElementById('fb-badge');
+      if (badge) badge.className = 'live-badge badge-warn';
+      // Após mais 10s sem reconexão: orienta o usuário a recarregar
+      _fbReloadTimer = setTimeout(() => {
+        setFbStatus('❌ Sem conexão', 'var(--red)', 'var(--red)');
+        if (badge) badge.className = 'live-badge badge-off';
+        _mostrarReloadHint(true);
+      }, 10000);
+    }, 10000);
   }
 });
 
