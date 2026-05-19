@@ -248,6 +248,35 @@ body::before {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ─── CABEÇALHOS EDITÁVEIS (admin) ─── */
+.page-info-bar {
+  background: rgba(79,45,127,0.07);
+  border: 1px solid rgba(79,45,127,0.18);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 0.82rem;
+  color: var(--text2);
+  line-height: 1.5;
+  display: none; /* mostrado via JS se tiver conteúdo */
+}
+.page-info-bar.visible { display: block; }
+.page-info-edit-btn {
+  display: none;
+  background: transparent;
+  border: 1px dashed rgba(79,45,127,0.35);
+  border-radius: 6px;
+  color: var(--text3);
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  margin-left: 8px;
+  transition: all 0.15s;
+}
+.page-info-edit-btn:hover { border-color: var(--purple-l); color: var(--purple-l); }
+body.admin-mode .page-info-edit-btn { display: inline-flex; align-items: center; gap: 4px; }
+
 .section-header {
   display: flex;
   align-items: flex-end;
@@ -2210,6 +2239,7 @@ body.edit-mode .user-mgmt-section { display: block; }
 
     <!-- ═══════════════════════════════ OVERVIEW ═══════════════════════════════ -->
     <div class="page active" id="page-overview">
+      <div class="page-info-bar" id="info-bar-overview"></div>
       <!-- Seletor de Semestre -->
       <div class="semester-selector-row" id="semester-selector-row">
         <div class="sem-pills-group" id="sem-pills-group">
@@ -2220,7 +2250,7 @@ body.edit-mode .user-mgmt-section { display: block; }
         <button id="add-sem-btn" class="add-sem-btn" onclick="abrirModalSemestre()" style="display:none" title="Adicionar novo semestre">+ Semestre</button>
       </div>
       <div style="margin-bottom:20px">
-        <div class="section-sub">Consolidado dos 3 departamentos · 1º semestre 2026</div>
+        <div class="section-sub">Consolidado dos 3 departamentos · 1º semestre 2026 <button class="page-info-edit-btn" onclick="editarInfoPagina('overview')" title="Editar informação desta página">✏️ Info</button></div>
       </div>
 
       <div class="stat-grid">
@@ -2708,8 +2738,9 @@ body.edit-mode .user-mgmt-section { display: block; }
 
     <!-- ═══════════════════════════════ REUNIÃO ═══════════════════════════════ -->
     <div class="page" id="page-meeting">
+      <div class="page-info-bar" id="info-bar-meeting"></div>
       <div class="section-header" style="margin-bottom:20px">
-        <div class="section-sub">Gaps · Gargalos · Pessoas-chave · Decisões</div>
+        <div class="section-sub">Gaps · Gargalos · Pessoas-chave · Decisões <button class="page-info-edit-btn" onclick="editarInfoPagina('meeting')" title="Editar informação desta página">✏️ Info</button></div>
         <div class="live-badge" id="ultima-reuniao-badge" style="border-radius:20px;gap:6px">
           <span style="font-size:0.85rem">📋</span>
           <span id="ultima-reuniao-txt">Sem reuniões</span>
@@ -2831,8 +2862,9 @@ body.edit-mode .user-mgmt-section { display: block; }
 
     <!-- ═══════════════════════════════ EQUIPE ═══════════════════════════════ -->
     <div class="page" id="page-equipe">
+      <div class="page-info-bar" id="info-bar-equipe"></div>
       <div class="section-header" style="margin-bottom:20px">
-        <div class="section-sub">Atribuições por pessoa · Quem está fazendo o quê</div>
+        <div class="section-sub">Atribuições por pessoa · Quem está fazendo o quê <button class="page-info-edit-btn" onclick="editarInfoPagina('equipe')" title="Editar informação desta página">✏️ Info</button></div>
         <button id="mover-membro-btn" onclick="abrirMoverMembro()" style="display:none;align-items:center;gap:6px;padding:7px 14px;background:rgba(79,45,127,0.2);border:1px solid rgba(79,45,127,0.4);border-radius:10px;color:var(--purple-l);font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s">👥 Mover membro</button>
       </div>
 
@@ -2862,8 +2894,9 @@ body.edit-mode .user-mgmt-section { display: block; }
 
     <!-- ═══════════════════════════════ TAREFAS ═══════════════════════════════ -->
     <div class="page" id="page-tarefas">
+      <div class="page-info-bar" id="info-bar-tarefas"></div>
       <div class="section-header" style="margin-bottom:20px">
-        <div class="section-sub">Gestão de tarefas · Todos os departamentos</div>
+        <div class="section-sub">Gestão de tarefas · Todos os departamentos <button class="page-info-edit-btn" onclick="editarInfoPagina('tarefas')" title="Editar informação desta página">✏️ Info</button></div>
         <div style="display:flex;align-items:center;gap:10px">
           <div id="save-notif" class="save-notif">✓ Exportado com sucesso</div>
           <button class="export-btn" onclick="exportCSV()">⬇ Exportar CSV · OneDrive</button>
@@ -3043,6 +3076,24 @@ let _fbAuthReady = false;
 _auth.signInAnonymously()
   .then(() => { _fbAuthReady = true; })
   .catch(e  => console.warn('[CINEA] Auth anônima falhou:', e));
+
+// Monitora estado de conexão com o Firebase (com delay de 5s para evitar falsos positivos)
+let _fbConnected = null; // null=desconhecido, true=online, false=offline
+let _fbOfflineTimer = null;
+_db.ref('.info/connected').on('value', snap => {
+  const isConn = snap.val() === true;
+  clearTimeout(_fbOfflineTimer);
+  if (isConn) {
+    _fbConnected = true;
+    if (_fbConnected === false) setFbStatus('☁️ Firebase reconectado', 'var(--green)', 'var(--green)');
+  } else {
+    // Aguarda 5s antes de declarar offline (evita falso positivo na inicialização)
+    _fbOfflineTimer = setTimeout(() => {
+      _fbConnected = false;
+      setFbStatus('⚠️ Sem conexão', 'var(--gold)', 'var(--gold)');
+    }, 5000);
+  }
+});
 
 // Formata data/hora atual como "16/05/2026 às 14:32"
 function _nowTs() {
@@ -3431,6 +3482,11 @@ function saveTasksToStorage() {
 // ── Firebase: salva tarefas automaticamente em cada operação ─────────────
 async function saveTasksToFirebase(dept) {
   if (!_db) return;
+  // Se sabidamente offline, avisa imediatamente sem tentar o banco
+  if (_fbConnected === false) {
+    mostrarToast('📴 Modo offline', 'Alteração salva localmente. Será sincronizada ao reconectar.');
+    return;
+  }
   // Aguarda auth anônima se ainda não está pronta
   if (!_fbAuthReady) {
     await new Promise(resolve => {
@@ -3438,14 +3494,21 @@ async function saveTasksToFirebase(dept) {
     });
   }
   try {
-    if (dept) {
-      await _db.ref('cinea/tasks/' + dept).set(TASKS[dept] || []);
-    } else {
-      await _db.ref('cinea/tasks').set({ hub: TASKS.hub, inov: TASKS.inov, tec: TASKS.tec });
-    }
+    const saveOp = dept
+      ? _db.ref('cinea/tasks/' + dept).set(TASKS[dept] || [])
+      : _db.ref('cinea/tasks').set({ hub: TASKS.hub, inov: TASKS.inov, tec: TASKS.tec });
+    // Timeout de 8s — evita que o usuário ache que salvou quando o banco está lento
+    await Promise.race([
+      saveOp,
+      new Promise((_, rej) => setTimeout(() => rej(new Error('fb_timeout')), 8000))
+    ]);
   } catch(e) {
     console.warn('[CINEA] Erro ao salvar tarefas no Firebase:', e.message);
-    mostrarToast('⚠️ Aviso', 'Tarefa salva localmente. Firebase indisponível no momento.');
+    if (e.message === 'fb_timeout' || _fbConnected === false) {
+      mostrarToast('📴 Sem conexão com o banco', 'Sua alteração foi salva localmente e NÃO está no servidor ainda. Reconecte e salve novamente.');
+    } else {
+      mostrarToast('⚠️ Erro ao salvar', 'Dados guardados localmente. Verifique sua conexão.');
+    }
   }
 }
 
@@ -3660,6 +3723,15 @@ function openAddPD(dept, e) {
   const dd = document.getElementById('ap-dd-' + dept);
   if (!dd) return;
   document.querySelectorAll('.member-picker-dd.open').forEach(el => el.classList.remove('open'));
+  const rect = dd.parentElement.getBoundingClientRect();
+  const spaceBelow = window.innerHeight - rect.bottom;
+  if (spaceBelow < 260) {
+    dd.style.top    = 'auto';
+    dd.style.bottom = 'calc(100% + 5px)';
+  } else {
+    dd.style.top    = 'calc(100% + 5px)';
+    dd.style.bottom = 'auto';
+  }
   dd.classList.toggle('open');
 }
 function toggleAddPM(dept, m) {
@@ -3702,6 +3774,16 @@ function openEditPD(dept, i, e) {
   const dd  = document.getElementById('ep-dd-' + key);
   if (!dd) return;
   document.querySelectorAll('.member-picker-dd.open').forEach(el => el.classList.remove('open'));
+  // Verifica se há espaço abaixo; se não, abre para cima
+  const rect = dd.parentElement.getBoundingClientRect();
+  const spaceBelow = window.innerHeight - rect.bottom;
+  if (spaceBelow < 260) {
+    dd.style.top    = 'auto';
+    dd.style.bottom = 'calc(100% + 5px)';
+  } else {
+    dd.style.top    = 'calc(100% + 5px)';
+    dd.style.bottom = 'auto';
+  }
   dd.classList.toggle('open');
 }
 function toggleEditPM(dept, i, m) {
@@ -4147,7 +4229,15 @@ function renderTaskTable(dept) {
           <div class="member-picker-dd" id="ep-dd-${key}"></div>
         </div>
       </td>
-      <td>${renderStatusPill(dept, i, task.status || 'Pendente', logado)}</td>
+      <td>
+        <span class="status-view-${dept}-${i}">${renderStatusPill(dept, i, task.status || 'Pendente', logado)}</span>
+        <select class="status-edit-${dept}-${i}" style="display:none;background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.75rem;padding:4px 8px;font-family:'DM Sans',sans-serif;cursor:pointer">
+          <option value="Pendente">⏸ Pendente</option>
+          <option value="Em andamento">▶ Em andamento</option>
+          <option value="Concluída">✅ Concluída</option>
+          <option value="Bloqueada">🔒 Bloqueada</option>
+        </select>
+      </td>
       <td style="white-space:nowrap">
         <button onclick="startEdit('${dept}',${i})" id="btn-edit-${dept}-${i}" style="background:rgba(79,45,127,0.2);border:1px solid rgba(79,45,127,0.3);border-radius:6px;color:var(--purple-l);font-size:0.72rem;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif">Editar</button>
         <button onclick="saveEdit('${dept}',${i})" id="btn-save-${dept}-${i}" style="display:none;background:rgba(39,174,96,0.15);border:1px solid rgba(39,174,96,0.3);border-radius:6px;color:var(--green);font-size:0.72rem;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif">Salvar</button>
@@ -4380,6 +4470,11 @@ function startEdit(dept, i) {
   document.getElementById(`btn-edit-${dept}-${i}`).style.display  = 'none';
   document.getElementById(`btn-save-${dept}-${i}`).style.display  = 'inline';
   document.getElementById(`btn-etipo-${key}`)?.style && (document.getElementById(`btn-etipo-${key}`).style.display = 'inline');
+  // Mostra select de status e define valor atual
+  const statusView = document.querySelector(`.status-view-${dept}-${i}`);
+  const statusSel  = document.querySelector(`.status-edit-${dept}-${i}`);
+  if (statusView) statusView.style.display = 'none';
+  if (statusSel)  { statusSel.style.display = 'inline-block'; statusSel.value = TASKS[dept][i].status || 'Pendente'; }
 }
 
 function saveEdit(dept, i) {
@@ -4389,9 +4484,12 @@ function saveEdit(dept, i) {
   if (!newName || newAssignees.length === 0) {
     mostrarToast('⚠️ Adicione ao menos um responsável.', ''); return;
   }
+  const statusSel = document.querySelector(`.status-edit-${dept}-${i}`);
+  const newStatus = statusSel?.value || TASKS[dept][i].status || 'Pendente';
   TASKS[dept][i].name      = newName;
   TASKS[dept][i].assignees = newAssignees;
   TASKS[dept][i].tipo      = _editTipo[dept + '_' + i] || TASKS[dept][i].tipo || 'normal';
+  TASKS[dept][i].status    = newStatus;
   saveTasksToStorage();
   saveTasksToFirebase(dept); // persiste imediatamente no Firebase
   registrarLog('Editou tarefa em ' + dept + ': ' + newName);
@@ -5622,6 +5720,7 @@ function atualizarTopbarUser() {
     if (lixeiraBtn)   lixeiraBtn.style.display    = isAdmin ? 'flex' : 'none';
     if (ddLixeiraMob) ddLixeiraMob.style.display  = isAdmin ? 'flex' : 'none';
     if (editBtn)      editBtn.style.display       = isAdmin ? 'flex' : 'none';
+    document.body.classList.toggle('admin-mode', isAdmin);
     // Sino de notificações: visível para todos os usuários logados
     if (bellWrap)  bellWrap.classList.toggle('visible', !!_currentUser);
     pararListenerNotificacoes(); // garante clean start se trocou de usuário
@@ -6219,43 +6318,140 @@ async function registrarLog(acao) {
   } catch(e) { /* silencioso */ }
 }
 
+let _logTabAtual = 'acessos';
+let _logAllItems = [];       // todos os itens carregados do Firebase
+let _logAcessosOffset = 0;
+let _logAlteracoesOffset = 0;
+const _LOG_PAGE = 10;
+
 function abrirLog() {
   fecharUserDropdown();
+  _logTabAtual = 'acessos';
+  _logAllItems = [];
+  _logAcessosOffset = 0;
+  _logAlteracoesOffset = 0;
   document.getElementById('log-modal').style.display = 'flex';
-  carregarLog();
+  switchLogTab('acessos');
+  carregarLogFirebase();
 }
 function fecharLog() {
   document.getElementById('log-modal').style.display = 'none';
 }
-async function carregarLog() {
-  const list = document.getElementById('log-list');
-  if (!list) return;
-  try {
-    const snap  = await _db.ref('cinea/auditoria').orderByChild('ts').limitToLast(100).once('value');
-    const data  = snap.val() || {};
-    const items = Object.values(data).sort((a,b) => (b.ts||'').localeCompare(a.ts||''));
-    _logCache = items;
-    if (!items.length) { list.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:30px">Nenhuma atividade registrada.</div>'; return; }
-    list.innerHTML = `
-      <table style="width:100%;border-collapse:collapse;font-size:0.78rem">
-        <thead>
-          <tr style="border-bottom:1px solid var(--border)">
-            <th style="text-align:left;padding:6px 8px;color:var(--text3);font-weight:600">Usuário</th>
-            <th style="text-align:left;padding:6px 8px;color:var(--text3);font-weight:600">Ação</th>
-            <th style="text-align:left;padding:6px 8px;color:var(--text3);font-weight:600;white-space:nowrap">Data/Hora</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${items.map(i => `
-            <tr style="border-bottom:1px solid var(--border)">
-              <td style="padding:8px;color:var(--text)"><span style="background:rgba(79,45,127,0.15);border-radius:6px;padding:2px 7px;font-weight:600">${i.nome||i.matricula}</span></td>
-              <td style="padding:8px;color:var(--text2)">${i.acao||'—'}</td>
-              <td style="padding:8px;color:var(--text3);white-space:nowrap">${i.ts ? new Date(i.ts).toLocaleString('pt-BR') : '—'}</td>
-            </tr>`).join('')}
-        </tbody>
-      </table>`;
-  } catch(e) { list.innerHTML = '<div style="text-align:center;color:var(--red);font-size:0.82rem;padding:30px">Erro ao carregar log.</div>'; }
+function switchLogTab(tab) {
+  _logTabAtual = tab;
+  const btnA = document.getElementById('log-tab-acessos');
+  const btnB = document.getElementById('log-tab-alteracoes');
+  const listA = document.getElementById('log-acessos-list');
+  const listB = document.getElementById('log-alteracoes-list');
+  const ativo   = 'background:var(--purple);border:1px solid var(--purple);color:#fff';
+  const inativo = 'background:var(--card2);border:1px solid var(--border);color:var(--text2)';
+  if (btnA) btnA.style.cssText = btnA.style.cssText.replace(/background:[^;]+;border:[^;]+;color:[^;]+/, tab==='acessos'?ativo:inativo);
+  if (btnB) btnB.style.cssText = btnB.style.cssText.replace(/background:[^;]+;border:[^;]+;color:[^;]+/, tab==='alteracoes'?ativo:inativo);
+  if (listA) listA.style.display = tab==='acessos'    ? 'block' : 'none';
+  if (listB) listB.style.display = tab==='alteracoes' ? 'block' : 'none';
+  if (_logAllItems.length) renderLogTab(tab);
 }
+async function carregarLogFirebase() {
+  const listA = document.getElementById('log-acessos-list');
+  const listB = document.getElementById('log-alteracoes-list');
+  if (listA) listA.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:30px">Carregando…</div>';
+  try {
+    const snap = await _db.ref('cinea/auditoria').orderByChild('ts').limitToLast(500).once('value');
+    const data = snap.val() || {};
+    _logAllItems = Object.values(data).sort((a,b) => (b.ts||'').localeCompare(a.ts||''));
+    _logCache = _logAllItems; // mantém compatibilidade com downloadLog
+    _logAcessosOffset = 0;
+    _logAlteracoesOffset = 0;
+    renderLogTab(_logTabAtual);
+  } catch(e) {
+    if (listA) listA.innerHTML = '<div style="text-align:center;color:var(--red);font-size:0.82rem;padding:30px">Erro ao carregar log.</div>';
+  }
+}
+function _logTableHTML(items) {
+  if (!items.length) return '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:30px">Nenhum registro encontrado.</div>';
+  return `<table style="width:100%;border-collapse:collapse;font-size:0.78rem">
+    <thead><tr style="border-bottom:1px solid var(--border)">
+      <th style="text-align:left;padding:6px 8px;color:var(--text3);font-weight:600">Usuário</th>
+      <th style="text-align:left;padding:6px 8px;color:var(--text3);font-weight:600">Ação</th>
+      <th style="text-align:left;padding:6px 8px;color:var(--text3);font-weight:600;white-space:nowrap">Data/Hora</th>
+    </tr></thead>
+    <tbody>${items.map(i => `
+      <tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:8px;color:var(--text)"><span style="background:rgba(79,45,127,0.15);border-radius:6px;padding:2px 7px;font-weight:600">${i.nome||i.matricula}</span></td>
+        <td style="padding:8px;color:var(--text2)">${i.acao||'—'}</td>
+        <td style="padding:8px;color:var(--text3);white-space:nowrap">${i.ts?new Date(i.ts).toLocaleString('pt-BR'):'—'}</td>
+      </tr>`).join('')}
+    </tbody></table>`;
+}
+function renderLogTab(tab) {
+  const isAcessos = tab === 'acessos';
+  const listEl = document.getElementById(isAcessos ? 'log-acessos-list' : 'log-alteracoes-list');
+  if (!listEl) return;
+  const filtered = _logAllItems.filter(i =>
+    isAcessos ? (i.acao === 'Acessou o portal') : (i.acao !== 'Acessou o portal')
+  );
+  const offset = isAcessos ? _logAcessosOffset : _logAlteracoesOffset;
+  const visible = filtered.slice(0, offset + _LOG_PAGE);
+  const hasMore = filtered.length > visible.length;
+  listEl.innerHTML = _logTableHTML(visible) +
+    (hasMore ? `<div style="text-align:center;padding:14px">
+      <button onclick="carregarMaisLog('${tab}')" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 20px;font-size:0.78rem;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif">
+        ↓ Carregar mais (${filtered.length - visible.length} restantes)
+      </button></div>` : '');
+}
+function carregarMaisLog(tab) {
+  if (tab === 'acessos')    _logAcessosOffset    += _LOG_PAGE;
+  else                      _logAlteracoesOffset += _LOG_PAGE;
+  renderLogTab(tab);
+}
+
+// ── Info de páginas (admin) ──────────────────────────────────────────────────
+let _pageInfoCache = {}; // { pageId: texto }
+let _pageInfoEditando = null;
+
+async function carregarPageInfos() {
+  try {
+    const snap = await _db.ref('cinea/config/page_info').once('value');
+    _pageInfoCache = snap.val() || {};
+    Object.entries(_pageInfoCache).forEach(([pageId, txt]) => _renderInfoBar(pageId, txt));
+  } catch(e) { /* silencioso */ }
+}
+function _renderInfoBar(pageId, txt) {
+  const bar = document.getElementById('info-bar-' + pageId);
+  if (!bar) return;
+  if (txt && txt.trim()) {
+    bar.textContent = txt.trim();
+    bar.classList.add('visible');
+  } else {
+    bar.textContent = '';
+    bar.classList.remove('visible');
+  }
+}
+function editarInfoPagina(pageId) {
+  _pageInfoEditando = pageId;
+  const ta = document.getElementById('page-info-textarea');
+  if (ta) ta.value = _pageInfoCache[pageId] || '';
+  document.getElementById('page-info-modal').style.display = 'flex';
+  setTimeout(() => ta?.focus(), 80);
+}
+function fecharInfoModal() {
+  document.getElementById('page-info-modal').style.display = 'none';
+  _pageInfoEditando = null;
+}
+async function salvarInfoPagina() {
+  if (!_pageInfoEditando) return;
+  const txt = document.getElementById('page-info-textarea')?.value?.trim() || '';
+  _pageInfoCache[_pageInfoEditando] = txt;
+  _renderInfoBar(_pageInfoEditando, txt);
+  fecharInfoModal();
+  try {
+    await _db.ref('cinea/config/page_info/' + _pageInfoEditando).set(txt || null);
+    mostrarToast('✅ Informação salva', 'Visível para todos os membros.');
+  } catch(e) {
+    mostrarToast('⚠️ Erro ao salvar', 'Informação aplicada localmente.');
+  }
+}
+
 function downloadLog() {
   if (!_logCache.length) { mostrarToast('⚠️ Log vazio', 'Nenhuma atividade para baixar.'); return; }
   const header = ['Usuário', 'Código', 'Perfil', 'Ação', 'Data/Hora'];
@@ -6274,13 +6470,6 @@ function downloadLog() {
   a.download = `cinea_log_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
   URL.revokeObjectURL(url);
-}
-
-async function limparLog() {
-  if (!confirm('Apagar todo o histórico de atividades permanentemente?')) return;
-  await _db.ref('cinea/auditoria').remove();
-  _logCache = [];
-  carregarLog();
 }
 
 // ── Trocar minha senha ──
@@ -7233,6 +7422,7 @@ function pararListenerMeetings() {
 // ☁️ Inicia carregando do Firebase (cai para localStorage se offline)
 loadFromFirebase();
 carregarSemestresFirebase();
+carregarPageInfos();
 
 // 🔐 Restaura sessão salva (sobrevive F5 e fechamento do browser se "Manter conectado")
 (async function restaurarSessao() {
@@ -7866,17 +8056,23 @@ async function salvarFeedbackSugestao(key) {
 
 <!-- MODAL LOG DE ATIVIDADES -->
 <div id="log-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:600;align-items:center;justify-content:center;padding:20px">
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:680px;max-height:85vh;display:flex;flex-direction:column">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-shrink:0">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:720px;max-height:88vh;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-shrink:0">
       <div style="font-size:1rem;font-weight:700;color:var(--text)">📋 Log de Atividades</div>
       <div style="display:flex;gap:8px;align-items:center">
         <button onclick="downloadLog()" style="background:rgba(39,174,96,0.08);border:1px solid rgba(39,174,96,0.25);border-radius:8px;padding:5px 12px;font-size:0.72rem;color:var(--green);cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Baixar CSV</button>
-        <button onclick="limparLog()" style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:8px;padding:5px 12px;font-size:0.72rem;color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif">🗑 Limpar log</button>
         <button onclick="fecharLog()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text2);width:32px;height:32px;cursor:pointer">✕</button>
       </div>
     </div>
-    <div id="log-list" style="overflow-y:auto;flex:1">
-      <div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:30px">Carregando...</div>
+    <!-- Tabs -->
+    <div style="display:flex;gap:6px;margin-bottom:14px;flex-shrink:0">
+      <button id="log-tab-acessos" onclick="switchLogTab('acessos')" style="padding:6px 16px;border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;background:var(--purple);border:1px solid var(--purple);color:#fff">🔑 Acessos</button>
+      <button id="log-tab-alteracoes" onclick="switchLogTab('alteracoes')" style="padding:6px 16px;border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;background:var(--card2);border:1px solid var(--border);color:var(--text2)">✏️ Alterações</button>
+    </div>
+    <!-- Conteúdo das tabs -->
+    <div style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:0">
+      <div id="log-acessos-list"></div>
+      <div id="log-alteracoes-list" style="display:none"></div>
     </div>
   </div>
 </div>
@@ -8306,6 +8502,23 @@ async function salvarFeedbackSugestao(key) {
     <div class="notif-toast-sub"  id="toast-sub">—</div>
   </div>
   <button class="notif-toast-close" onclick="fecharToast()">✕</button>
+</div>
+
+<!-- MODAL INFO PÁGINA (admin) -->
+<div id="page-info-modal" onclick="if(event.target===this)fecharInfoModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:700;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:480px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div style="font-size:1rem;font-weight:700;color:var(--text)">✏️ Informação da página</div>
+      <button onclick="fecharInfoModal()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text2);width:32px;height:32px;cursor:pointer">✕</button>
+    </div>
+    <label class="reuniao-label">Texto informativo (deixe vazio para ocultar)</label>
+    <textarea id="page-info-textarea" class="reuniao-input" rows="4" placeholder="Ex: Próxima reunião: 20/05 às 14h · Pauta: revisão de metas" style="resize:vertical;min-height:80px;width:100%;margin-bottom:16px"></textarea>
+    <div style="font-size:0.72rem;color:var(--text3);margin-bottom:16px">Este texto aparece em destaque no topo da página para todos os membros.</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="fecharInfoModal()" style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:9px 18px;font-size:0.82rem;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif">Cancelar</button>
+      <button onclick="salvarInfoPagina()" style="background:var(--purple);border:none;border-radius:10px;padding:9px 18px;font-size:0.82rem;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600">💾 Salvar</button>
+    </div>
+  </div>
 </div>
 </body>
 </html>
