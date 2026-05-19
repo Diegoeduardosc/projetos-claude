@@ -72,7 +72,7 @@ body::before {
 }
 
 .sidebar-logo {
-  padding: 24px 20px 20px;
+  padding: 11px 20px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 12px;
 }
@@ -127,12 +127,26 @@ body::before {
   flex-shrink: 0;
 }
 
+.sidebar-nav-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+.sidebar-nav-scroll::-webkit-scrollbar { width: 4px; }
+.sidebar-nav-scroll::-webkit-scrollbar-track { background: transparent; }
+.sidebar-nav-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
 .sidebar-bottom {
-  margin-top: auto;
+  flex-shrink: 0;
   padding: 0 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+  margin-top: 4px;
 }
 .live-badge {
   display: flex;
@@ -233,6 +247,35 @@ body::before {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ─── CABEÇALHOS EDITÁVEIS (admin) ─── */
+.page-info-bar {
+  background: rgba(79,45,127,0.07);
+  border: 1px solid rgba(79,45,127,0.18);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 0.82rem;
+  color: var(--text2);
+  line-height: 1.5;
+  display: none; /* mostrado via JS se tiver conteúdo */
+}
+.page-info-bar.visible { display: block; }
+.page-info-edit-btn {
+  display: none;
+  background: transparent;
+  border: 1px dashed rgba(79,45,127,0.35);
+  border-radius: 6px;
+  color: var(--text3);
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  margin-left: 8px;
+  transition: all 0.15s;
+}
+.page-info-edit-btn:hover { border-color: var(--purple-l); color: var(--purple-l); }
+body.admin-mode .page-info-edit-btn { display: inline-flex; align-items: center; gap: 4px; }
 
 .section-header {
   display: flex;
@@ -628,13 +671,13 @@ body.edit-mode .edit-hint-bar { display: block; }
   letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 28px;
 }
 .modal-label {
-  font-size: 0.75rem; color: var(--text3); margin-bottom: 8px;
-  letter-spacing: 0.5px;
+  font-size: 0.82rem; color: var(--text2); margin-bottom: 8px;
+  letter-spacing: 0.3px; font-weight: 500;
 }
 .modal-input {
   width: 100%; background: var(--bg2); border: 1px solid var(--border);
-  border-radius: 10px; color: var(--text); font-size: 0.95rem;
-  padding: 12px 16px; font-family: 'DM Mono', monospace;
+  border-radius: 10px; color: var(--text); font-size: 0.88rem;
+  padding: 12px 16px; font-family: 'DM Sans', sans-serif;
   outline: none; transition: border-color 0.2s; margin-bottom: 6px;
 }
 .modal-input:focus { border-color: var(--purple-l); }
@@ -759,19 +802,54 @@ body.edit-mode .idea-tag { cursor: text; }
   justify-content: center;
   gap: 5px;
   cursor: pointer;
-  padding: 8px;
-  border-radius: 10px;
-  background: var(--card2);
-  border: 1px solid var(--border);
+  padding: 7px 6px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
   flex-shrink: 0;
+  transition: background 0.15s;
 }
+.hamburger:hover { background: var(--card2); }
 .hamburger span {
   display: block;
   width: 20px; height: 2px;
-  background: var(--text);
+  background: var(--text2);
   border-radius: 2px;
   transition: all 0.3s;
 }
+/* Wrapper título + botão editar no topbar */
+.topbar-title-wrap {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 0;
+}
+@media (max-width: 900px) {
+  .topbar-title-wrap { display: none; }
+}
+/* Botão de edição inline no topbar — só admin */
+.page-title-edit-btn {
+  display: none;
+  align-items: center;
+  padding: 3px 7px;
+  margin-left: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text3);
+  font-size: 0.72rem;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  vertical-align: middle;
+  line-height: 1;
+}
+.page-title-edit-btn:hover {
+  color: var(--purple-l);
+  border-color: rgba(107,63,160,0.35);
+  background: rgba(107,63,160,0.1);
+}
+body.admin-mode .page-title-edit-btn { display: inline-flex; }
 
 /* ─── SIDEBAR OVERLAY ─── */
 .sidebar-overlay {
@@ -815,13 +893,14 @@ body.edit-mode .idea-tag { cursor: text; }
   }
   .sidebar.mobile-open { transform: translateX(0); }
   .sidebar-close-btn { display: flex; }
-  .main { margin-left: 0; }
+  .main { margin-left: 0; overflow-x: hidden; }
   .hamburger { display: flex; }
   .topbar { padding: 12px 16px; gap: 8px; }
   .topbar-right { gap: 8px; }
   .filter-pill { display: none; }
   .diego-topbar { display: none; }
   .sync-time { display: none; }
+  .topbar-title { display: none; }
   .content { padding: 16px; }
   .stat-grid { grid-template-columns: repeat(2,1fr); gap: 12px; }
   .grid-2 { grid-template-columns: 1fr; }
@@ -849,10 +928,9 @@ body.edit-mode .idea-tag { cursor: text; }
 /* ─── RESPONSIVE 600px (smartphone) ─── */
 @media (max-width: 600px) {
   /* Esconde botões secundários do topbar — ficam no menu do usuário */
-  .sug-wrap       { display: none !important; }
   .lixeira-topbar-btn { display: none !important; }
-  /* Mostra itens mobile-only no dropdown */
-  .dd-mob-only    { display: flex !important; }
+  /* Mostra itens mobile-only no dropdown (lixeira admin) */
+  .dd-mob-only    { display: flex; }
   /* Chip de usuário: oculta cargo para economizar espaço */
   .user-chip-role { display: none; }
   .user-chip      { padding: 5px 8px; gap: 5px; }
@@ -902,7 +980,12 @@ body.edit-mode .idea-tag { cursor: text; }
   /* User dropdown no mobile: mais largo e abre em posição correta */
   .user-dropdown  { right: 0; min-width: 210px; }
   /* Notif dropdown */
-  .notif-dropdown-panel { right: -60px; min-width: 280px; }
+  .notif-dropdown-panel { right: -8px; min-width: 0; width: calc(100vw - 32px); max-width: 320px; }
+  /* Garante que modais com padding 28px não fiquem apertados */
+  [style*="padding:28px"] { padding: 18px 14px !important; }
+  [style*="padding: 28px"] { padding: 18px 14px !important; }
+  [style*="padding:32px"] { padding: 18px 14px !important; }
+  [style*="padding: 32px"] { padding: 18px 14px !important; }
 }
 
 /* ═══ AUTH GATE — portão de acesso ═══ */
@@ -911,6 +994,7 @@ body.edit-mode .idea-tag { cursor: text; }
   background: var(--bg);
   display: flex; align-items: center; justify-content: center;
   padding: 20px;
+  overflow-y: auto;
 }
 #auth-gate::before {
   content: ''; position: absolute; inset: 0; pointer-events: none;
@@ -925,6 +1009,38 @@ body.edit-mode .idea-tag { cursor: text; }
   position: relative; z-index: 1;
   box-shadow: 0 32px 80px rgba(0,0,0,0.55);
   animation: fadeUp 0.45s ease;
+}
+@media (max-width: 480px) {
+  .gate-card { padding: 30px 22px; border-radius: 18px; }
+  .gate-logo  { font-size: 2rem; }
+}
+
+/* ─── RESPONSIVE 430px (iPhone 15 / telas compactas) ─── */
+@media (max-width: 430px) {
+  .content    { padding: 8px; }
+  .card       { padding: 12px 10px; }
+  .stat-card  { padding: 10px; }
+  .stat-value { font-size: 1.4rem; }
+  .stat-grid  { gap: 8px; }
+  /* Impede que qualquer card ou elemento filho quebre o layout */
+  .card, .stat-card, .por-pessoa-card, .ata-item { max-width: 100%; }
+  /* Modais: padding menor e conteúdo não transborda */
+  .modal-box  { padding: 20px 16px !important; }
+  /* Resumo bar: itens em 2 colunas sempre */
+  .resumo-item { flex: 1 1 calc(50% - 8px); min-width: 0; }
+  /* Filtro de reuniões em coluna sempre */
+  .reunioes-filtro { flex-direction: column; }
+  .filtro-input, .filtro-input-date, .filtro-select { width: 100% !important; min-width: 0 !important; }
+  /* Ata/accordion header: empilha chips */
+  .ata-header { flex-wrap: wrap; }
+  .ata-header-left { flex-wrap: wrap; }
+  /* Section-header empilhado */
+  .section-header { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .section-header button, .section-header a { font-size: 0.7rem; padding: 5px 9px; }
+  /* Mural grid em coluna */
+  .mural-grid { grid-template-columns: 1fr !important; }
+  /* Barra de gráfico com scroll horizontal */
+  .bar-chart  { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 }
 .gate-logo-area { text-align: center; margin-bottom: 28px; }
 .gate-logo {
@@ -1292,6 +1408,74 @@ body:not(.user-logged-in) .add-task-row { display: none !important; }
 }
 
 /* ═══ REUNIÕES ═══ */
+/* ─── Mural Colaborativo ─────────────────────────────────────── */
+.mural-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:14px; }
+@media(max-width:700px){ .mural-grid { grid-template-columns:1fr; } }
+.mural-col {
+  background:var(--card); border:1px solid var(--border); border-radius:14px;
+  padding:14px; display:flex; flex-direction:column; gap:8px; min-height:140px;
+}
+.mural-col-header {
+  display:flex; align-items:center; gap:8px;
+  font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1px;
+  padding-bottom:8px; border-bottom:1px solid var(--border); flex-shrink:0;
+}
+.mural-postit {
+  background:var(--card2); border-radius:10px; padding:10px 28px 10px 12px;
+  font-size:0.82rem; color:var(--text2); line-height:1.45;
+  position:relative; border-left:3px solid transparent; word-break:break-word;
+}
+.mural-postit-autor { font-size:0.68rem; font-weight:600; color:var(--text3); margin-bottom:4px; }
+.mural-postit-del {
+  position:absolute; top:6px; right:6px; background:transparent; border:none;
+  color:var(--text3); font-size:0.72rem; cursor:pointer; opacity:0;
+  transition:opacity 0.15s; padding:2px 5px; border-radius:4px; line-height:1;
+}
+.mural-postit:hover .mural-postit-del { opacity:1; }
+.mural-postit-del:hover { background:rgba(231,76,60,0.15); color:var(--red); }
+.mural-empty { text-align:center; color:var(--text3); font-size:0.77rem; padding:18px 8px; flex:1; }
+.mural-input-row {
+  display:flex; gap:8px; align-items:flex-start; margin-top:14px; flex-wrap:wrap;
+}
+.mural-textarea {
+  flex:1; min-width:160px; background:var(--card); border:1px solid var(--border);
+  border-radius:10px; color:var(--text); font-family:'DM Sans',sans-serif;
+  font-size:0.85rem; padding:10px 12px; resize:none; height:42px; outline:none;
+  transition:border-color 0.2s, height 0.15s; box-sizing:border-box;
+}
+.mural-textarea:focus { border-color:var(--purple-l); height:72px; }
+.mural-cat-select {
+  background:var(--card); border:1px solid var(--border); border-radius:10px;
+  color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.82rem;
+  padding:0 12px; outline:none; cursor:pointer; height:42px;
+}
+.mural-send-btn {
+  background:var(--purple); border:none; border-radius:10px; color:#fff;
+  font-family:'DM Sans',sans-serif; font-size:0.82rem; font-weight:600;
+  padding:0 18px; height:42px; cursor:pointer; white-space:nowrap; transition:opacity 0.15s;
+}
+.mural-send-btn:hover { opacity:0.85; }
+
+.ata-item { border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:8px; }
+.ata-header {
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:11px 16px; cursor:pointer; background:var(--card); transition:background 0.15s;
+  user-select:none;
+}
+.ata-header:hover { background:var(--card2); }
+.ata-header-left { display:flex; align-items:center; gap:10px; flex-wrap:wrap; min-width:0; }
+.ata-data-pill {
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:0.78rem; font-weight:600; color:var(--text);
+  white-space:nowrap;
+}
+.ata-meta { font-size:0.72rem; color:var(--text3); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.ata-chevron { font-size:0.72rem; color:var(--text3); transition:transform 0.22s; flex-shrink:0; }
+.ata-chevron.open { transform:rotate(180deg); }
+.ata-body { display:none; padding:14px 16px; border-top:1px solid var(--border); background:var(--card); }
+.ata-body.open { display:block; }
+.ata-actions { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+
 .reunion-card {
   position: relative;
   background: var(--card);
@@ -1705,7 +1889,7 @@ body.light-mode .sug-btn:hover { background: rgba(245,166,35,0.1); }
   flex-shrink: 0;
 }
 .lixeira-topbar-btn:hover { background: rgba(231,76,60,0.12); border-color: rgba(231,76,60,0.35); }
-body.user-logged-in .lixeira-topbar-btn { display: flex; }
+/* lixeira-topbar-btn: visibilidade controlada via JS em atualizarTopbarUser (admin only) */
 body.light-mode .lixeira-topbar-btn:hover { background: rgba(231,76,60,0.09); }
 
 /* Status pills para sugestões */
@@ -1861,7 +2045,7 @@ body.edit-mode .user-mgmt-section { display: block; }
 }
 .filtro-input:focus { border-color: var(--purple-l); }
 .filtro-input::placeholder { color: var(--text3); }
-.filtro-input-text { flex: 1; min-width: 180px; }
+.filtro-input-text { flex: 1; min-width: 0; }
 .filtro-input-date { width: 140px; }
 .filtro-select {
   background: var(--card);
@@ -1925,6 +2109,143 @@ body.edit-mode .user-mgmt-section { display: block; }
   align-self: flex-start; flex-shrink: 0;
 }
 .notif-toast-close:hover { color: var(--text); }
+
+/* ─── INDICADORES · BI PANELS ─── */
+.bi-panels-grid { display: flex; flex-direction: column; gap: 24px; }
+.bi-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+}
+.bi-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.bi-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.bi-panel-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.bi-config-btn {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  background: rgba(79,45,127,0.14);
+  border: 1px solid rgba(79,45,127,0.3);
+  border-radius: 8px;
+  color: var(--purple-l);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.bi-config-btn:hover { background: rgba(79,45,127,0.26); border-color: rgba(79,45,127,0.5); }
+body.admin-mode .bi-config-btn { display: inline-flex; }
+.bi-iframe-wrap { width: 100%; height: 600px; position: relative; background: var(--bg2); }
+.bi-iframe-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
+.bi-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 320px;
+  gap: 14px;
+  color: var(--text3);
+  text-align: center;
+  padding: 32px;
+}
+.bi-placeholder svg { opacity: 0.18; width: 52px; height: 52px; }
+.bi-placeholder-title { font-size: 0.88rem; font-weight: 600; color: var(--text2); }
+.bi-placeholder-sub { font-size: 0.74rem; color: var(--text3); max-width: 280px; line-height: 1.6; }
+/* Modal BI config */
+.bi-url-input {
+  width: 100%;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-family: 'DM Mono', monospace;
+  padding: 10px 14px;
+  resize: vertical;
+  min-height: 72px;
+  outline: none;
+  transition: border-color 0.15s;
+  margin-bottom: 12px;
+}
+.bi-url-input:focus { border-color: var(--purple-l); }
+.bi-url-hint {
+  font-size: 0.72rem;
+  color: var(--text3);
+  line-height: 1.65;
+  margin-bottom: 16px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+}
+.bi-url-hint code {
+  background: var(--bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'DM Mono', monospace;
+  color: var(--cyan-l);
+  font-size: 0.7rem;
+}
+@media (max-width: 600px) {
+  .bi-iframe-wrap { height: 420px; }
+  .bi-panel-header { padding: 12px 14px; }
+}
+@media (max-width: 430px) {
+  .bi-iframe-wrap { height: 340px; }
+}
+
+/* ════ NAV VISIBILITY (olhinho) ════ */
+.nav-item-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 2px;
+}
+.nav-item-row .nav-item { flex: 1; min-width: 0; margin-bottom: 0; }
+.nav-vis-btn {
+  display: none;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 26px; height: 26px;
+  border: none; background: transparent;
+  cursor: pointer; border-radius: 7px;
+  color: var(--text3); padding: 0;
+  transition: background 0.15s, color 0.15s;
+  line-height: 1;
+}
+.nav-vis-btn:hover { background: var(--card2); color: var(--text2); }
+body.admin-mode .nav-vis-btn { display: flex; }
+.nav-item-row.page-hidden .nav-item { opacity: 0.4; }
+.nav-item-row.page-hidden .nav-item .nav-item-text {
+  text-decoration: line-through;
+  text-decoration-color: rgba(255,255,255,0.2);
+}
+.nav-item-row.page-hidden .nav-vis-btn { color: var(--red); }
+body:not(.admin-mode) .nav-item-row.page-hidden { display: none; }
 </style>
 </head>
 <body>
@@ -1938,63 +2259,128 @@ body.edit-mode .user-mgmt-section { display: block; }
     <div class="sub sidebar-sub">NED · PUC Minas · 2026</div>
   </div>
 
-  <div class="gestor-geral-card">
-    <div class="gestor-geral-label sidebar-gestor-label">Gestor do CINEA</div>
-    <div class="gestor-geral-row">
-      <div class="gestor-geral-avatar sidebar-gestor-avatar">JC</div>
-      <div>
-        <div class="gestor-geral-name sidebar-gestor-name">Prof. João Carlos Oliveira Caetano</div>
-        <div class="gestor-geral-role sidebar-gestor-role">Gestor Geral · CINEA / NED</div>
+  <div class="sidebar-nav-scroll">
+    <div class="gestor-geral-card">
+      <div class="gestor-geral-label sidebar-gestor-label">Gestor do CINEA</div>
+      <div class="gestor-geral-row">
+        <div class="gestor-geral-avatar sidebar-gestor-avatar">JC</div>
+        <div>
+          <div class="gestor-geral-name sidebar-gestor-name">Prof. João Carlos Oliveira Caetano</div>
+          <div class="gestor-geral-role sidebar-gestor-role">Gestor Geral · CINEA / NED</div>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="nav-group">
-    <div class="nav-label">Visão Geral</div>
-    <div class="nav-item active" onclick="showPage('overview',this)">
-      <div class="nav-dot" style="background:var(--purple-l)"></div>
-      Dashboard Geral
+    <div class="nav-group">
+      <div class="nav-label">Visão Geral</div>
+      <div class="nav-item-row" id="nav-row-overview">
+        <div class="nav-item active" onclick="showPage('overview',this)">
+          <div class="nav-dot" style="background:var(--purple-l)"></div>
+          <span class="nav-item-text">Dashboard Geral</span>
+        </div>
+        <button class="nav-vis-btn" id="vis-btn-overview" onclick="togglePageVisibility('overview')" title="Ocultar esta página">
+          <svg width="14" height="10" viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M1 7s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/><circle cx="10" cy="7" r="2.5"/></svg>
+        </button>
+      </div>
+      <div class="nav-item-row" id="nav-row-indicadores">
+        <div class="nav-item" onclick="showPage('indicadores',this)">
+          <div class="nav-dot" style="background:var(--cyan)"></div>
+          <span class="nav-item-text">Indicadores</span>
+        </div>
+        <button class="nav-vis-btn" id="vis-btn-indicadores" onclick="togglePageVisibility('indicadores')" title="Ocultar esta página">
+          <svg width="14" height="10" viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M1 7s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/><circle cx="10" cy="7" r="2.5"/></svg>
+        </button>
+      </div>
+      <div class="nav-item-row" id="nav-row-gsheets">
+        <div class="nav-item" onclick="showPage('gsheets',this)">
+          <div class="nav-dot" style="background:var(--green)"></div>
+          <span class="nav-item-text">Google Sheets</span>
+        </div>
+        <button class="nav-vis-btn" id="vis-btn-gsheets" onclick="togglePageVisibility('gsheets')" title="Ocultar esta página">
+          <svg width="14" height="10" viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M1 7s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/><circle cx="10" cy="7" r="2.5"/></svg>
+        </button>
+      </div>
+      <div class="nav-item-row" id="nav-row-roadmap">
+        <div class="nav-item" onclick="showPage('roadmap',this)">
+          <div class="nav-dot" style="background:var(--gold)"></div>
+          <span class="nav-item-text">Roadmap BI</span>
+        </div>
+        <button class="nav-vis-btn" id="vis-btn-roadmap" onclick="togglePageVisibility('roadmap')" title="Ocultar esta página">
+          <svg width="14" height="10" viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M1 7s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/><circle cx="10" cy="7" r="2.5"/></svg>
+        </button>
+      </div>
+      <div class="nav-item-row" id="nav-row-ideas">
+        <div class="nav-item" onclick="showPage('ideas',this)">
+          <div class="nav-dot" style="background:var(--pink)"></div>
+          <span class="nav-item-text">Ideias de Implantação</span>
+        </div>
+        <button class="nav-vis-btn" id="vis-btn-ideas" onclick="togglePageVisibility('ideas')" title="Ocultar esta página">
+          <svg width="14" height="10" viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M1 7s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/><circle cx="10" cy="7" r="2.5"/></svg>
+        </button>
+      </div>
     </div>
-    <div class="nav-item" onclick="showPage('roadmap',this)">
-      <div class="nav-dot" style="background:var(--gold)"></div>
-      Roadmap BI
-    </div>
-    <div class="nav-item" onclick="showPage('ideas',this)">
-      <div class="nav-dot" style="background:var(--pink)"></div>
-      Ideias de Implantação
-    </div>
-  </div>
 
-  <div class="nav-group">
-    <div class="nav-label">Departamentos</div>
-    <div class="nav-item" onclick="showPage('hub',this)">
-      <div class="nav-dot" style="background:var(--pink)"></div>
-      Hub de Integração
+    <div class="nav-group">
+      <div class="nav-label">Departamentos</div>
+      <div class="nav-item-row" id="nav-row-hub">
+        <div class="nav-item" onclick="showPage('hub',this)">
+          <div class="nav-dot" style="background:var(--pink)"></div>
+          <span class="nav-item-text">Hub de Integração</span>
+        </div>
+        <button class="nav-vis-btn" id="vis-btn-hub" onclick="togglePageVisibility('hub')" title="Ocultar esta página">
+          <svg width="14" height="10" viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M1 7s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/><circle cx="10" cy="7" r="2.5"/></svg>
+        </button>
+      </div>
+      <div class="nav-item-row" id="nav-row-inov">
+        <div class="nav-item" onclick="showPage('inov',this)">
+          <div class="nav-dot" style="background:var(--purple-l)"></div>
+          <span class="nav-item-text">Inovação Pedagógica</span>
+        </div>
+        <button class="nav-vis-btn" id="vis-btn-inov" onclick="togglePageVisibility('inov')" title="Ocultar esta página">
+          <svg width="14" height="10" viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M1 7s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/><circle cx="10" cy="7" r="2.5"/></svg>
+        </button>
+      </div>
+      <div class="nav-item-row" id="nav-row-tec">
+        <div class="nav-item" onclick="showPage('tec',this)">
+          <div class="nav-dot" style="background:var(--cyan)"></div>
+          <span class="nav-item-text">Tecnologias &amp; Aprendizagem</span>
+        </div>
+        <button class="nav-vis-btn" id="vis-btn-tec" onclick="togglePageVisibility('tec')" title="Ocultar esta página">
+          <svg width="14" height="10" viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M1 7s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/><circle cx="10" cy="7" r="2.5"/></svg>
+        </button>
+      </div>
     </div>
-    <div class="nav-item" onclick="showPage('inov',this)">
-      <div class="nav-dot" style="background:var(--purple-l)"></div>
-      Inovação Pedagógica
-    </div>
-    <div class="nav-item" onclick="showPage('tec',this)">
-      <div class="nav-dot" style="background:var(--cyan)"></div>
-      Tecnologias & Aprendizagem
-    </div>
-  </div>
 
-  <div class="nav-group">
-    <div class="nav-label">Operacional</div>
-    <div class="nav-item" onclick="showPage('tarefas',this)">
-      <div class="nav-dot" style="background:var(--gold)"></div>
-      Tarefas
+    <div class="nav-group">
+      <div class="nav-label">Operacional</div>
+      <div class="nav-item-row" id="nav-row-tarefas">
+        <div class="nav-item" onclick="showPage('tarefas',this)">
+          <div class="nav-dot" style="background:var(--gold)"></div>
+          <span class="nav-item-text">Tarefas</span>
+        </div>
+        <button class="nav-vis-btn" id="vis-btn-tarefas" onclick="togglePageVisibility('tarefas')" title="Ocultar esta página">
+          <svg width="14" height="10" viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M1 7s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/><circle cx="10" cy="7" r="2.5"/></svg>
+        </button>
+      </div>
+      <div class="nav-item-row" id="nav-row-equipe">
+        <div class="nav-item" onclick="showPage('equipe',this)">
+          <div class="nav-dot" style="background:var(--pink-l)"></div>
+          <span class="nav-item-text">Equipe</span>
+        </div>
+        <button class="nav-vis-btn" id="vis-btn-equipe" onclick="togglePageVisibility('equipe')" title="Ocultar esta página">
+          <svg width="14" height="10" viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M1 7s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/><circle cx="10" cy="7" r="2.5"/></svg>
+        </button>
+      </div>
+      <div class="nav-item-row" id="nav-row-meeting">
+        <div class="nav-item" onclick="showPage('meeting',this)">
+          <div class="nav-dot" style="background:var(--green)"></div>
+          <span class="nav-item-text">Reuniões</span>
+        </div>
+        <button class="nav-vis-btn" id="vis-btn-meeting" onclick="togglePageVisibility('meeting')" title="Ocultar esta página">
+          <svg width="14" height="10" viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M1 7s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/><circle cx="10" cy="7" r="2.5"/></svg>
+        </button>
+      </div>
     </div>
-    <div class="nav-item" onclick="showPage('equipe',this)">
-      <div class="nav-dot" style="background:var(--pink-l)"></div>
-      Equipe
-    </div>
-    <div class="nav-item" onclick="showPage('meeting',this)">
-      <div class="nav-dot" style="background:var(--green)"></div>
-      Reuniões
-    </div>
-  </div>
+  </div><!-- /sidebar-nav-scroll -->
 
   <div class="sidebar-bottom">
     <div class="live-badge" id="pbi-sidebar-badge" style="cursor:pointer;flex-direction:column;align-items:flex-start;gap:4px" onclick="showPage('powerbi', document.querySelector('.nav-item[onclick*=powerbi]'))" title="Clique para ir à aba Power BI">
@@ -2032,12 +2418,15 @@ body.edit-mode .user-mgmt-section { display: block; }
     <div class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
       <span></span><span></span><span></span>
     </div>
-    <div class="topbar-title" id="page-title">Dashboard Geral</div>
+    <div class="topbar-title-wrap">
+      <div class="topbar-title" id="page-title">Dashboard Geral</div>
+      <button class="page-title-edit-btn" id="page-title-edit-btn" onclick="editarInfoPaginaAtual()" title="Editar banner informativo desta página">✏️ Editar info</button>
+    </div>
     <div class="topbar-right">
       <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Alternar tema claro/escuro">🌙</button>
       <!-- Sugestões de melhorias (todos os logados) -->
       <div class="sug-wrap" id="sug-wrap">
-        <button class="sug-btn" id="sug-btn" onclick="abrirSugestaoModal()" title="Sugestões de melhorias">💡</button>
+        <button class="sug-btn" id="sug-btn" onclick="_currentUser?.role==='admin'?abrirSugestoesAdmin():abrirSugestaoModal()" title="Sugestões de melhorias">💡</button>
         <div class="sug-notif-badge" id="sug-notif-badge"></div>
       </div>
       <!-- Lixeira (todos os logados) -->
@@ -2052,7 +2441,7 @@ body.edit-mode .user-mgmt-section { display: block; }
             <button id="notif-aviso-btn" class="notif-aviso-compose-btn" onclick="toggleAvisoCompose(event)" title="Enviar aviso a todos" style="display:none">📢 Aviso</button>
           </div>
           <div id="aviso-compose" style="display:none" onclick="event.stopPropagation()">
-            <textarea id="aviso-texto-input" class="notif-aviso-textarea" placeholder="Mensagem para todos os usuários..."></textarea>
+            <textarea id="aviso-texto-input" class="notif-aviso-textarea" placeholder="Mensagem para todos os usuários..." maxlength="500"></textarea>
             <div style="display:flex;gap:6px;margin-top:6px">
               <button class="notif-resolve-btn" style="flex:1" onclick="enviarAvisoGlobal()">📢 Enviar a todos</button>
               <button class="notif-dismiss-btn" onclick="document.getElementById('aviso-compose').style.display='none'">Cancelar</button>
@@ -2072,13 +2461,11 @@ body.edit-mode .user-mgmt-section { display: block; }
         </div>
         <div class="user-dropdown" id="user-dropdown">
           <div class="user-dd-item" id="dd-gerenciar" onclick="abrirGerenciarUsuarios()" style="display:none">👥 Gerenciar equipe</div>
-          <div class="user-dd-item" id="dd-sugestoes" onclick="abrirSugestoesAdmin()" style="display:none">💡 Sugestões recebidas</div>
           <div class="user-dd-item" id="dd-log" onclick="abrirLog()" style="display:none">📋 Log de atividades</div>
           <div class="user-dd-item" id="dd-senha" onclick="abrirModal()" style="display:none">🔑 Alterar senha admin</div>
           <div class="user-dd-divider"></div>
           <div class="user-dd-item" id="dd-changelog" onclick="abrirChangelog()">🚀 Melhorias &amp; Versões <span id="cl-badge" class="cl-dd-badge"></span></div>
-          <div class="user-dd-item dd-mob-only" onclick="abrirSugestaoModal()">💡 Enviar sugestão</div>
-          <div class="user-dd-item dd-mob-only" onclick="abrirLixeira()">🗑️ Lixeira</div>
+          <div class="user-dd-item dd-mob-only" id="dd-lixeira-mob" onclick="abrirLixeira()" style="display:none">🗑️ Lixeira</div>
           <div class="user-dd-item" id="dd-trocar-senha" onclick="abrirTrocarSenha()">🔑 Trocar minha senha</div>
           <div class="user-dd-item danger" onclick="fazerLogout()">🚪 Sair</div>
         </div>
@@ -2090,6 +2477,7 @@ body.edit-mode .user-mgmt-section { display: block; }
 
     <!-- ═══════════════════════════════ OVERVIEW ═══════════════════════════════ -->
     <div class="page active" id="page-overview">
+      <div class="page-info-bar" id="info-bar-overview"></div>
       <!-- Seletor de Semestre -->
       <div class="semester-selector-row" id="semester-selector-row">
         <div class="sem-pills-group" id="sem-pills-group">
@@ -2100,7 +2488,7 @@ body.edit-mode .user-mgmt-section { display: block; }
         <button id="add-sem-btn" class="add-sem-btn" onclick="abrirModalSemestre()" style="display:none" title="Adicionar novo semestre">+ Semestre</button>
       </div>
       <div style="margin-bottom:20px">
-        <div class="section-sub">Consolidado dos 3 departamentos · 1º semestre 2026</div>
+        <div class="section-sub">Consolidado dos 3 departamentos · 1º semestre 2026 <button class="page-info-edit-btn" onclick="editarInfoPagina('overview')" title="Editar informação desta página">✏️ Info</button></div>
       </div>
 
       <div class="stat-grid">
@@ -2483,7 +2871,7 @@ body.edit-mode .user-mgmt-section { display: block; }
             <div class="kpi-top"><span class="kpi-name">Satisfação dos cursos atendidos</span><div class="kpi-vals"><span class="kpi-cur">0</span><span class="kpi-sep">/</span><span class="kpi-tgt" data-sync="hub_t3">85%</span><span class="kpi-pct" style="background:rgba(231,76,60,0.1);color:var(--red)">0%</span></div></div>
             <div class="kpi-track"><div class="kpi-fill" style="width:0%;background:linear-gradient(90deg,var(--pink),var(--pink-l))"></div></div>
           </div>
-          <div style="margin-top:14px;padding:10px 12px;background:rgba(233,30,140,0.06);border:1px solid rgba(233,30,140,0.15);border-radius:10px;font-size:0.75rem;color:var(--text3)">
+          <div class="dept-data-hint" style="margin-top:14px;padding:10px 12px;background:rgba(233,30,140,0.06);border:1px solid rgba(233,30,140,0.15);border-radius:10px;font-size:0.75rem;color:var(--text3)">
             ℹ️ Dados serão preenchidos por Rosimeire via planilha no OneDrive
           </div>
         </div>
@@ -2528,7 +2916,7 @@ body.edit-mode .user-mgmt-section { display: block; }
             <div class="kpi-top"><span class="kpi-name">Materiais pedagógicos produzidos</span><div class="kpi-vals"><span class="kpi-cur">0</span><span class="kpi-sep">/</span><span class="kpi-tgt">10</span><span class="kpi-pct" style="background:rgba(231,76,60,0.1);color:var(--red)">0%</span></div></div>
             <div class="kpi-track"><div class="kpi-fill" style="width:0%;background:linear-gradient(90deg,var(--purple),var(--purple-l))"></div></div>
           </div>
-          <div style="margin-top:14px;padding:10px 12px;background:rgba(79,45,127,0.1);border:1px solid rgba(79,45,127,0.25);border-radius:10px;font-size:0.75rem;color:var(--text3)">
+          <div class="dept-data-hint" style="margin-top:14px;padding:10px 12px;background:rgba(79,45,127,0.1);border:1px solid rgba(79,45,127,0.25);border-radius:10px;font-size:0.75rem;color:var(--text3)">
             ℹ️ Dados serão preenchidos por Cláudia via planilha no OneDrive
           </div>
         </div>
@@ -2572,7 +2960,7 @@ body.edit-mode .user-mgmt-section { display: block; }
             <div class="kpi-top"><span class="kpi-name">Acessos ao Guia do Professor</span><div class="kpi-vals"><span class="kpi-cur">0</span><span class="kpi-sep">/</span><span class="kpi-tgt" data-sync="tec_t3">1.000</span><span class="kpi-pct" style="background:rgba(231,76,60,0.1);color:var(--red)">0%</span></div></div>
             <div class="kpi-track"><div class="kpi-fill" style="width:0%;background:linear-gradient(90deg,var(--cyan),var(--cyan-l))"></div></div>
           </div>
-          <div style="margin-top:14px;padding:10px 12px;background:rgba(0,180,204,0.06);border:1px solid rgba(0,180,204,0.2);border-radius:10px;font-size:0.75rem;color:var(--text3)">
+          <div class="dept-data-hint" style="margin-top:14px;padding:10px 12px;background:rgba(0,180,204,0.06);border:1px solid rgba(0,180,204,0.2);border-radius:10px;font-size:0.75rem;color:var(--text3)">
             ℹ️ Dados serão preenchidos por Jefferson via planilha no OneDrive
           </div>
         </div>
@@ -2588,67 +2976,85 @@ body.edit-mode .user-mgmt-section { display: block; }
 
     <!-- ═══════════════════════════════ REUNIÃO ═══════════════════════════════ -->
     <div class="page" id="page-meeting">
+      <div class="page-info-bar" id="info-bar-meeting"></div>
       <div class="section-header" style="margin-bottom:20px">
-        <div class="section-sub">Gaps · Gargalos · Pessoas-chave · Decisões</div>
+        <div class="section-sub">Gaps · Gargalos · Pessoas-chave · Decisões <button class="page-info-edit-btn" onclick="editarInfoPagina('meeting')" title="Editar informação desta página">✏️ Info</button></div>
         <div class="live-badge" id="ultima-reuniao-badge" style="border-radius:20px;gap:6px">
           <span style="font-size:0.85rem">📋</span>
           <span id="ultima-reuniao-txt">Sem reuniões</span>
         </div>
       </div>
 
-      <!-- ═══ ATAS DE REUNIÃO ═══ -->
+      <!-- ═══ MURAL COLABORATIVO ═══ -->
       <div style="margin-top:4px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;flex-wrap:wrap;gap:8px">
+          <div>
+            <div style="font-size:1rem;font-weight:600;color:var(--text)">🗂️ Mural Interativo de Reunião — Post-it</div>
+            <div style="font-size:0.73rem;color:var(--text3);margin-top:3px">Contribuições visíveis para todos em tempo real · Mural permanente</div>
+          </div>
+          <div id="mural-admin-btns" style="display:none">
+            <button onclick="limparMural()" style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.22);border-radius:8px;padding:5px 12px;font-size:0.72rem;color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif">🗑 Limpar mural</button>
+          </div>
+        </div>
+
+        <!-- Não logado -->
+        <div id="mural-locked" style="display:flex;flex-direction:column;align-items:center;padding:30px;background:var(--card);border:1px solid var(--border);border-radius:16px;text-align:center;gap:6px">
+          <div style="font-size:1.8rem">🔒</div>
+          <div style="font-size:0.88rem;font-weight:600;color:var(--text)">Mural restrito</div>
+          <div style="font-size:0.78rem;color:var(--text3)">Faça login para ver e contribuir com o mural da reunião</div>
+        </div>
+
+        <!-- Logado -->
+        <div id="mural-content" style="display:none">
+          <div class="mural-grid" id="mural-grid"></div>
+          <!-- inputs inline por coluna — campo global removido -->
+        </div>
+      </div>
+
+      <!-- ═══ ATAS DE REUNIÃO ═══ -->
+      <div style="margin-top:32px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
           <div>
             <div style="font-size:1rem;font-weight:600;color:var(--text)">Atas de Reunião</div>
-            <div style="font-size:0.73rem;color:var(--text3);margin-top:3px">Histórico · visível apenas em modo edição</div>
+            <div style="font-size:0.73rem;color:var(--text3);margin-top:3px">Histórico de reuniões · qualquer membro pode registrar</div>
           </div>
           <button id="nova-reuniao-btn" class="edit-btn" style="display:none;font-size:0.78rem;align-items:center;gap:6px" onclick="abrirFormReuniao()">+ Nova Reunião</button>
         </div>
 
-        <!-- Estado bloqueado -->
+        <!-- Estado bloqueado (apenas visitantes não logados) -->
         <div id="reunioes-locked" class="reuniao-locked">
           <div style="font-size:2.2rem">🔒</div>
-          <div style="font-size:0.92rem;font-weight:600;color:var(--text)">Atas protegidas</div>
-          <div style="font-size:0.78rem;color:var(--text3);max-width:280px">Ative o modo edição para visualizar e registrar as reuniões do CINEA</div>
+          <div style="font-size:0.92rem;font-weight:600;color:var(--text)">Acesso restrito</div>
+          <div style="font-size:0.78rem;color:var(--text3);max-width:280px">Faça login para visualizar e registrar as atas de reunião do CINEA</div>
         </div>
 
         <!-- Lista de reuniões (desbloqueada) -->
         <div id="reunioes-list" style="display:none">
-          <!-- Filtros de atas -->
+          <!-- Filtros -->
           <div class="reunioes-filtro">
             <input class="filtro-input filtro-input-text" id="filtro-texto" type="text" placeholder="🔍 Buscar por palavra-chave..." oninput="filtrarReunioes()">
-            <input class="filtro-input filtro-input-date" id="filtro-de"   type="date" title="Data inicial" onchange="filtrarReunioes()">
-            <input class="filtro-input filtro-input-date" id="filtro-ate"  type="date" title="Data final"   onchange="filtrarReunioes()">
+            <input class="filtro-input filtro-input-date" id="filtro-de"  type="date" title="Data inicial" onchange="filtrarReunioes()">
+            <input class="filtro-input filtro-input-date" id="filtro-ate" type="date" title="Data final"   onchange="filtrarReunioes()">
             <select class="filtro-select" id="filtro-participante" onchange="filtrarReunioes()">
               <option value="">👥 Todos os participantes</option>
             </select>
             <button class="filtro-clear-btn" onclick="limparFiltros()">✕ Limpar</button>
             <span class="filtro-count" id="filtro-count"></span>
           </div>
-          <div id="reunioes-empty" style="text-align:center;color:var(--text3);font-size:0.82rem;padding:36px;background:var(--card);border:1px solid var(--border);border-radius:16px">
+          <!-- Botão histórico -->
+          <div id="historico-btn-wrap" style="display:none;margin-top:10px">
+            <button onclick="abrirHistorico()" style="display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.8rem;padding:9px 16px;cursor:pointer;width:100%;transition:background 0.15s"
+              onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background='var(--card)'">
+              <span>📋 Ver histórico completo</span>
+              <span id="historico-count-badge" style="background:rgba(79,45,127,0.2);border-radius:20px;padding:1px 10px;font-size:0.72rem;color:var(--purple-l);font-weight:600"></span>
+              <span style="margin-left:auto;color:var(--text3);font-size:0.75rem">→</span>
+            </button>
+          </div>
+          <div id="reunioes-empty" style="display:none;text-align:center;color:var(--text3);font-size:0.82rem;padding:36px;background:var(--card);border:1px solid var(--border);border-radius:16px">
             Nenhuma reunião registrada ainda. Clique em <strong style="color:var(--text2)">+ Nova Reunião</strong> para começar.
           </div>
         </div>
 
-        <!-- Configuração GitHub backup (edit mode) -->
-        <div id="gh-config-section" style="display:none;margin-top:16px">
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px">
-            <div style="font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:12px">☁️ Backup · Repositório GitHub Privado</div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
-              <div style="flex:1;min-width:200px">
-                <div style="font-size:0.7rem;color:var(--text3);margin-bottom:4px">Personal Access Token</div>
-                <input id="gh-pat-input" type="password" placeholder="ghp_xxxxxxxxxxxx" class="reuniao-input" style="margin-top:0;width:100%">
-              </div>
-              <div style="flex:1;min-width:160px">
-                <div style="font-size:0.7rem;color:var(--text3);margin-bottom:4px">Repositório (usuario/repo)</div>
-                <input id="gh-repo-input" type="text" placeholder="Diegoeduardosc/cinea-reunioes" class="reuniao-input" style="margin-top:0;width:100%">
-              </div>
-              <button onclick="salvarConfigGH()" style="height:40px;padding:0 16px;background:rgba(79,45,127,0.3);border:1px solid var(--purple-l);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.78rem;cursor:pointer;white-space:nowrap">Salvar</button>
-            </div>
-            <div id="gh-status" style="font-size:0.7rem;color:var(--text3);margin-top:8px"></div>
-          </div>
-        </div>
       </div>
 
       <!-- ═══ TAREFAS POR DEPARTAMENTO ═══ -->
@@ -2670,13 +3076,33 @@ body.edit-mode .user-mgmt-section { display: block; }
           <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--text2)"><div style="width:10px;height:10px;border-radius:50%;background:var(--red)"></div>Pendente / Bloqueada</div>
         </div>
       </div>
+
+      <!-- Configuração GitHub backup (edit mode) — exibido abaixo da legenda -->
+      <div id="gh-config-section" style="display:none;margin-top:16px">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px">
+          <div style="font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:12px">☁️ Backup · Repositório GitHub Privado</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+            <div style="flex:1;min-width:200px">
+              <div style="font-size:0.7rem;color:var(--text3);margin-bottom:4px">Personal Access Token</div>
+              <input id="gh-pat-input" type="password" placeholder="ghp_xxxxxxxxxxxx" class="reuniao-input" style="margin-top:0;width:100%">
+            </div>
+            <div style="flex:1;min-width:160px">
+              <div style="font-size:0.7rem;color:var(--text3);margin-bottom:4px">Repositório (usuario/repo)</div>
+              <input id="gh-repo-input" type="text" placeholder="Diegoeduardosc/cinea-reunioes" class="reuniao-input" style="margin-top:0;width:100%">
+            </div>
+            <button onclick="salvarConfigGH()" style="height:40px;padding:0 16px;background:rgba(79,45,127,0.3);border:1px solid var(--purple-l);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.78rem;cursor:pointer;white-space:nowrap">Salvar</button>
+          </div>
+          <div id="gh-status" style="font-size:0.7rem;color:var(--text3);margin-top:8px"></div>
+        </div>
+      </div>
     </div>
 
 
     <!-- ═══════════════════════════════ EQUIPE ═══════════════════════════════ -->
     <div class="page" id="page-equipe">
+      <div class="page-info-bar" id="info-bar-equipe"></div>
       <div class="section-header" style="margin-bottom:20px">
-        <div class="section-sub">Atribuições por pessoa · Quem está fazendo o quê</div>
+        <div class="section-sub">Atribuições por pessoa · Quem está fazendo o quê <button class="page-info-edit-btn" onclick="editarInfoPagina('equipe')" title="Editar informação desta página">✏️ Info</button></div>
         <button id="mover-membro-btn" onclick="abrirMoverMembro()" style="display:none;align-items:center;gap:6px;padding:7px 14px;background:rgba(79,45,127,0.2);border:1px solid rgba(79,45,127,0.4);border-radius:10px;color:var(--purple-l);font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s">👥 Mover membro</button>
       </div>
 
@@ -2706,8 +3132,9 @@ body.edit-mode .user-mgmt-section { display: block; }
 
     <!-- ═══════════════════════════════ TAREFAS ═══════════════════════════════ -->
     <div class="page" id="page-tarefas">
+      <div class="page-info-bar" id="info-bar-tarefas"></div>
       <div class="section-header" style="margin-bottom:20px">
-        <div class="section-sub">Gestão de tarefas · Todos os departamentos</div>
+        <div class="section-sub">Gestão de tarefas · Todos os departamentos <button class="page-info-edit-btn" onclick="editarInfoPagina('tarefas')" title="Editar informação desta página">✏️ Info</button></div>
         <div style="display:flex;align-items:center;gap:10px">
           <div id="save-notif" class="save-notif">✓ Exportado com sucesso</div>
           <button class="export-btn" onclick="exportCSV()">⬇ Exportar CSV · OneDrive</button>
@@ -2779,6 +3206,185 @@ body.edit-mode .user-mgmt-section { display: block; }
       <div id="concluidos-section"></div>
     </div>
 
+    <!-- ═══════════════════════════════ INDICADORES ═══════════════════════════════ -->
+    <div class="page" id="page-indicadores">
+      <div class="page-info-bar" id="info-bar-indicadores"></div>
+      <div class="section-header" style="margin-bottom:24px">
+        <div class="section-sub">Painéis de inteligência · Power BI por departamento <button class="page-info-edit-btn" onclick="editarInfoPagina('indicadores')" title="Editar informação desta página">✏️ Info</button></div>
+      </div>
+
+      <div class="bi-panels-grid">
+
+        <!-- Hub de Integração -->
+        <div class="bi-panel" id="bi-panel-hub">
+          <div class="bi-panel-header">
+            <div class="bi-panel-title">
+              <div class="bi-panel-dot" style="background:var(--pink)"></div>
+              Hub de Integração
+            </div>
+            <button class="bi-config-btn" onclick="abrirConfigurarBi('hub')">
+              ⚙️ Configurar painel
+            </button>
+          </div>
+          <div class="bi-iframe-wrap" id="bi-wrap-hub">
+            <div class="bi-placeholder" id="bi-placeholder-hub">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="4"  y="30" width="8"  height="14" rx="2" fill="currentColor"/>
+                <rect x="16" y="20" width="8"  height="24" rx="2" fill="currentColor"/>
+                <rect x="28" y="10" width="8"  height="34" rx="2" fill="currentColor"/>
+                <rect x="40" y="4"  width="8"  height="40" rx="2" fill="currentColor"/>
+              </svg>
+              <div class="bi-placeholder-title">Painel não configurado</div>
+              <div class="bi-placeholder-sub" id="bi-placeholder-sub-hub">Aguardando configuração pelo administrador</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inovação Pedagógica -->
+        <div class="bi-panel" id="bi-panel-inov">
+          <div class="bi-panel-header">
+            <div class="bi-panel-title">
+              <div class="bi-panel-dot" style="background:var(--purple-l)"></div>
+              Inovação Pedagógica
+            </div>
+            <button class="bi-config-btn" onclick="abrirConfigurarBi('inov')">
+              ⚙️ Configurar painel
+            </button>
+          </div>
+          <div class="bi-iframe-wrap" id="bi-wrap-inov">
+            <div class="bi-placeholder" id="bi-placeholder-inov">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="4"  y="30" width="8"  height="14" rx="2" fill="currentColor"/>
+                <rect x="16" y="20" width="8"  height="24" rx="2" fill="currentColor"/>
+                <rect x="28" y="10" width="8"  height="34" rx="2" fill="currentColor"/>
+                <rect x="40" y="4"  width="8"  height="40" rx="2" fill="currentColor"/>
+              </svg>
+              <div class="bi-placeholder-title">Painel não configurado</div>
+              <div class="bi-placeholder-sub" id="bi-placeholder-sub-inov">Aguardando configuração pelo administrador</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tecnologias & Aprendizagem -->
+        <div class="bi-panel" id="bi-panel-tec">
+          <div class="bi-panel-header">
+            <div class="bi-panel-title">
+              <div class="bi-panel-dot" style="background:var(--cyan)"></div>
+              Tecnologias &amp; Aprendizagem
+            </div>
+            <button class="bi-config-btn" onclick="abrirConfigurarBi('tec')">
+              ⚙️ Configurar painel
+            </button>
+          </div>
+          <div class="bi-iframe-wrap" id="bi-wrap-tec">
+            <div class="bi-placeholder" id="bi-placeholder-tec">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="4"  y="30" width="8"  height="14" rx="2" fill="currentColor"/>
+                <rect x="16" y="20" width="8"  height="24" rx="2" fill="currentColor"/>
+                <rect x="28" y="10" width="8"  height="34" rx="2" fill="currentColor"/>
+                <rect x="40" y="4"  width="8"  height="40" rx="2" fill="currentColor"/>
+              </svg>
+              <div class="bi-placeholder-title">Painel não configurado</div>
+              <div class="bi-placeholder-sub" id="bi-placeholder-sub-tec">Aguardando configuração pelo administrador</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /page-indicadores -->
+
+    <!-- ══════════════ GOOGLE SHEETS ══════════════ -->
+    <div class="page" id="page-gsheets">
+      <div class="page-info-bar" id="info-bar-gsheets"></div>
+      <div class="section-header" style="margin-bottom:24px">
+        <div class="section-sub">Planilhas colaborativas · Google Sheets por departamento <button class="page-info-edit-btn" onclick="editarInfoPagina('gsheets')" title="Editar informação desta página">✏️ Info</button></div>
+      </div>
+      <div class="bi-panels-grid">
+
+        <!-- Hub de Integração -->
+        <div class="bi-panel" id="gs-panel-hub">
+          <div class="bi-panel-header">
+            <div class="bi-panel-title">
+              <div class="bi-panel-dot" style="background:var(--pink)"></div>
+              Hub de Integração
+            </div>
+            <button class="bi-config-btn" onclick="abrirConfigurarGs('hub')">
+              ⚙️ Configurar planilha
+            </button>
+          </div>
+          <div class="bi-iframe-wrap" id="gs-wrap-hub">
+            <div class="bi-placeholder" id="gs-placeholder-hub">
+              <svg width="40" height="44" viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="2" width="28" height="40" rx="3" stroke="currentColor" stroke-width="1.8"/>
+                <line x1="6" y1="12" x2="26" y2="12" stroke="currentColor" stroke-width="1.4"/>
+                <line x1="6" y1="18" x2="26" y2="18" stroke="currentColor" stroke-width="1.4"/>
+                <line x1="6" y1="24" x2="26" y2="24" stroke="currentColor" stroke-width="1.4"/>
+                <line x1="6" y1="30" x2="18" y2="30" stroke="currentColor" stroke-width="1.4"/>
+                <line x1="16" y1="12" x2="16" y2="30" stroke="currentColor" stroke-width="1.4"/>
+              </svg>
+              <div class="bi-placeholder-title">Planilha não configurada</div>
+              <div class="bi-placeholder-sub" id="gs-placeholder-sub-hub">Aguardando configuração pelo administrador</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inovação Pedagógica -->
+        <div class="bi-panel" id="gs-panel-inov">
+          <div class="bi-panel-header">
+            <div class="bi-panel-title">
+              <div class="bi-panel-dot" style="background:var(--purple-l)"></div>
+              Inovação Pedagógica
+            </div>
+            <button class="bi-config-btn" onclick="abrirConfigurarGs('inov')">
+              ⚙️ Configurar planilha
+            </button>
+          </div>
+          <div class="bi-iframe-wrap" id="gs-wrap-inov">
+            <div class="bi-placeholder" id="gs-placeholder-inov">
+              <svg width="40" height="44" viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="2" width="28" height="40" rx="3" stroke="currentColor" stroke-width="1.8"/>
+                <line x1="6" y1="12" x2="26" y2="12" stroke="currentColor" stroke-width="1.4"/>
+                <line x1="6" y1="18" x2="26" y2="18" stroke="currentColor" stroke-width="1.4"/>
+                <line x1="6" y1="24" x2="26" y2="24" stroke="currentColor" stroke-width="1.4"/>
+                <line x1="6" y1="30" x2="18" y2="30" stroke="currentColor" stroke-width="1.4"/>
+                <line x1="16" y1="12" x2="16" y2="30" stroke="currentColor" stroke-width="1.4"/>
+              </svg>
+              <div class="bi-placeholder-title">Planilha não configurada</div>
+              <div class="bi-placeholder-sub" id="gs-placeholder-sub-inov">Aguardando configuração pelo administrador</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tecnologias & Aprendizagem -->
+        <div class="bi-panel" id="gs-panel-tec">
+          <div class="bi-panel-header">
+            <div class="bi-panel-title">
+              <div class="bi-panel-dot" style="background:var(--cyan)"></div>
+              Tecnologias &amp; Aprendizagem
+            </div>
+            <button class="bi-config-btn" onclick="abrirConfigurarGs('tec')">
+              ⚙️ Configurar planilha
+            </button>
+          </div>
+          <div class="bi-iframe-wrap" id="gs-wrap-tec">
+            <div class="bi-placeholder" id="gs-placeholder-tec">
+              <svg width="40" height="44" viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="2" width="28" height="40" rx="3" stroke="currentColor" stroke-width="1.8"/>
+                <line x1="6" y1="12" x2="26" y2="12" stroke="currentColor" stroke-width="1.4"/>
+                <line x1="6" y1="18" x2="26" y2="18" stroke="currentColor" stroke-width="1.4"/>
+                <line x1="6" y1="24" x2="26" y2="24" stroke="currentColor" stroke-width="1.4"/>
+                <line x1="6" y1="30" x2="18" y2="30" stroke="currentColor" stroke-width="1.4"/>
+                <line x1="16" y1="12" x2="16" y2="30" stroke="currentColor" stroke-width="1.4"/>
+              </svg>
+              <div class="bi-placeholder-title">Planilha não configurada</div>
+              <div class="bi-placeholder-sub" id="gs-placeholder-sub-tec">Aguardando configuração pelo administrador</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /page-gsheets -->
+
   </div><!-- /content -->
   <!-- MODAL SENHA ADMIN -->
   <div class="modal-overlay" id="modal-senha">
@@ -2826,6 +3432,87 @@ body.edit-mode .user-mgmt-section { display: block; }
     </div>
   </div>
 
+  <!-- MODAL HISTÓRICO DE REUNIÕES -->
+  <div id="historico-reunioes-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:600;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:760px;max-height:88vh;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+        <div>
+          <div style="font-size:1rem;font-weight:700;color:var(--text)">📋 Histórico de Reuniões</div>
+          <div style="font-size:0.72rem;color:var(--text3);margin-top:3px">Todas as atas registradas</div>
+        </div>
+        <button onclick="fecharHistorico()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text2);width:32px;height:32px;cursor:pointer;font-size:1rem">✕</button>
+      </div>
+      <!-- Lista completa -->
+      <div id="historico-list" style="overflow-y:auto;flex:1">
+        <div id="historico-empty" style="display:none;text-align:center;color:var(--text3);font-size:0.82rem;padding:36px">Nenhuma ata encontrada.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ARQUIVAR TAREFA -->
+  <div class="modal-overlay" id="modal-arquivar-confirm" style="display:none;z-index:3000">
+    <div class="modal-box" style="max-width:380px;text-align:center">
+      <div style="font-size:2rem;margin-bottom:8px">📦</div>
+      <div class="modal-logo" style="font-size:1.05rem;margin-bottom:4px">Arquivar tarefa?</div>
+      <div class="modal-sub" style="margin-bottom:16px;font-size:0.82rem;color:var(--text3)">
+        Tarefa: <strong id="arquivar-task-nome" style="color:var(--text2)"></strong>
+      </div>
+      <p style="font-size:0.81rem;color:var(--text2);margin-bottom:20px;line-height:1.5">
+        Deseja mover esta tarefa para o <strong>arquivo de concluídas</strong>?<br>
+        Ela ficará registrada no final da tela e pode ser restaurada a qualquer momento.
+      </p>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button class="modal-btn" style="flex:1;max-width:160px" onclick="_confirmarArquivar(true)">📦 Sim, arquivar</button>
+        <button class="modal-btn secondary" style="flex:1;max-width:160px" onclick="_confirmarArquivar(false)">Não, manter aqui</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIGURAR PAINEL BI -->
+  <div id="bi-config-modal" onclick="if(event.target===this)fecharBiModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:700;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;max-width:540px;width:100%;position:relative;max-height:90vh;overflow-y:auto">
+      <button onclick="fecharBiModal()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text2);font-size:0.9rem;cursor:pointer;padding:4px 10px;border-radius:8px;line-height:1.4;transition:color 0.15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text2)'">✕</button>
+      <div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:4px" id="bi-config-modal-title">Configurar Painel</div>
+      <div style="font-size:0.75rem;color:var(--text3);margin-bottom:20px" id="bi-config-modal-sub">Cole o URL de incorporação do Power BI</div>
+      <div class="bi-url-hint">
+        📋 <strong style="color:var(--text2)">Como obter o URL:</strong><br><br>
+        1. Abra o relatório no <strong>Power BI Service</strong> (app.powerbi.com)<br>
+        2. Vá em <strong>Arquivo → Incorporar relatório → Site ou portal</strong><br>
+        3. Copie o valor do atributo <code>src="..."</code> do iframe gerado<br><br>
+        💡 Cole o URL completo ou o código HTML inteiro do iframe — o sistema extrai automaticamente.
+      </div>
+      <textarea id="bi-url-input" class="bi-url-input" placeholder="https://app.powerbi.com/reportEmbed?reportId=..." rows="4" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey))salvarBiUrl()"></textarea>
+      <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;align-items:center">
+        <button class="modal-btn secondary" onclick="fecharBiModal()" style="min-width:90px;font-size:0.78rem">Cancelar</button>
+        <button class="modal-btn" onclick="salvarBiUrl()" style="min-width:140px;font-size:0.8rem">💾 Salvar painel</button>
+      </div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:0.69rem;color:var(--text3)">Para remover o painel, limpe o campo de texto e clique em Salvar.</div>
+    </div>
+  </div>
+
+  <!-- MODAL GOOGLE SHEETS CONFIG -->
+  <div id="gs-config-modal" onclick="if(event.target===this)fecharGsModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:700;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;max-width:540px;width:100%;position:relative;max-height:90vh;overflow-y:auto">
+      <button onclick="fecharGsModal()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text2);font-size:0.9rem;cursor:pointer;padding:4px 10px;border-radius:8px;line-height:1.4;transition:color 0.15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text2)'">✕</button>
+      <div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:4px" id="gs-config-modal-title">Configurar Planilha</div>
+      <div style="font-size:0.75rem;color:var(--text3);margin-bottom:20px" id="gs-config-modal-sub">Cole o URL de publicação do Google Sheets</div>
+      <div class="bi-url-hint">
+        📋 <strong style="color:var(--text2)">Como obter o URL:</strong><br><br>
+        1. Abra a planilha no <strong>Google Sheets</strong><br>
+        2. Vá em <strong>Arquivo → Compartilhar → Publicar na Web</strong><br>
+        3. Selecione a aba desejada e clique em <strong>Publicar</strong><br>
+        4. Copie o link da aba <strong>"Incorporar"</strong> ou o código HTML do iframe<br><br>
+        💡 Cole o URL completo, o código HTML do iframe ou até o link de compartilhamento normal — o sistema converte automaticamente.
+      </div>
+      <textarea id="gs-url-input" class="bi-url-input" placeholder="https://docs.google.com/spreadsheets/d/..." rows="4" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey))salvarGsUrl()"></textarea>
+      <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;align-items:center">
+        <button class="modal-btn secondary" onclick="fecharGsModal()" style="min-width:90px;font-size:0.78rem">Cancelar</button>
+        <button class="modal-btn" onclick="salvarGsUrl()" style="min-width:160px;font-size:0.8rem">💾 Salvar planilha</button>
+      </div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:0.69rem;color:var(--text3)">Para remover a planilha, limpe o campo de texto e clique em Salvar.</div>
+    </div>
+  </div>
+
   <div class="edit-hint-bar">✏️ <strong style="color:var(--purple-l)">Modo Edição ativo</strong> &nbsp;·&nbsp; Clique em qualquer valor ou texto para editar &nbsp;·&nbsp; Clique nos <span style="color:var(--gold)">●</span> status para alternar &nbsp;·&nbsp; Clique nos pontos coloridos da reunião para mudar status &nbsp;·&nbsp; Pressione <kbd style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1px 6px">✓ Salvar</kbd> quando terminar</div>
 </main>
 
@@ -2851,6 +3538,53 @@ let _fbAuthReady = false;
 _auth.signInAnonymously()
   .then(() => { _fbAuthReady = true; })
   .catch(e  => console.warn('[CINEA] Auth anônima falhou:', e));
+
+// Monitora estado de conexão com o Firebase (com delay de 5s para evitar falsos positivos)
+let _fbConnected = null; // null=desconhecido, true=online, false=offline
+let _fbOfflineTimer = null;
+const _pendingSync = new Set(); // depts com alterações não sincronizadas
+
+_db.ref('.info/connected').on('value', snap => {
+  const isConn = snap.val() === true;
+  clearTimeout(_fbOfflineTimer);
+  if (isConn) {
+    const voltou = _fbConnected === false;
+    _fbConnected = true;
+    if (voltou) {
+      setFbStatus('☁️ Firebase reconectado', 'var(--green)', 'var(--green)');
+      // Sincroniza automaticamente o que ficou pendente
+      if (_pendingSync.size > 0) _sincronizarPendentes();
+    }
+  } else {
+    // Aguarda 5s antes de declarar offline (evita falso positivo na inicialização)
+    _fbOfflineTimer = setTimeout(() => {
+      _fbConnected = false;
+      setFbStatus('⚠️ Sem conexão', 'var(--gold)', 'var(--gold)');
+    }, 5000);
+  }
+});
+
+async function _sincronizarPendentes() {
+  const depts = [..._pendingSync];
+  mostrarToast('🔄 Sincronizando…', `Reenviando ${depts.length} alteração(ões) pendente(s) ao servidor.`);
+  let erros = 0;
+  for (const dept of depts) {
+    try {
+      if (dept === '__all__') {
+        await _db.ref('cinea/tasks').set({ hub: TASKS.hub, inov: TASKS.inov, tec: TASKS.tec });
+      } else {
+        await _db.ref('cinea/tasks/' + dept).set(TASKS[dept] || []);
+      }
+      _pendingSync.delete(dept);
+    } catch(e) { erros++; }
+  }
+  if (erros === 0) {
+    mostrarToast('✅ Sincronizado!', 'Todas as alterações pendentes foram enviadas ao servidor.');
+    setFbStatus('☁️ Firebase ativo', 'var(--green)', 'var(--green)');
+  } else {
+    mostrarToast('⚠️ Sincronização parcial', `${erros} alteração(ões) ainda pendente(s). Verifique a conexão.`);
+  }
+}
 
 // Formata data/hora atual como "16/05/2026 às 14:32"
 function _nowTs() {
@@ -3060,22 +3794,32 @@ function toggleSidebar() {
   overlay.classList.toggle('active');
 }
 
+let _currentPageId = 'overview';
+let _pageVis = {}; // visibilidade de páginas: { pageId: false } quando oculta
+
 function showPage(id, el) {
+  // Bloqueia acesso a páginas ocultas para não-admins
+  if (_pageVis[id] === false && (!_currentUser || _currentUser.role !== 'admin')) {
+    return;
+  }
+  _currentPageId = id;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const pg = document.getElementById('page-' + id);
   if (pg) pg.classList.add('active');
   if (el) el.classList.add('active');
   const titles = {
-    overview:  'Dashboard Geral',
-    equipe:    'Equipe',
-    tarefas:   'Tarefas',
-    roadmap:   'Roadmap de Implantação BI',
-    ideas:     'Ideias de Implantação',
-    hub:       'Hub de Integração',
-    inov:      'Inovação Pedagógica',
-    tec:       'Tecnologias & Aprendizagem',
-    meeting:   'Reuniões',
+    overview:     'Dashboard Geral',
+    indicadores:  'Indicadores',
+    gsheets:      'Google Sheets',
+    equipe:       'Equipe',
+    tarefas:      'Tarefas',
+    roadmap:      'Roadmap de Implantação BI',
+    ideas:        'Ideias de Implantação',
+    hub:          'Hub de Integração',
+    inov:         'Inovação Pedagógica',
+    tec:          'Tecnologias & Aprendizagem',
+    meeting:      'Reuniões',
   };
   // Mirror sidebar nav item text to page title; fall back to titles map
   const navText = el ? el.textContent.trim() : '';
@@ -3100,9 +3844,18 @@ function showPage(id, el) {
   if (id === 'meeting') {
     loadTasksFromStorage(); // espelha exatamente o que está em Equipe & Tarefas
     renderMeetingCards();
+    iniciarListenerMural();
+  } else {
+    pararListenerMural();
   }
   if (id === 'ideas') {
     renderIdeas();
+  }
+  if (id === 'indicadores') {
+    carregarBiUrls();
+  }
+  if (id === 'gsheets') {
+    carregarGsUrls();
   }
   // Fecha sidebar no mobile ao navegar
   const sidebar = document.getElementById('sidebar');
@@ -3236,6 +3989,11 @@ function saveTasksToStorage() {
 // ── Firebase: salva tarefas automaticamente em cada operação ─────────────
 async function saveTasksToFirebase(dept) {
   if (!_db) return;
+  // Se sabidamente offline, avisa imediatamente sem tentar o banco
+  if (_fbConnected === false) {
+    mostrarToast('📴 Modo offline', 'Alteração salva localmente. Será sincronizada ao reconectar.');
+    return;
+  }
   // Aguarda auth anônima se ainda não está pronta
   if (!_fbAuthReady) {
     await new Promise(resolve => {
@@ -3243,14 +4001,23 @@ async function saveTasksToFirebase(dept) {
     });
   }
   try {
-    if (dept) {
-      await _db.ref('cinea/tasks/' + dept).set(TASKS[dept] || []);
-    } else {
-      await _db.ref('cinea/tasks').set({ hub: TASKS.hub, inov: TASKS.inov, tec: TASKS.tec });
-    }
+    const saveOp = dept
+      ? _db.ref('cinea/tasks/' + dept).set(TASKS[dept] || [])
+      : _db.ref('cinea/tasks').set({ hub: TASKS.hub, inov: TASKS.inov, tec: TASKS.tec });
+    // Timeout de 8s — evita que o usuário ache que salvou quando o banco está lento
+    await Promise.race([
+      saveOp,
+      new Promise((_, rej) => setTimeout(() => rej(new Error('fb_timeout')), 8000))
+    ]);
   } catch(e) {
     console.warn('[CINEA] Erro ao salvar tarefas no Firebase:', e.message);
-    mostrarToast('⚠️ Aviso', 'Tarefa salva localmente. Firebase indisponível no momento.');
+    // Guarda na fila de pendentes para reenvio automático ao reconectar
+    _pendingSync.add(dept || '__all__');
+    if (e.message === 'fb_timeout' || _fbConnected === false) {
+      mostrarToast('📴 Salvo localmente', 'Sem conexão com o servidor. O sistema tentará reenviar automaticamente ao reconectar.');
+    } else {
+      mostrarToast('⚠️ Erro ao salvar', 'Guardado localmente. Tentativa automática de reenvio ao reconectar.');
+    }
   }
 }
 
@@ -3465,6 +4232,15 @@ function openAddPD(dept, e) {
   const dd = document.getElementById('ap-dd-' + dept);
   if (!dd) return;
   document.querySelectorAll('.member-picker-dd.open').forEach(el => el.classList.remove('open'));
+  const rect = dd.parentElement.getBoundingClientRect();
+  const spaceBelow = window.innerHeight - rect.bottom;
+  if (spaceBelow < 260) {
+    dd.style.top    = 'auto';
+    dd.style.bottom = 'calc(100% + 5px)';
+  } else {
+    dd.style.top    = 'calc(100% + 5px)';
+    dd.style.bottom = 'auto';
+  }
   dd.classList.toggle('open');
 }
 function toggleAddPM(dept, m) {
@@ -3507,6 +4283,16 @@ function openEditPD(dept, i, e) {
   const dd  = document.getElementById('ep-dd-' + key);
   if (!dd) return;
   document.querySelectorAll('.member-picker-dd.open').forEach(el => el.classList.remove('open'));
+  // Verifica se há espaço abaixo; se não, abre para cima
+  const rect = dd.parentElement.getBoundingClientRect();
+  const spaceBelow = window.innerHeight - rect.bottom;
+  if (spaceBelow < 260) {
+    dd.style.top    = 'auto';
+    dd.style.bottom = 'calc(100% + 5px)';
+  } else {
+    dd.style.top    = 'calc(100% + 5px)';
+    dd.style.bottom = 'auto';
+  }
   dd.classList.toggle('open');
 }
 function toggleEditPM(dept, i, m) {
@@ -3614,6 +4400,15 @@ function openStDD(pillEl) {
 // Fecha pelo elemento mais próximo na árvore — sem getElementById
 function pickStatus(dept, idx, val) {
   event.target.closest('.st-dropdown')?.classList.remove('open');
+  // Se selecionou Concluída e a tarefa ainda não estava Concluída → perguntar sobre arquivamento
+  if (val === 'Concluída' && (TASKS[dept]?.[idx]?.status || 'Pendente') !== 'Concluída') {
+    _pendingConcluida = { dept, idx };
+    const modal = document.getElementById('modal-arquivar-confirm');
+    const nome  = document.getElementById('arquivar-task-nome');
+    if (nome)  nome.textContent  = TASKS[dept][idx].name;
+    if (modal) modal.style.display = 'flex';
+    return;
+  }
   changeTaskStatus(dept, idx, val);
 }
 function renderAtividadesSetor(dept) {
@@ -3820,7 +4615,7 @@ function renderDeptHeader(dept) {
       .join('');
     el.innerHTML = `
       <div>
-        <div style="font-size:0.65rem;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Responsável pelo setor</div>
+        <div class="dept-resp-label" style="font-size:0.65rem;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Responsável pelo setor</div>
         <select onchange="setDeptResp('${dept}', this.value)"
           style="background:var(--card2);border:1px solid var(--border);border-radius:10px;
                  color:${resp === 'Em definição' ? 'var(--text3)' : colorVar};font-family:'DM Sans',sans-serif;font-size:0.88rem;
@@ -3829,6 +4624,17 @@ function renderDeptHeader(dept) {
         </select>
       </div>
       <div class="avatar ${color}" style="transition:background 0.2s;${resp === 'Em definição' ? 'opacity:0.45' : ''}">${escapeHtml(info.sigla)}</div>`;
+    // Restaura rótulo editado e reaplica edit mode se ativo (elemento gerado dinamicamente)
+    const labelEl = el.querySelector('.dept-resp-label');
+    if (labelEl) {
+      const saved = localStorage.getItem('cinea_dept_resp_label');
+      if (saved) labelEl.textContent = saved;
+      if (editModeActive) {
+        labelEl.contentEditable = 'plaintext-only';
+        labelEl.classList.add('ed');
+        labelEl.oninput = () => localStorage.setItem('cinea_dept_resp_label', labelEl.textContent.trim());
+      }
+    }
   } else {
     // Exibição estática (não logado)
     el.innerHTML = `
@@ -3894,7 +4700,8 @@ function renderTaskTable(dept) {
   tbl.innerHTML = '<thead><tr><th style="width:38%">Tarefa</th><th>Responsáveis</th><th>Status</th><th style="width:108px">Ações</th></tr></thead>';
   const tbody   = document.createElement('tbody');
   const fixas   = TASKS[dept].map((t,i)=>({t,i})).filter(({t}) => t.tipo === 'fixa');
-  const regulares = TASKS[dept].map((t,i)=>({t,i})).filter(({t}) => t.tipo !== 'fixa' && t.status !== 'Concluída');
+  // Tarefas arquivadas (concluída + arquivada=true) saem da tabela principal
+  const regulares = TASKS[dept].map((t,i)=>({t,i})).filter(({t}) => t.tipo !== 'fixa' && !(t.status === 'Concluída' && t.arquivada));
 
   function addSepRow(label, color) {
     const sr = document.createElement('tr');
@@ -3931,11 +4738,20 @@ function renderTaskTable(dept) {
           <div class="member-picker-dd" id="ep-dd-${key}"></div>
         </div>
       </td>
-      <td>${renderStatusPill(dept, i, task.status || 'Pendente', logado)}</td>
+      <td>
+        <span class="status-view-${dept}-${i}">${renderStatusPill(dept, i, task.status || 'Pendente', logado)}</span>
+        <select class="status-edit-${dept}-${i}" style="display:none;background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.75rem;padding:4px 8px;font-family:'DM Sans',sans-serif;cursor:pointer">
+          <option value="Pendente">⏸ Pendente</option>
+          <option value="Em andamento">▶ Em andamento</option>
+          <option value="Concluída">✅ Concluída</option>
+          <option value="Bloqueada">🔒 Bloqueada</option>
+        </select>
+      </td>
       <td style="white-space:nowrap">
         <button onclick="startEdit('${dept}',${i})" id="btn-edit-${dept}-${i}" style="background:rgba(79,45,127,0.2);border:1px solid rgba(79,45,127,0.3);border-radius:6px;color:var(--purple-l);font-size:0.72rem;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif">Editar</button>
         <button onclick="saveEdit('${dept}',${i})" id="btn-save-${dept}-${i}" style="display:none;background:rgba(39,174,96,0.15);border:1px solid rgba(39,174,96,0.3);border-radius:6px;color:var(--green);font-size:0.72rem;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif">Salvar</button>
         <button class="tipo-btn${etipo==='fixa'?' ativa':''}" id="btn-etipo-${key}" onclick="toggleEditTipo('${dept}',${i})" style="display:none;padding:2px 7px;font-size:0.68rem">${etipo==='fixa'?'🔄 Fixa':'○ Normal'}</button>
+        ${(task.status === 'Concluída' && !task.arquivada) ? `<button onclick="arquivarTarefa('${dept}',${i})" title="Mover para o arquivo" style="background:rgba(39,174,96,0.12);border:1px solid rgba(39,174,96,0.3);border-radius:6px;color:var(--green);font-size:0.72rem;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-left:2px">📦 Arquivar</button>` : ''}
         <button onclick="deleteTask('${dept}',${i})" style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.2);border-radius:6px;color:var(--red);font-size:0.72rem;padding:3px 7px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-left:2px">✕</button>
       </td>
     `;
@@ -3966,19 +4782,76 @@ function atualizarResumoTarefas() {
   document.querySelectorAll('.resumo-pessoas').forEach(el=> el.textContent = pessoas);
 }
 
-// ── Seção Concluídos ──────────────────────────────────────────
-let _concluidosOpen = true;
+// ── Seção Arquivo de Concluídos ───────────────────────────────
+let _concluidosOpen  = true;
+let _pendingConcluida = null; // { dept, idx } — aguardando confirmação de arquivamento
+
+/* Chamado pelos botões do modal de arquivamento */
+function _confirmarArquivar(arquivar) {
+  const modal = document.getElementById('modal-arquivar-confirm');
+  if (modal) modal.style.display = 'none';
+  if (!_pendingConcluida) return;
+  const { dept, idx } = _pendingConcluida;
+  _pendingConcluida = null;
+  // Marca a tarefa como Concluída primeiro
+  changeTaskStatus(dept, idx, 'Concluída');
+  if (arquivar) {
+    // Pequeno delay para garantir que o status já foi salvo antes de marcar arquivada
+    setTimeout(() => arquivarTarefa(dept, idx), 80);
+  }
+  // Se não arquivar, a tarefa fica na tabela principal com o botão "📦 Arquivar"
+}
+
+/* Arquiva uma tarefa Concluída (move para a seção de arquivo) */
+function arquivarTarefa(dept, idx) {
+  if (!_currentUser) { abrirLoginModal(); return; }
+  if (!TASKS[dept]?.[idx]) return;
+  TASKS[dept][idx].arquivada   = true;
+  TASKS[dept][idx].arquivadaEm = new Date().toISOString();
+  saveTasksToStorage();
+  saveTasksToFirebase(dept);
+  registrarLog(`Tarefa arquivada: "${TASKS[dept][idx].name}" (${DEPT_LABELS[dept]})`);
+  renderTaskTable(dept);
+  renderAtividadesSetor(dept);
+  renderMeetingCards();
+  renderConcluidos();
+  atualizarResumoTarefas();
+  renderTeamCards();
+  mostrarToast('📦 Tarefa arquivada', 'A tarefa foi movida para o arquivo de concluídas.');
+}
+
+/* Restaura uma tarefa arquivada de volta para Em andamento */
+function desarquivarTarefa(dept, idx) {
+  if (!_currentUser) { abrirLoginModal(); return; }
+  if (!TASKS[dept]?.[idx]) return;
+  TASKS[dept][idx].arquivada   = false;
+  TASKS[dept][idx].arquivadaEm = null;
+  TASKS[dept][idx].status      = 'Em andamento';
+  saveTasksToStorage();
+  saveTasksToFirebase(dept);
+  registrarLog(`Tarefa restaurada: "${TASKS[dept][idx].name}" (${DEPT_LABELS[dept]})`);
+  renderTaskTable(dept);
+  renderAtividadesSetor(dept);
+  renderMeetingCards();
+  renderConcluidos();
+  atualizarResumoTarefas();
+  renderTeamCards();
+  mostrarToast('↩ Tarefa restaurada', 'A tarefa voltou para "Em andamento" no dashboard.');
+}
+
+/* Renderiza o arquivo de tarefas concluídas (t.arquivada === true) */
 function renderConcluidos() {
   const el = document.getElementById('concluidos-section');
   if (!el) return;
   const DEPT_COLOR = { hub: 'var(--pink)', inov: 'var(--purple-l)', tec: 'var(--cyan)' };
   const logado = !!_currentUser;
-  // Coleta tarefas concluídas por depto mantendo o índice original
+
+  // Coleta apenas tarefas com arquivada=true
   const grupos = [];
   ['hub','inov','tec'].forEach(dept => {
     const lista = TASKS[dept]
       .map((t,i) => ({...t, _dept: dept, _idx: i}))
-      .filter(t => t.status === 'Concluída' && t.tipo !== 'fixa'); // fixas nunca vão para concluídos
+      .filter(t => t.status === 'Concluída' && t.arquivada && t.tipo !== 'fixa');
     if (lista.length) grupos.push({ dept, tasks: lista });
   });
   const total = grupos.reduce((s,g) => s + g.tasks.length, 0);
@@ -3987,7 +4860,7 @@ function renderConcluidos() {
   let html = `<div class="card" style="margin-top:16px;border-color:rgba(39,174,96,0.22)">
     <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:2px 0 6px" onclick="toggleConcluidos()">
       <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--green)">✅ Concluídos</span>
+        <span style="font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--green)">📦 Tarefas Arquivadas</span>
         <span style="background:rgba(39,174,96,0.15);color:var(--green);border-radius:20px;padding:2px 10px;font-size:0.72rem;font-weight:600">${total}</span>
       </div>
       <span id="concl-chevron" style="color:var(--text3);font-size:0.75rem;transition:transform 0.2s">${_concluidosOpen?'▲':'▼'}</span>
@@ -4000,16 +4873,20 @@ function renderConcluidos() {
     tasks.forEach(task => {
       const pillCls = PILL_CLASS[dept];
       const shared  = task.assignees.length > 1;
-      html += `<tr style="opacity:0.65">
-        <td style="width:38%"><span style="color:var(--text2);font-size:0.79rem;text-decoration:line-through">${task.name}</span></td>
+      const dtArq   = task.arquivadaEm ? new Date(task.arquivadaEm).toLocaleDateString('pt-BR') : '';
+      html += `<tr style="opacity:0.6">
+        <td style="width:38%">
+          <span style="color:var(--text2);font-size:0.79rem;text-decoration:line-through">${escapeHtml(task.name)}</span>
+          ${dtArq ? `<div style="font-size:0.68rem;color:var(--text3);margin-top:2px">arquivada em ${dtArq}</div>` : ''}
+        </td>
         <td>
           <div class="assignee-pills">${task.assignees.map(a =>
-            `<span class="assignee-pill ${pillCls}">${a}</span>`).join('')}</div>
+            `<span class="assignee-pill ${pillCls}">${escapeHtml(a)}</span>`).join('')}</div>
           ${shared?'<span class="shared-tag" style="margin-top:4px;display:inline-flex">⟳ Compartilhada</span>':''}
         </td>
         <td><span class="st-pill sp-concluida">● Concluída</span></td>
         <td style="white-space:nowrap">
-          ${logado?`<button onclick="changeTaskStatus('${dept}',${task._idx},'Pendente')" style="background:rgba(107,95,133,0.15);border:1px solid rgba(107,95,133,0.3);border-radius:6px;color:var(--text2);font-size:0.72rem;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif">↩ Re-abrir</button>`:''}
+          ${logado ? `<button onclick="desarquivarTarefa('${dept}',${task._idx})" title="Restaurar tarefa para Em andamento" style="background:rgba(107,95,133,0.15);border:1px solid rgba(107,95,133,0.3);border-radius:6px;color:var(--text2);font-size:0.72rem;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif">↩ Restaurar</button>` : ''}
         </td>
       </tr>`;
     });
@@ -4102,6 +4979,11 @@ function startEdit(dept, i) {
   document.getElementById(`btn-edit-${dept}-${i}`).style.display  = 'none';
   document.getElementById(`btn-save-${dept}-${i}`).style.display  = 'inline';
   document.getElementById(`btn-etipo-${key}`)?.style && (document.getElementById(`btn-etipo-${key}`).style.display = 'inline');
+  // Mostra select de status e define valor atual
+  const statusView = document.querySelector(`.status-view-${dept}-${i}`);
+  const statusSel  = document.querySelector(`.status-edit-${dept}-${i}`);
+  if (statusView) statusView.style.display = 'none';
+  if (statusSel)  { statusSel.style.display = 'inline-block'; statusSel.value = TASKS[dept][i].status || 'Pendente'; }
 }
 
 function saveEdit(dept, i) {
@@ -4111,9 +4993,12 @@ function saveEdit(dept, i) {
   if (!newName || newAssignees.length === 0) {
     mostrarToast('⚠️ Adicione ao menos um responsável.', ''); return;
   }
+  const statusSel = document.querySelector(`.status-edit-${dept}-${i}`);
+  const newStatus = statusSel?.value || TASKS[dept][i].status || 'Pendente';
   TASKS[dept][i].name      = newName;
   TASKS[dept][i].assignees = newAssignees;
   TASKS[dept][i].tipo      = _editTipo[dept + '_' + i] || TASKS[dept][i].tipo || 'normal';
+  TASKS[dept][i].status    = newStatus;
   saveTasksToStorage();
   saveTasksToFirebase(dept); // persiste imediatamente no Firebase
   registrarLog('Editou tarefa em ' + dept + ': ' + newName);
@@ -4403,7 +5288,11 @@ const TEXT_ED_SELS = [
   // .idea-title / .idea-desc / .idea-tag / .idea-num são gerenciados pelo renderIdeas() diretamente
   '.ck-text', '.gauge-label',
   '.sidebar-brand', '.sidebar-sub',
-  '.sidebar-gestor-label', '.sidebar-gestor-avatar', '.sidebar-gestor-name', '.sidebar-gestor-role'
+  '.sidebar-gestor-label', '.sidebar-gestor-avatar', '.sidebar-gestor-name', '.sidebar-gestor-role',
+  // Rótulos de métricas, cabeçalhos de seção e textos de aviso dos departamentos
+  '.stat-label', '.card-title', '.dept-data-hint',
+  // Navegação lateral
+  '.nav-label', '.nav-item-text'
 ];
 
 function toggleEditMode() {
@@ -5144,6 +6033,11 @@ function somenteNumeros(el) {
   }
 }
 
+// ── Sanitiza matrícula para uso seguro como chave Firebase (só dígitos) ─────────
+function sanitizarMat(mat) {
+  return String(mat).replace(/\D/g, '');
+}
+
 // ════════════════ SISTEMA DE USUÁRIOS ════════════════
 
 function abrirLoginModal() {
@@ -5165,7 +6059,7 @@ async function fazerLogin() {
   errEl.textContent = 'Verificando…';
   try {
     const hash = await sha256(senha);
-    const snap = await _db.ref('cinea/users/' + mat).once('value');
+    const snap = await _db.ref('cinea/users/' + sanitizarMat(mat)).once('value');
     const u = snap.val();
     if (!u || u.senha_hash !== hash) {
       errEl.textContent = '❌ Matrícula ou senha incorretos.';
@@ -5183,6 +6077,7 @@ async function fazerLogin() {
     atualizarTopbarUser();
     // Registra acesso no Firebase
     _db.ref('cinea/acessos').push({ matricula: mat, nome: u.nome, role: u.role, ts: new Date().toISOString() }).catch(()=>{});
+    registrarLog('Acessou o portal');
   } catch(e) {
     errEl.textContent = '❌ Erro de conexão. Tente novamente.';
     console.warn('Login error:', e);
@@ -5191,22 +6086,85 @@ async function fazerLogin() {
 
 // ── Login pelo portão de entrada ──────────────────────────────────────────────
 async function fazerLoginGate() {
-  const mat    = document.getElementById('gate-mat').value.trim();
-  const senha  = document.getElementById('gate-senha').value;
-  const errEl  = document.getElementById('gate-error');
+  const mat     = document.getElementById('gate-mat').value.trim();
+  const senha   = document.getElementById('gate-senha').value;
+  const errEl   = document.getElementById('gate-error');
   const lembrar = document.getElementById('gate-lembrar')?.checked;
-  if (!mat || !senha) { errEl.textContent = 'Preencha matrícula e senha.'; return; }
-  errEl.textContent = 'Verificando…';
+  if (!mat || !senha) { errEl.style.color = ''; errEl.textContent = 'Preencha o código de pessoa e a senha.'; return; }
+
+  // ── Rate limit: bloqueia após 3 tentativas erradas (janela de 30 min) ────────
+  const _rlKey  = 'cinea_falhas_' + sanitizarMat(mat);
+  const _agora  = Date.now();
+  const _JANELA = 30 * 60 * 1000;
+  let _rl = {};
+  try { _rl = JSON.parse(localStorage.getItem(_rlKey) || '{}'); } catch {}
+  if (!_rl.inicio || (_agora - _rl.inicio) > _JANELA) _rl = { count: 0, inicio: _agora };
+
+  function _redirecionarReset() {
+    abrirSolicitarResetGate();
+    setTimeout(() => { const el = document.getElementById('reset-req-mat'); if (el) el.value = mat; }, 120);
+  }
+
+  if (_rl.count >= 3) {
+    errEl.style.color = 'var(--gold)';
+    errEl.textContent = '🔒 Acesso bloqueado. Redefina sua senha para continuar.';
+    setTimeout(_redirecionarReset, 900);
+    return;
+  }
+
+  errEl.style.color = '';
+  errEl.textContent = 'Conectando…';
   try {
-    const hash = await sha256(senha);
-    const snap = await _db.ref('cinea/users/' + mat).once('value');
-    const u = snap.val();
-    if (!u || u.senha_hash !== hash) {
-      errEl.textContent = '❌ Matrícula ou senha incorretos.';
-      document.getElementById('gate-senha').value = '';
-      setTimeout(() => document.getElementById('gate-mat').select(), 50);
+    // ── Garante autenticação anônima antes de qualquer leitura ──────────────
+    if (!_fbAuthReady) {
+      try {
+        await Promise.race([
+          _auth.signInAnonymously().then(() => { _fbAuthReady = true; }),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('auth_timeout')), 10000))
+        ]);
+      } catch(authErr) {
+        // Tenta onAuthStateChanged como fallback
+        await new Promise(resolve => {
+          const _unsub = _auth.onAuthStateChanged(user => {
+            _unsub(); if (user) _fbAuthReady = true; resolve();
+          });
+          setTimeout(resolve, 5000);
+        });
+      }
+    }
+    if (!_fbAuthReady) {
+      errEl.style.color = 'var(--red)';
+      errEl.textContent = '❌ Sem conexão com o servidor. Verifique sua internet e tente novamente.';
       return;
     }
+    errEl.textContent = 'Verificando…';
+    const hash = await sha256(senha);
+    // Timeout de 12s na leitura do banco — evita travar indefinidamente
+    const snap = await Promise.race([
+      _db.ref('cinea/users/' + sanitizarMat(mat)).once('value'),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('db_timeout')), 12000))
+    ]);
+    const u = snap.val();
+    if (!u || u.senha_hash !== hash) {
+      _rl.count++;
+      localStorage.setItem(_rlKey, JSON.stringify(_rl));
+      document.getElementById('gate-senha').value = '';
+      setTimeout(() => document.getElementById('gate-mat').select(), 50);
+      const restantes = 3 - _rl.count;
+      if (restantes <= 0) {
+        errEl.style.color = 'var(--gold)';
+        errEl.textContent = '🔒 3 tentativas incorretas. Abrindo redefinição de senha…';
+        setTimeout(_redirecionarReset, 1600);
+      } else {
+        errEl.style.color = 'var(--red)';
+        errEl.textContent = `❌ Senha incorreta. ${restantes} tentativa${restantes !== 1 ? 's' : ''} restante${restantes !== 1 ? 's' : ''}.`;
+      }
+      return;
+    }
+    // Sucesso: limpa contador de falhas
+    localStorage.removeItem(_rlKey);
+    errEl.style.color = '';
+    errEl.textContent = '';
     _currentUser = { matricula: mat, nome: u.nome, sigla: (u.sigla || mat.slice(0,2)).toUpperCase(), role: u.role || 'membro' };
     const sessJSON = JSON.stringify(_currentUser);
     sessionStorage.setItem('cinea_session', sessJSON);
@@ -5218,17 +6176,21 @@ async function fazerLoginGate() {
     setTimeout(() => { gate.style.display = 'none'; gate.classList.remove('gate-hiding'); }, 380);
     atualizarTopbarUser();
     _db.ref('cinea/acessos').push({ matricula: mat, nome: u.nome, role: u.role, ts: new Date().toISOString() }).catch(() => {});
+    registrarLog('Acessou o portal');
   } catch(e) {
-    errEl.textContent = '❌ Erro de conexão. Tente novamente.';
+    errEl.style.color = 'var(--red)';
+    if (e?.message === 'db_timeout' || e?.message === 'auth_timeout') {
+      errEl.textContent = '⏱ Conexão lenta. Verifique sua internet e tente novamente.';
+    } else {
+      errEl.textContent = '❌ Erro de conexão. Tente novamente.';
+    }
     console.warn('Gate login error:', e);
   }
 }
 function abrirSolicitarResetGate() {
   // Abre o modal de reset acima do portão (z-index 9500)
   document.getElementById('solicitar-reset-modal').style.display = 'flex';
-  document.getElementById('reset-req-mat').value   = '';
-  document.getElementById('reset-req-error').textContent = '';
-  setTimeout(() => document.getElementById('reset-req-mat').focus(), 80);
+  _abrirResetModal(); // Gerencia estado de rate limit + foco
 }
 
 function fazerLogout() {
@@ -5247,24 +6209,27 @@ function atualizarTopbarUser() {
   const nameEl     = document.getElementById('topbar-user-name');
   const roleEl     = document.getElementById('topbar-user-role');
   const ddGer      = document.getElementById('dd-gerenciar');
-  const ddSug      = document.getElementById('dd-sugestoes');
   const ddLog      = document.getElementById('dd-log');
   const ddSenha    = document.getElementById('dd-senha');
   const editBtn    = document.getElementById('edit-mode-btn');
   const bellWrap   = document.getElementById('notif-bell-wrap');
+  const lixeiraBtn = document.getElementById('lixeira-topbar-btn');
+  const ddLixeiraMob = document.getElementById('dd-lixeira-mob');
   const isAdmin    = _currentUser && _currentUser.role === 'admin';
 
   if (_currentUser) {
-    if (loginBtn)  loginBtn.style.display = 'none';
-    if (userChip)  userChip.style.display = 'flex';
-    if (avatar)    avatar.textContent      = _currentUser.sigla;
-    if (nameEl)    nameEl.textContent      = _currentUser.nome;
-    if (roleEl)    roleEl.textContent      = isAdmin ? 'Admin · CINEA' : 'Equipe CINEA';
-    if (ddGer)     ddGer.style.display     = isAdmin ? 'flex' : 'none';
-    if (ddSug)     ddSug.style.display     = isAdmin ? 'flex' : 'none';
-    if (ddLog)     ddLog.style.display     = isAdmin ? 'flex' : 'none';
-    if (ddSenha)   ddSenha.style.display   = isAdmin ? 'flex' : 'none';
-    if (editBtn)   editBtn.style.display   = 'flex';
+    if (loginBtn)     loginBtn.style.display     = 'none';
+    if (userChip)     userChip.style.display     = 'flex';
+    if (avatar)       avatar.textContent          = _currentUser.sigla;
+    if (nameEl)       nameEl.textContent          = _currentUser.nome;
+    if (roleEl)       roleEl.textContent          = isAdmin ? 'Admin · CINEA' : 'Equipe CINEA';
+    if (ddGer)        ddGer.style.display         = isAdmin ? 'flex' : 'none';
+    if (ddLog)        ddLog.style.display         = isAdmin ? 'flex' : 'none';
+    if (ddSenha)      ddSenha.style.display       = isAdmin ? 'flex' : 'none';
+    if (lixeiraBtn)   lixeiraBtn.style.display    = isAdmin ? 'flex' : 'none';
+    if (ddLixeiraMob) ddLixeiraMob.style.display  = isAdmin ? 'flex' : 'none';
+    if (editBtn)      editBtn.style.display       = isAdmin ? 'flex' : 'none';
+    document.body.classList.toggle('admin-mode', isAdmin);
     // Sino de notificações: visível para todos os usuários logados
     if (bellWrap)  bellWrap.classList.toggle('visible', !!_currentUser);
     pararListenerNotificacoes(); // garante clean start se trocou de usuário
@@ -5337,21 +6302,22 @@ async function carregarListaUsuarios() {
     }
     container.innerHTML = entries.map(([mat, u]) => {
       const isSelf = mat === _currentUser?.matricula;
+      const editBtn   = `<button onclick="editarUsuarioInline('${mat}')" style="background:rgba(79,45,127,0.1);border:1px solid rgba(79,45,127,0.3);border-radius:8px;padding:5px 10px;font-size:0.72rem;color:var(--purple-l);cursor:pointer;font-family:'DM Sans',sans-serif">✏️ Editar</button>`;
       const removeBtn = isSelf
         ? `<span title="Você não pode remover sua própria conta" style="background:rgba(107,95,133,0.08);border:1px solid rgba(107,95,133,0.15);border-radius:8px;padding:5px 10px;font-size:0.72rem;color:var(--text3);font-family:'DM Sans',sans-serif;cursor:not-allowed;user-select:none">🔒 Você</span>`
         : `<button onclick="removerUsuario('${mat}','${u.nome||mat}')" style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.25);border-radius:8px;padding:5px 10px;font-size:0.72rem;color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif">✕ Remover</button>`;
       const resetBtn = isSelf
         ? ''
-        : `<button onclick="resetarSenhaUsuario('${mat}','${u.nome||mat}')" style="background:rgba(0,180,204,0.08);border:1px solid rgba(0,180,204,0.25);border-radius:8px;padding:5px 10px;font-size:0.72rem;color:var(--cyan);cursor:pointer;font-family:'DM Sans',sans-serif" title="Resetar senha para a matrícula">🔄 Resetar</button>`;
-      return `<div class="user-mgmt-row">
+        : `<button onclick="resetarSenhaUsuario('${mat}','${u.nome||mat}')" style="background:rgba(0,180,204,0.08);border:1px solid rgba(0,180,204,0.25);border-radius:8px;padding:5px 10px;font-size:0.72rem;color:var(--cyan);cursor:pointer;font-family:'DM Sans',sans-serif" title="Resetar senha para o código de pessoa">🔄 Resetar</button>`;
+      return `<div class="user-mgmt-row" id="user-row-${mat}">
         <div style="display:flex;align-items:center;gap:10px">
           <div style="width:32px;height:32px;border-radius:50%;background:${isSelf?'linear-gradient(135deg,var(--pink),var(--pink-l))':'linear-gradient(135deg,var(--purple),var(--purple-l))'};display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;color:#fff;flex-shrink:0">${(u.sigla||mat.slice(0,2)).toUpperCase()}</div>
           <div>
-            <div style="font-size:0.82rem;font-weight:600;color:var(--text)">${u.nome||mat}${isSelf?' <span style="font-size:0.65rem;color:var(--text3);font-weight:400">(você)</span>':''}</div>
-            <div style="font-size:0.68rem;color:var(--text3)">Mat: ${mat} · ${u.role==='admin'?'👑 Admin':'Membro'}</div>
+            <div style="font-size:0.82rem;font-weight:600;color:var(--text)">${escapeHtml(u.nome||mat)}${isSelf?' <span style="font-size:0.65rem;color:var(--text3);font-weight:400">(você)</span>':''}</div>
+            <div style="font-size:0.68rem;color:var(--text3)">Cód: ${mat} · ${u.role==='admin'?'👑 Admin':'Membro'}</div>
           </div>
         </div>
-        <div style="display:flex;gap:6px">${resetBtn}${removeBtn}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">${editBtn}${resetBtn}${removeBtn}</div>
       </div>`;
     }).join('');
   } catch(e) {
@@ -5370,7 +6336,7 @@ async function adicionarUsuario() {
   errEl.textContent = 'Salvando…';
   try {
     const hash = await sha256(senha);
-    await _db.ref('cinea/users/' + mat).set({ nome, sigla, senha_hash: hash, role: 'membro', ativo: true, criadoEm: new Date().toISOString() });
+    await _db.ref('cinea/users/' + sanitizarMat(mat)).set({ nome, sigla, senha_hash: hash, role: 'membro', ativo: true, criadoEm: new Date().toISOString() });
     errEl.style.color = 'var(--green)';
     errEl.textContent = '✅ Membro adicionado!';
     document.getElementById('new-user-nome').value = '';
@@ -5382,13 +6348,93 @@ async function adicionarUsuario() {
   } catch(e) { errEl.textContent = '❌ Erro: ' + e.message; }
 }
 
+async function editarUsuarioInline(mat) {
+  if (!_currentUser || _currentUser.role !== 'admin') return;
+  const row = document.getElementById('user-row-' + mat);
+  if (!row) return;
+  // Busca dados atuais do Firebase
+  const snap = await _db.ref('cinea/users/' + sanitizarMat(mat)).once('value');
+  const u = snap.val();
+  if (!u) return;
+  const isSelf = mat === _currentUser?.matricula;
+  row.innerHTML = `
+    <div style="width:100%">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div>
+          <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">Nome</div>
+          <input id="edit-nome-${mat}" class="reuniao-input" value="${escapeHtml(u.nome||'')}" placeholder="Nome completo" style="margin:0;width:100%">
+        </div>
+        <div>
+          <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">Código de Pessoa</div>
+          <input id="edit-mat-${mat}" class="reuniao-input" value="${mat}" placeholder="Somente números" inputmode="numeric"
+            oninput="this.value=this.value.replace(/\\D/g,'')" style="margin:0;width:100%"
+            ${isSelf ? 'readonly title="Não é possível alterar seu próprio código"' : ''}>
+        </div>
+        <div>
+          <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">Sigla (2-3 letras)</div>
+          <input id="edit-sigla-${mat}" class="reuniao-input" value="${escapeHtml(u.sigla||'')}" placeholder="Ex: RO" maxlength="3" style="margin:0;width:100%;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div>
+          <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">Perfil</div>
+          <select id="edit-role-${mat}" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;padding:11px 12px;outline:none" ${isSelf?'disabled title="Você não pode alterar seu próprio perfil"':''}>
+            <option value="membro" ${u.role!=='admin'?'selected':''}>Membro</option>
+            <option value="admin"  ${u.role==='admin'?'selected':''}>👑 Admin</option>
+          </select>
+        </div>
+      </div>
+      <div id="edit-error-${mat}" style="font-size:0.73rem;color:var(--red);min-height:16px;margin-bottom:6px"></div>
+      <div style="display:flex;gap:8px">
+        <button onclick="salvarEdicaoUsuario('${mat}')" style="background:var(--purple);border:none;border-radius:8px;color:#fff;font-family:'DM Sans',sans-serif;font-size:0.78rem;font-weight:600;padding:7px 16px;cursor:pointer">💾 Salvar</button>
+        <button onclick="carregarListaUsuarios()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.78rem;padding:7px 14px;cursor:pointer">Cancelar</button>
+      </div>
+    </div>`;
+}
+
+async function salvarEdicaoUsuario(matAtual) {
+  if (!_currentUser || _currentUser.role !== 'admin') return;
+  const errEl   = document.getElementById('edit-error-' + matAtual);
+  const nome    = document.getElementById('edit-nome-'  + matAtual)?.value.trim();
+  const novaMat = document.getElementById('edit-mat-'   + matAtual)?.value.trim();
+  const sigla   = document.getElementById('edit-sigla-' + matAtual)?.value.trim().toUpperCase();
+  const role    = document.getElementById('edit-role-'  + matAtual)?.value || 'membro';
+  if (!nome)    { errEl.textContent = 'Nome é obrigatório.'; return; }
+  if (!novaMat) { errEl.textContent = 'Código de pessoa é obrigatório.'; return; }
+  if (!sigla || sigla.length < 2) { errEl.textContent = 'Sigla deve ter 2-3 letras.'; return; }
+  errEl.style.color = 'var(--text3)'; errEl.textContent = 'Salvando…';
+  try {
+    const snap = await _db.ref('cinea/users/' + sanitizarMat(matAtual)).once('value');
+    const dadosAtuais = snap.val() || {};
+    const dadosNovos  = { ...dadosAtuais, nome, sigla, role };
+    if (novaMat !== matAtual) {
+      // Código de pessoa mudou: verifica se novo código já existe
+      const snapNovo = await _db.ref('cinea/users/' + sanitizarMat(novaMat)).once('value');
+      if (snapNovo.exists()) { errEl.style.color='var(--red)'; errEl.textContent = '❌ Esse código de pessoa já está cadastrado.'; return; }
+      await _db.ref('cinea/users/' + sanitizarMat(novaMat)).set(dadosNovos);
+      await _db.ref('cinea/users/' + sanitizarMat(matAtual)).remove();
+    } else {
+      await _db.ref('cinea/users/' + sanitizarMat(matAtual)).update({ nome, sigla, role });
+    }
+    // Se editou o próprio usuário (exceto código, que é bloqueado), atualiza sessão local
+    if (matAtual === _currentUser.matricula) {
+      _currentUser = { ..._currentUser, nome, sigla };
+      const sessJSON = JSON.stringify(_currentUser);
+      sessionStorage.setItem('cinea_session', sessJSON);
+      if (localStorage.getItem('cinea_session')) localStorage.setItem('cinea_session', sessJSON);
+      atualizarTopbarUser();
+    }
+    registrarLog(`Editou cadastro de usuário: ${nome} (${novaMat !== matAtual ? matAtual + ' → ' + novaMat : novaMat})`);
+    mostrarToast('✅ Cadastro atualizado', nome + ' foi atualizado com sucesso.');
+    carregarListaUsuarios();
+  } catch(e) { errEl.style.color='var(--red)'; errEl.textContent = '❌ Erro: ' + e.message; }
+}
+
 async function removerUsuario(mat, nome) {
   if (mat === _currentUser?.matricula) {
     mostrarToast('🔒 Ação bloqueada', 'Você não pode remover sua própria conta.');
     return;
   }
   if (!confirm(`Remover "${nome || mat}" permanentemente?\nEsta ação não pode ser desfeita.`)) return;
-  await _db.ref('cinea/users/' + mat).remove();
+  await _db.ref('cinea/users/' + sanitizarMat(mat)).remove();
   registrarLog('Removeu usuário: ' + (nome || mat) + ' (' + mat + ')');
   mostrarToast('🗑 Usuário removido', (nome || mat) + ' foi excluído do sistema.');
   carregarListaUsuarios();
@@ -5398,7 +6444,7 @@ async function resetarSenhaUsuario(mat, nome) {
   if (!confirm(`Resetar a senha de "${nome}"?\n\nA nova senha será a própria matrícula: ${mat}`)) return;
   try {
     const hash = await sha256(mat);
-    await _db.ref('cinea/users/' + mat + '/senha_hash').set(hash);
+    await _db.ref('cinea/users/' + sanitizarMat(mat) + '/senha_hash').set(hash);
     registrarLog('Resetou senha de: ' + nome + ' (' + mat + ')');
     alert(`✅ Senha de "${nome}" resetada!\nNova senha temporária: ${mat}\nOriente o usuário a trocá-la após o login.`);
   } catch(e) { alert('❌ Erro ao resetar: ' + e.message); }
@@ -5418,9 +6464,20 @@ document.addEventListener('click', () => {
   document.querySelectorAll('.st-dropdown.open').forEach(el => el.classList.remove('open'));
 });
 
+// ── Rate limit em-memória: evita flood de notificações por console ───────────────
+let _notifAdminRL = { count: 0, resetAt: 0 };
+
 // ── Notifica o admin sobre eventos importantes (apenas usuários não-admin) ──────
 async function notificarAdmin(tipo, dados) {
   if (!_db || !_currentUser || _currentUser.role === 'admin') return;
+  // Janela deslizante: máx 15 notificações por minuto (silencioso — não exibe mensagem)
+  const _agora = Date.now();
+  if (_agora > _notifAdminRL.resetAt) {
+    _notifAdminRL.count  = 0;
+    _notifAdminRL.resetAt = _agora + 60_000;
+  }
+  if (_notifAdminRL.count >= 15) return;
+  _notifAdminRL.count++;
   try {
     await _db.ref('cinea/notificacoes').push({
       tipo,
@@ -5443,6 +6500,10 @@ async function dispensarNotif(key) {
 async function enviarAvisoGlobal() {
   const texto = document.getElementById('aviso-texto-input')?.value?.trim();
   if (!texto) { mostrarToast('⚠️ Atenção', 'Digite uma mensagem para enviar.'); return; }
+  if (texto.length > 500) {
+    mostrarToast('⚠️ Mensagem muito longa', `Máximo de 500 caracteres (atual: ${texto.length}).`);
+    return;
+  }
   if (!_currentUser || _currentUser.role !== 'admin') return;
   try {
     await _db.ref('cinea/notificacoes').push({
@@ -5595,7 +6656,7 @@ async function resolverReset(notifKey, mat, nome) {
   if (!confirm(`Resetar a senha de "${nome}" (matrícula: ${mat})?\nA nova senha será a própria matrícula.`)) return;
   try {
     const hash = await sha256(mat);
-    await _db.ref('cinea/users/' + mat + '/senha_hash').set(hash);
+    await _db.ref('cinea/users/' + sanitizarMat(mat) + '/senha_hash').set(hash);
     await _db.ref('cinea/notificacoes/' + notifKey + '/lido').set(true);
     registrarLog('Resetou senha de: ' + nome + ' (' + mat + ')');
     await carregarNotificacoes();
@@ -5604,37 +6665,136 @@ async function resolverReset(notifKey, mat, nome) {
 }
 
 // ════════ SOLICITAR RESET (modal do login) ════════
+
+// ── Rate limiting: bloqueia após 3 tentativas erradas por 5 minutos ───────────
+const _RESET_MAX_TENTATIVAS = 3;
+const _RESET_LOCKOUT_MS     = 5 * 60 * 1000; // 5 min
+let   _resetCountdownTimer  = null;
+
+function _getRLState() {
+  try { return JSON.parse(localStorage.getItem('cinea_rl_reset') || '{}'); }
+  catch { return {}; }
+}
+function _setRLState(s) { localStorage.setItem('cinea_rl_reset', JSON.stringify(s)); }
+
+// Retorna true se o usuário pode tentar; false se está bloqueado (e exibe msg)
+function _rlPermitido(errEl) {
+  const s = _getRLState();
+  const now = Date.now();
+  if (s.bloqueadoAte && s.bloqueadoAte > now) {
+    _iniciarCountdown(errEl, s.bloqueadoAte);
+    return false;
+  }
+  // Lockout expirou — reseta
+  if (s.bloqueadoAte && s.bloqueadoAte <= now) _setRLState({});
+  return true;
+}
+
+// Registra falha e bloqueia se atingiu o limite
+function _rlRegistrarFalha(errEl) {
+  const s   = _getRLState();
+  const now = Date.now();
+  const tentativas = (s.tentativas || 0) + 1;
+  const restantes  = _RESET_MAX_TENTATIVAS - tentativas;
+
+  if (tentativas >= _RESET_MAX_TENTATIVAS) {
+    const bloqueadoAte = now + _RESET_LOCKOUT_MS;
+    _setRLState({ tentativas, bloqueadoAte });
+    _iniciarCountdown(errEl, bloqueadoAte);
+  } else {
+    _setRLState({ tentativas });
+    const aviso = restantes === 1
+      ? '⚠️ Matrícula não encontrada. Última tentativa antes do bloqueio temporário.'
+      : `⚠️ Matrícula não encontrada. ${restantes} tentativas restantes.`;
+    errEl.style.color  = 'var(--red)';
+    errEl.textContent  = aviso;
+  }
+}
+
+// Contador regressivo exibido no campo de erro
+function _iniciarCountdown(errEl, bloqueadoAte) {
+  clearInterval(_resetCountdownTimer);
+  const atualizar = () => {
+    const restMs = bloqueadoAte - Date.now();
+    if (restMs <= 0) {
+      clearInterval(_resetCountdownTimer);
+      _setRLState({});
+      errEl.style.color = 'var(--text3)';
+      errEl.textContent = 'Bloqueio encerrado. Você pode tentar novamente.';
+      document.getElementById('reset-req-mat').disabled  = false;
+      document.getElementById('btn-enviar-reset').disabled = false;
+      return;
+    }
+    const min = String(Math.floor(restMs / 60000)).padStart(2, '0');
+    const seg = String(Math.floor((restMs % 60000) / 1000)).padStart(2, '0');
+    errEl.style.color = 'var(--red)';
+    errEl.textContent = `🔒 Muitas tentativas. Tente novamente em ${min}:${seg}.`;
+    document.getElementById('reset-req-mat').disabled  = true;
+    document.getElementById('btn-enviar-reset').disabled = true;
+  };
+  atualizar();
+  _resetCountdownTimer = setInterval(atualizar, 1000);
+}
+
+function _rlSucesso() {
+  clearInterval(_resetCountdownTimer);
+  _setRLState({});
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+function _abrirResetModal() {
+  const errEl = document.getElementById('reset-req-error');
+  const mat   = document.getElementById('reset-req-mat');
+  const btn   = document.getElementById('btn-enviar-reset');
+  mat.value        = '';
+  errEl.textContent = '';
+  errEl.style.color = 'var(--text3)';
+  // Verifica imediatamente se ainda está bloqueado
+  if (!_rlPermitido(errEl)) return;
+  if (mat) mat.disabled = false;
+  if (btn) btn.disabled = false;
+  setTimeout(() => mat?.focus(), 80);
+}
+
 function abrirSolicitarReset() {
   fecharLoginModal();
   document.getElementById('solicitar-reset-modal').style.display = 'flex';
-  document.getElementById('reset-req-mat').value   = '';
-  document.getElementById('reset-req-error').textContent = '';
-  setTimeout(() => document.getElementById('reset-req-mat').focus(), 80);
+  _abrirResetModal();
 }
 function fecharSolicitarReset() {
+  clearInterval(_resetCountdownTimer);
   document.getElementById('solicitar-reset-modal').style.display = 'none';
+  // Reabilita campos para a próxima abertura (o _abrirResetModal trata o estado)
+  document.getElementById('reset-req-mat').disabled    = false;
+  document.getElementById('btn-enviar-reset').disabled = false;
   if (!_currentUser) {
-    // Volta o foco para o portão de entrada (sem abrir o modal flutuante)
     setTimeout(() => document.getElementById('gate-mat')?.focus(), 80);
   } else {
     abrirLoginModal();
   }
 }
+
 async function enviarSolicitacaoReset() {
-  const mat   = document.getElementById('reset-req-mat').value.trim();
   const errEl = document.getElementById('reset-req-error');
+
+  // ── 1. Verifica rate limit ANTES de qualquer consulta ao Firebase ──
+  if (!_rlPermitido(errEl)) return;
+
+  const mat = document.getElementById('reset-req-mat').value.trim();
   if (!mat) { errEl.style.color = 'var(--red)'; errEl.textContent = 'Informe sua matrícula.'; return; }
-  errEl.style.color = 'var(--text3)'; errEl.textContent = 'Verificando matrícula…';
+
+  errEl.style.color = 'var(--text3)'; errEl.textContent = 'Verificando…';
   try {
-    // ── Valida se a matrícula existe no banco ANTES de criar qualquer notificação ──
-    const snap = await _db.ref('cinea/users/' + mat).once('value');
-    const u = snap.val();
+    // ── 2. Consulta o banco apenas se não estiver bloqueado ──
+    const snap = await _db.ref('cinea/users/' + sanitizarMat(mat)).once('value');
+    const u    = snap.val();
     if (!u) {
-      errEl.style.color = 'var(--red)';
-      errEl.textContent = '❌ Matrícula não encontrada no sistema.';
+      // Matrícula não existe — registra falha (pode bloquear)
+      _rlRegistrarFalha(errEl);
       return;
     }
-    // Nome vem do banco — nunca do campo digitado pelo usuário
+    // ── 3. Sucesso: zera contagem e cria notificação ──
+    _rlSucesso();
     const nomeReal = u.nome || mat;
     await _db.ref('cinea/notificacoes').push({
       matricula: mat, nome: nomeReal,
@@ -5644,10 +6804,16 @@ async function enviarSolicitacaoReset() {
     errEl.style.color = 'var(--green)';
     errEl.textContent = '✅ Solicitação enviada! O administrador irá resetar sua senha em breve.';
     setTimeout(fecharSolicitarReset, 3000);
-  } catch(e) { errEl.style.color = 'var(--red)'; errEl.textContent = '❌ Erro de conexão.'; }
+  } catch(e) {
+    // Erros de conexão NÃO contam como tentativa falha
+    errEl.style.color = 'var(--red)';
+    errEl.textContent = '❌ Erro de conexão. Tente novamente.';
+  }
 }
 
 // ════════ LOG DE ATIVIDADES ════════
+let _logCache = []; // mantém os itens carregados para o download CSV
+
 async function registrarLog(acao) {
   if (!_currentUser) return;
   try {
@@ -5661,46 +6827,461 @@ async function registrarLog(acao) {
   } catch(e) { /* silencioso */ }
 }
 
+let _logTabAtual = 'acessos';
+let _logAllItems = [];       // todos os itens carregados do Firebase
+let _logAcessosOffset = 0;
+let _logAlteracoesOffset = 0;
+const _LOG_PAGE = 10;
+
 function abrirLog() {
   fecharUserDropdown();
+  _logTabAtual = 'acessos';
+  _logAllItems = [];
+  _logAcessosOffset = 0;
+  _logAlteracoesOffset = 0;
   document.getElementById('log-modal').style.display = 'flex';
-  carregarLog();
+  switchLogTab('acessos');
+  carregarLogFirebase();
 }
 function fecharLog() {
   document.getElementById('log-modal').style.display = 'none';
 }
-async function carregarLog() {
-  const list = document.getElementById('log-list');
-  if (!list) return;
-  try {
-    const snap  = await _db.ref('cinea/auditoria').orderByChild('ts').limitToLast(100).once('value');
-    const data  = snap.val() || {};
-    const items = Object.values(data).sort((a,b) => (b.ts||'').localeCompare(a.ts||''));
-    if (!items.length) { list.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:30px">Nenhuma atividade registrada.</div>'; return; }
-    list.innerHTML = `
-      <table style="width:100%;border-collapse:collapse;font-size:0.78rem">
-        <thead>
-          <tr style="border-bottom:1px solid var(--border)">
-            <th style="text-align:left;padding:6px 8px;color:var(--text3);font-weight:600">Usuário</th>
-            <th style="text-align:left;padding:6px 8px;color:var(--text3);font-weight:600">Ação</th>
-            <th style="text-align:left;padding:6px 8px;color:var(--text3);font-weight:600;white-space:nowrap">Data/Hora</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${items.map(i => `
-            <tr style="border-bottom:1px solid var(--border)">
-              <td style="padding:8px;color:var(--text)"><span style="background:rgba(79,45,127,0.15);border-radius:6px;padding:2px 7px;font-weight:600">${i.nome||i.matricula}</span></td>
-              <td style="padding:8px;color:var(--text2)">${i.acao||'—'}</td>
-              <td style="padding:8px;color:var(--text3);white-space:nowrap">${i.ts ? new Date(i.ts).toLocaleString('pt-BR') : '—'}</td>
-            </tr>`).join('')}
-        </tbody>
-      </table>`;
-  } catch(e) { list.innerHTML = '<div style="text-align:center;color:var(--red);font-size:0.82rem;padding:30px">Erro ao carregar log.</div>'; }
+function switchLogTab(tab) {
+  _logTabAtual = tab;
+  const btnA = document.getElementById('log-tab-acessos');
+  const btnB = document.getElementById('log-tab-alteracoes');
+  const listA = document.getElementById('log-acessos-list');
+  const listB = document.getElementById('log-alteracoes-list');
+  const ativo   = 'background:var(--purple);border:1px solid var(--purple);color:#fff';
+  const inativo = 'background:var(--card2);border:1px solid var(--border);color:var(--text2)';
+  if (btnA) btnA.style.cssText = btnA.style.cssText.replace(/background:[^;]+;border:[^;]+;color:[^;]+/, tab==='acessos'?ativo:inativo);
+  if (btnB) btnB.style.cssText = btnB.style.cssText.replace(/background:[^;]+;border:[^;]+;color:[^;]+/, tab==='alteracoes'?ativo:inativo);
+  if (listA) listA.style.display = tab==='acessos'    ? 'block' : 'none';
+  if (listB) listB.style.display = tab==='alteracoes' ? 'block' : 'none';
+  if (_logAllItems.length) renderLogTab(tab);
 }
-async function limparLog() {
-  if (!confirm('Apagar todo o histórico de atividades permanentemente?')) return;
-  await _db.ref('cinea/auditoria').remove();
-  carregarLog();
+async function carregarLogFirebase() {
+  const listA = document.getElementById('log-acessos-list');
+  const listB = document.getElementById('log-alteracoes-list');
+  if (listA) listA.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:30px">Carregando…</div>';
+  try {
+    const snap = await _db.ref('cinea/auditoria').orderByChild('ts').limitToLast(500).once('value');
+    const data = snap.val() || {};
+    _logAllItems = Object.values(data).sort((a,b) => (b.ts||'').localeCompare(a.ts||''));
+    _logCache = _logAllItems; // mantém compatibilidade com downloadLog
+    _logAcessosOffset = 0;
+    _logAlteracoesOffset = 0;
+    renderLogTab(_logTabAtual);
+  } catch(e) {
+    if (listA) listA.innerHTML = '<div style="text-align:center;color:var(--red);font-size:0.82rem;padding:30px">Erro ao carregar log.</div>';
+  }
+}
+function _logTableHTML(items) {
+  if (!items.length) return '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:30px">Nenhum registro encontrado.</div>';
+  return `<table style="width:100%;border-collapse:collapse;font-size:0.78rem">
+    <thead><tr style="border-bottom:1px solid var(--border)">
+      <th style="text-align:left;padding:6px 8px;color:var(--text3);font-weight:600">Usuário</th>
+      <th style="text-align:left;padding:6px 8px;color:var(--text3);font-weight:600">Ação</th>
+      <th style="text-align:left;padding:6px 8px;color:var(--text3);font-weight:600;white-space:nowrap">Data/Hora</th>
+    </tr></thead>
+    <tbody>${items.map(i => `
+      <tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:8px;color:var(--text)"><span style="background:rgba(79,45,127,0.15);border-radius:6px;padding:2px 7px;font-weight:600">${i.nome||i.matricula}</span></td>
+        <td style="padding:8px;color:var(--text2)">${i.acao||'—'}</td>
+        <td style="padding:8px;color:var(--text3);white-space:nowrap">${i.ts?new Date(i.ts).toLocaleString('pt-BR'):'—'}</td>
+      </tr>`).join('')}
+    </tbody></table>`;
+}
+function renderLogTab(tab) {
+  const isAcessos = tab === 'acessos';
+  const listEl = document.getElementById(isAcessos ? 'log-acessos-list' : 'log-alteracoes-list');
+  if (!listEl) return;
+  const filtered = _logAllItems.filter(i =>
+    isAcessos ? (i.acao === 'Acessou o portal') : (i.acao !== 'Acessou o portal')
+  );
+  const offset = isAcessos ? _logAcessosOffset : _logAlteracoesOffset;
+  const visible = filtered.slice(0, offset + _LOG_PAGE);
+  const hasMore = filtered.length > visible.length;
+  listEl.innerHTML = _logTableHTML(visible) +
+    (hasMore ? `<div style="text-align:center;padding:14px">
+      <button onclick="carregarMaisLog('${tab}')" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 20px;font-size:0.78rem;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif">
+        ↓ Carregar mais (${filtered.length - visible.length} restantes)
+      </button></div>` : '');
+}
+function carregarMaisLog(tab) {
+  if (tab === 'acessos')    _logAcessosOffset    += _LOG_PAGE;
+  else                      _logAlteracoesOffset += _LOG_PAGE;
+  renderLogTab(tab);
+}
+
+// ── Info de páginas (admin) ──────────────────────────────────────────────────
+let _pageInfoCache = {}; // { pageId: texto }
+let _pageInfoEditando = null;
+
+async function carregarPageInfos() {
+  try {
+    const snap = await _db.ref('cinea/config/page_info').once('value');
+    _pageInfoCache = snap.val() || {};
+    Object.entries(_pageInfoCache).forEach(([pageId, txt]) => _renderInfoBar(pageId, txt));
+  } catch(e) { /* silencioso */ }
+}
+function _renderInfoBar(pageId, txt) {
+  const bar = document.getElementById('info-bar-' + pageId);
+  if (!bar) return;
+  if (txt && txt.trim()) {
+    bar.textContent = txt.trim();
+    bar.classList.add('visible');
+  } else {
+    bar.textContent = '';
+    bar.classList.remove('visible');
+  }
+}
+function editarInfoPaginaAtual() {
+  editarInfoPagina(_currentPageId || 'overview');
+}
+
+function editarInfoPagina(pageId) {
+  _pageInfoEditando = pageId;
+  const ta = document.getElementById('page-info-textarea');
+  if (ta) ta.value = _pageInfoCache[pageId] || '';
+  // Mostra qual página está sendo editada no título do modal
+  const titleEl = document.querySelector('#page-info-modal [style*="font-size:1rem"]');
+  const pageNames = { overview:'Dashboard Geral', indicadores:'Indicadores', gsheets:'Google Sheets',
+    roadmap:'Roadmap BI', ideas:'Ideias de Implantação', hub:'Hub de Integração', inov:'Inovação Pedagógica',
+    tec:'Tecnologias & Aprendizagem', meeting:'Reuniões', equipe:'Equipe', tarefas:'Tarefas' };
+  if (titleEl) titleEl.textContent = '✏️ Banner: ' + (pageNames[pageId] || pageId);
+  document.getElementById('page-info-modal').style.display = 'flex';
+  setTimeout(() => ta?.focus(), 80);
+}
+function fecharInfoModal() {
+  document.getElementById('page-info-modal').style.display = 'none';
+  _pageInfoEditando = null;
+}
+async function salvarInfoPagina() {
+  if (!_pageInfoEditando) return;
+  const txt = document.getElementById('page-info-textarea')?.value?.trim() || '';
+  _pageInfoCache[_pageInfoEditando] = txt;
+  _renderInfoBar(_pageInfoEditando, txt);
+  fecharInfoModal();
+  try {
+    await _db.ref('cinea/config/page_info/' + _pageInfoEditando).set(txt || null);
+    mostrarToast('✅ Informação salva', 'Visível para todos os membros.');
+  } catch(e) {
+    mostrarToast('⚠️ Erro ao salvar', 'Informação aplicada localmente.');
+  }
+}
+
+// ════════ INDICADORES · POWER BI ════════
+let _biUrls = { hub: '', inov: '', tec: '' };
+let _biUrlsCarregado = false;
+let _biEditingDept = null;
+const _BI_DEPT_NAMES = {
+  hub:  'Hub de Integração',
+  inov: 'Inovação Pedagógica',
+  tec:  'Tecnologias & Aprendizagem'
+};
+
+async function carregarBiUrls() {
+  // Atualiza o placeholder text para refletir se o usuário é admin
+  ['hub','inov','tec'].forEach(dept => {
+    const subEl = document.getElementById('bi-placeholder-sub-' + dept);
+    if (subEl && !_biUrls[dept]) {
+      const isAdmin = _currentUser?.role === 'admin';
+      subEl.textContent = isAdmin
+        ? 'Clique em "Configurar painel" para adicionar o URL do Power BI'
+        : 'Aguardando configuração pelo administrador';
+    }
+  });
+  // Só carrega do Firebase uma vez por sessão
+  if (_biUrlsCarregado) return;
+  if (!_db) return;
+  try {
+    const snap = await _db.ref('cinea/config/bi_urls').once('value');
+    const data = snap.val() || {};
+    _biUrls = { hub: data.hub || '', inov: data.inov || '', tec: data.tec || '' };
+    _biUrlsCarregado = true;
+    ['hub','inov','tec'].forEach(dept => _renderBiPanel(dept));
+  } catch(e) {
+    console.warn('[CINEA] Erro ao carregar URLs do BI:', e);
+  }
+}
+
+function _extractBiUrl(raw) {
+  if (!raw) return '';
+  const trimmed = raw.trim();
+  // Se for HTML de iframe, extrai o src
+  const m = trimmed.match(/src=["']([^"']+)["']/);
+  if (m) return m[1].trim();
+  return trimmed;
+}
+
+function _renderBiPanel(dept) {
+  const url = _biUrls[dept] || '';
+  const wrap = document.getElementById('bi-wrap-' + dept);
+  const placeholder = document.getElementById('bi-placeholder-' + dept);
+  if (!wrap) return;
+  // Remove iframe existente
+  const existing = wrap.querySelector('iframe');
+  if (existing) existing.remove();
+  if (url) {
+    if (placeholder) placeholder.style.display = 'none';
+    const iframe = document.createElement('iframe');
+    iframe.src = url;
+    iframe.allowFullscreen = true;
+    iframe.setAttribute('allow', 'fullscreen');
+    iframe.style.cssText = 'width:100%;height:100%;border:none;display:block';
+    iframe.title = _BI_DEPT_NAMES[dept] + ' · Power BI';
+    wrap.appendChild(iframe);
+  } else {
+    if (placeholder) {
+      placeholder.style.display = 'flex';
+      const subEl = document.getElementById('bi-placeholder-sub-' + dept);
+      if (subEl) {
+        const isAdmin = _currentUser?.role === 'admin';
+        subEl.textContent = isAdmin
+          ? 'Clique em "Configurar painel" para adicionar o URL do Power BI'
+          : 'Aguardando configuração pelo administrador';
+      }
+    }
+  }
+}
+
+function abrirConfigurarBi(dept) {
+  if (!_currentUser || _currentUser.role !== 'admin') return;
+  _biEditingDept = dept;
+  const modal  = document.getElementById('bi-config-modal');
+  const titleEl = document.getElementById('bi-config-modal-title');
+  const subEl  = document.getElementById('bi-config-modal-sub');
+  const input  = document.getElementById('bi-url-input');
+  if (!modal) return;
+  if (titleEl) titleEl.textContent = 'Configurar: ' + _BI_DEPT_NAMES[dept];
+  if (subEl)   subEl.textContent   = 'Cole o URL de incorporação do Power BI para ' + _BI_DEPT_NAMES[dept];
+  if (input)   input.value         = _biUrls[dept] || '';
+  modal.style.display = 'flex';
+  setTimeout(() => { if (input) input.focus(); }, 120);
+}
+
+function fecharBiModal() {
+  const modal = document.getElementById('bi-config-modal');
+  if (modal) modal.style.display = 'none';
+  _biEditingDept = null;
+}
+
+async function salvarBiUrl() {
+  if (!_biEditingDept) return;
+  const dept = _biEditingDept;
+  const raw  = document.getElementById('bi-url-input')?.value || '';
+  const url  = _extractBiUrl(raw);
+  _biUrls[dept] = url;
+  _renderBiPanel(dept);
+  fecharBiModal();
+  if (_db) {
+    try {
+      await _db.ref('cinea/config/bi_urls/' + dept).set(url || null);
+      mostrarToast('✅ Painel salvo!', `Painel de ${_BI_DEPT_NAMES[dept]} foi ${url ? 'configurado com sucesso' : 'removido'}.`);
+    } catch(e) {
+      mostrarToast('⚠️ Erro ao salvar', 'Não foi possível salvar no servidor. Tente novamente.');
+    }
+  }
+}
+
+// ════════════════════════════════════════════════
+// GOOGLE SHEETS
+// ════════════════════════════════════════════════
+let _gsUrls = { hub: '', inov: '', tec: '' };
+let _gsUrlsCarregado = false;
+let _gsEditingDept = null;
+const _GS_DEPT_NAMES = {
+  hub:  'Hub de Integração',
+  inov: 'Inovação Pedagógica',
+  tec:  'Tecnologias & Aprendizagem'
+};
+
+async function carregarGsUrls() {
+  ['hub','inov','tec'].forEach(dept => {
+    const subEl = document.getElementById('gs-placeholder-sub-' + dept);
+    if (subEl && !_gsUrls[dept]) {
+      const isAdmin = _currentUser?.role === 'admin';
+      subEl.textContent = isAdmin
+        ? 'Clique em "Configurar planilha" para adicionar o URL do Google Sheets'
+        : 'Aguardando configuração pelo administrador';
+    }
+  });
+  if (_gsUrlsCarregado) return;
+  if (!_db) return;
+  try {
+    const snap = await _db.ref('cinea/config/gs_urls').once('value');
+    const data = snap.val() || {};
+    _gsUrls = { hub: data.hub || '', inov: data.inov || '', tec: data.tec || '' };
+    _gsUrlsCarregado = true;
+    ['hub','inov','tec'].forEach(dept => _renderGsPanel(dept));
+  } catch(e) {
+    console.warn('[CINEA] Erro ao carregar URLs do GS:', e);
+  }
+}
+
+function _extractGsUrl(raw) {
+  if (!raw) return '';
+  const trimmed = raw.trim();
+  // Extrai src de iframe se colado como HTML
+  const iframeMatch = trimmed.match(/src=["']([^"']+)["']/);
+  const url = iframeMatch ? iframeMatch[1].trim() : trimmed;
+  // Converte link de edição/visualização para pubhtml embed
+  const idMatch = url.match(/https:\/\/docs\.google\.com\/spreadsheets\/d\/([^\/\?&#]+)/);
+  if (idMatch) {
+    const sheetId = idMatch[1];
+    const gidMatch = url.match(/[?&#]gid=(\d+)/);
+    if (gidMatch) {
+      return `https://docs.google.com/spreadsheets/d/${sheetId}/pubhtml?gid=${gidMatch[1]}&single=true&widget=true&headers=false`;
+    }
+    return `https://docs.google.com/spreadsheets/d/${sheetId}/pubhtml?widget=true&headers=false`;
+  }
+  return url;
+}
+
+function _renderGsPanel(dept) {
+  const url = _gsUrls[dept] || '';
+  const wrap = document.getElementById('gs-wrap-' + dept);
+  const placeholder = document.getElementById('gs-placeholder-' + dept);
+  if (!wrap) return;
+  const existing = wrap.querySelector('iframe');
+  if (existing) existing.remove();
+  if (url) {
+    if (placeholder) placeholder.style.display = 'none';
+    const iframe = document.createElement('iframe');
+    iframe.src = url;
+    iframe.allowFullscreen = true;
+    iframe.setAttribute('allow', 'fullscreen');
+    iframe.style.cssText = 'width:100%;height:100%;border:none;display:block';
+    iframe.title = _GS_DEPT_NAMES[dept] + ' · Google Sheets';
+    wrap.appendChild(iframe);
+  } else {
+    if (placeholder) {
+      placeholder.style.display = 'flex';
+      const subEl = document.getElementById('gs-placeholder-sub-' + dept);
+      if (subEl) {
+        const isAdmin = _currentUser?.role === 'admin';
+        subEl.textContent = isAdmin
+          ? 'Clique em "Configurar planilha" para adicionar o URL do Google Sheets'
+          : 'Aguardando configuração pelo administrador';
+      }
+    }
+  }
+}
+
+function abrirConfigurarGs(dept) {
+  if (!_currentUser || _currentUser.role !== 'admin') return;
+  _gsEditingDept = dept;
+  const modal   = document.getElementById('gs-config-modal');
+  const titleEl = document.getElementById('gs-config-modal-title');
+  const subEl   = document.getElementById('gs-config-modal-sub');
+  const input   = document.getElementById('gs-url-input');
+  if (!modal) return;
+  if (titleEl) titleEl.textContent = 'Configurar: ' + _GS_DEPT_NAMES[dept];
+  if (subEl)   subEl.textContent   = 'Cole o URL de publicação do Google Sheets para ' + _GS_DEPT_NAMES[dept];
+  if (input)   input.value         = _gsUrls[dept] || '';
+  modal.style.display = 'flex';
+  setTimeout(() => { if (input) input.focus(); }, 120);
+}
+
+function fecharGsModal() {
+  const modal = document.getElementById('gs-config-modal');
+  if (modal) modal.style.display = 'none';
+  _gsEditingDept = null;
+}
+
+async function salvarGsUrl() {
+  if (!_gsEditingDept) return;
+  const dept = _gsEditingDept;
+  const raw  = document.getElementById('gs-url-input')?.value || '';
+  const url  = _extractGsUrl(raw);
+  _gsUrls[dept] = url;
+  _renderGsPanel(dept);
+  fecharGsModal();
+  if (_db) {
+    try {
+      await _db.ref('cinea/config/gs_urls/' + dept).set(url || null);
+      mostrarToast('✅ Planilha salva!', `Planilha de ${_GS_DEPT_NAMES[dept]} foi ${url ? 'configurada com sucesso' : 'removida'}.`);
+    } catch(e) {
+      mostrarToast('⚠️ Erro ao salvar', 'Não foi possível salvar no servidor. Tente novamente.');
+    }
+  }
+}
+
+// ════════════════════════════════════════════════
+// VISIBILIDADE DE PÁGINAS
+// ════════════════════════════════════════════════
+const _ALL_PAGE_IDS = ['overview','indicadores','gsheets','roadmap','ideas','hub','inov','tec','tarefas','equipe','meeting'];
+
+async function carregarVisibilidade() {
+  if (!_db) return;
+  try {
+    const snap = await _db.ref('cinea/config/page_visibility').once('value');
+    _pageVis = snap.val() || {};
+    _applyVisibilidade();
+  } catch(e) {
+    console.warn('[CINEA] Erro ao carregar visibilidade:', e);
+  }
+}
+
+function _applyVisibilidade() {
+  _ALL_PAGE_IDS.forEach(id => {
+    const row = document.getElementById('nav-row-' + id);
+    if (!row) return;
+    const isHidden = _pageVis[id] === false;
+    row.classList.toggle('page-hidden', isHidden);
+    const btn = document.getElementById('vis-btn-' + id);
+    if (btn) btn.title = isHidden ? '👁 Página oculta · clique para mostrar' : 'Ocultar esta página';
+  });
+}
+
+async function togglePageVisibility(pageId) {
+  if (!_currentUser || _currentUser.role !== 'admin') return;
+  const atualmenteOculta = _pageVis[pageId] === false;
+  if (atualmenteOculta) {
+    delete _pageVis[pageId]; // torna visível
+  } else {
+    _pageVis[pageId] = false; // oculta
+  }
+  _applyVisibilidade();
+  const nomes = { overview:'Dashboard Geral', indicadores:'Indicadores', gsheets:'Google Sheets',
+    roadmap:'Roadmap BI', ideas:'Ideias de Implantação', hub:'Hub de Integração',
+    inov:'Inovação Pedagógica', tec:'Tecnologias & Aprendizagem',
+    meeting:'Reuniões', equipe:'Equipe', tarefas:'Tarefas' };
+  const nomePagina = nomes[pageId] || pageId;
+  mostrarToast(
+    atualmenteOculta ? '👁 Página visível' : '🚫 Página ocultada',
+    atualmenteOculta
+      ? `"${nomePagina}" agora aparece para todos os membros.`
+      : `"${nomePagina}" está oculta para membros comuns.`
+  );
+  if (_db) {
+    try {
+      await _db.ref('cinea/config/page_visibility/' + pageId).set(atualmenteOculta ? null : false);
+    } catch(e) {
+      console.warn('[CINEA] Erro ao salvar visibilidade:', e);
+    }
+  }
+}
+
+function downloadLog() {
+  if (!_logCache.length) { mostrarToast('⚠️ Log vazio', 'Nenhuma atividade para baixar.'); return; }
+  const header = ['Usuário', 'Código', 'Perfil', 'Ação', 'Data/Hora'];
+  const rows = _logCache.map(i => [
+    `"${(i.nome||'').replace(/"/g,'""')}"`,
+    `"${i.matricula||''}"`,
+    `"${i.role === 'admin' ? 'Admin' : 'Membro'}"`,
+    `"${(i.acao||'').replace(/"/g,'""')}"`,
+    `"${i.ts ? new Date(i.ts).toLocaleString('pt-BR') : '—'}"`
+  ].join(';'));
+  const csv  = [header.join(';'), ...rows].join('\r\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `cinea_log_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 // ── Trocar minha senha ──
@@ -5729,7 +7310,7 @@ async function salvarNovaSenha() {
   try {
     const mat       = _currentUser.matricula;
     const hashAtual = await sha256(atual);
-    const snap      = await _db.ref('cinea/users/' + mat + '/senha_hash').once('value');
+    const snap      = await _db.ref('cinea/users/' + sanitizarMat(mat) + '/senha_hash').once('value');
     if (snap.val() !== hashAtual) {
       errEl.style.color = 'var(--red)';
       errEl.textContent = '❌ Senha atual incorreta.';
@@ -5737,7 +7318,7 @@ async function salvarNovaSenha() {
       return;
     }
     const hashNova = await sha256(nova);
-    await _db.ref('cinea/users/' + mat + '/senha_hash').set(hashNova);
+    await _db.ref('cinea/users/' + sanitizarMat(mat) + '/senha_hash').set(hashNova);
     errEl.style.color = 'var(--green)';
     errEl.textContent = '✅ Senha alterada com sucesso!';
     setTimeout(fecharTrocarSenha, 1600);
@@ -5773,8 +7354,9 @@ function atualizarVisibilidadeMeetings() {
     // Logado: sempre mostra a lista (modo leitura ou edição)
     if (locked) locked.style.display = 'none';
     if (list)   list.style.display   = 'block';
-    // Botão nova reunião + config GitHub: só em edit mode
-    if (btnNovo) btnNovo.style.display = editModeActive ? 'flex' : 'none';
+    // Botão nova reunião: disponível para qualquer membro logado (rodízio de resumos)
+    if (btnNovo) btnNovo.style.display = 'flex';
+    // Config GitHub: só admin
     if (ghSec)   ghSec.style.display   = (_currentUser?.role === 'admin') ? 'block' : 'none';
     if (editModeActive) {
       const repo  = localStorage.getItem('cinea_gh_repo');
@@ -5831,10 +7413,17 @@ async function salvarReuniao() {
   const resumo   = document.getElementById('mtg-resumo').value.trim();
   const decisoes = document.getElementById('mtg-decisoes').value.trim();
   if (!data || !horario) { alert('Informe data e horário.'); return; }
+  // ── Limite de tamanho dos campos de texto ─────────────────────────────────
+  if (pauta.length > 3000 || resumo.length > 3000 || decisoes.length > 3000) {
+    alert('⚠️ Um ou mais campos excedem o limite de 3.000 caracteres.\nResuma o conteúdo e tente novamente.');
+    return;
+  }
   const participantes = EQUIPE_CINEA
     .filter(p => document.getElementById('chip-' + p.id)?.classList.contains('selected'))
     .map(p => p.nome);
-  const meeting = { data, horario, participantes, pauta, resumo, decisoes, criadoEm: new Date().toISOString() };
+  const meeting = { data, horario, participantes, pauta, resumo, decisoes,
+    criadoEm: new Date().toISOString(),
+    registradoPor: _currentUser?.nome || _currentUser?.matricula || '?' };
   const key = _reuniaoKey || ('mtg_' + Date.now());
   try {
     await _db.ref('cinea/meetings/' + key).set(meeting);
@@ -5868,9 +7457,67 @@ function renderizarReunioes(data) {
     }
   }
 
+  renderizarEntradasFiltradas();
+  // Se o modal de histórico estiver aberto, atualiza também
+  if (document.getElementById('historico-reunioes-modal')?.style.display === 'flex') {
+    renderHistoricoFiltrado();
+  }
+}
+
+let _ataAberta = null;
+
+function _buildAtaItem(key, m, aberta, isAdmin) {
+  const dataFmt = m.data ? m.data.split('-').reverse().join('/') : '—';
+  const nPart   = (m.participantes||[]).length;
+  return `<div class="ata-item">
+    <div class="ata-header" onclick="toggleAta('${key}')">
+      <div class="ata-header-left">
+        <span class="ata-data-pill">📅 ${dataFmt}</span>
+        <div class="ata-meta">
+          ${m.horario      ? `<span>⏰ ${m.horario}</span>` : ''}
+          ${nPart          ? `<span>👥 ${nPart} participante${nPart!==1?'s':''}</span>` : ''}
+          ${m.registradoPor? `<span>✍️ ${escapeHtml(m.registradoPor)}</span>` : ''}
+        </div>
+      </div>
+      <span class="ata-chevron ${aberta?'open':''}" id="ata-chev-${key}">▼</span>
+    </div>
+    <div class="ata-body ${aberta?'open':''}" id="ata-body-${key}">
+      ${m.participantes?.length?`<div class="reunion-section-lbl">Participantes</div><div class="reunion-tags">${m.participantes.map(p=>`<span class="reunion-tag">${escapeHtml(p)}</span>`).join('')}</div>`:''}
+      ${m.pauta    ?`<div class="reunion-section-lbl">Pauta</div><div class="reunion-text">${m.pauta.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>`:''}
+      ${m.resumo   ?`<div class="reunion-section-lbl">Resumo</div><div class="reunion-text">${m.resumo.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>`:''}
+      ${m.decisoes ?`<div class="reunion-section-lbl">Decisões / Próximos passos</div><div class="reunion-text">${m.decisoes.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>`:''}
+      <div class="ata-actions">
+        <button class="reunion-action-btn"    onclick="editarReuniao('${key}')">✎ Editar</button>
+        <button class="reunion-action-btn dl" onclick="downloadReuniao('${key}')">⬇ Word</button>
+        ${isAdmin?`<button class="reunion-action-btn del" onclick="deletarReuniao('${key}')">✕ Apagar</button>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleAta(key) {
+  const body    = document.getElementById('ata-body-' + key);
+  const chevron = document.getElementById('ata-chev-' + key);
+  if (!body) return;
+  const abrindo = !body.classList.contains('open');
+  if (_ataAberta && _ataAberta !== key) {
+    document.getElementById('ata-body-' + _ataAberta)?.classList.remove('open');
+    document.getElementById('ata-chev-' + _ataAberta)?.classList.remove('open');
+  }
+  body.classList.toggle('open', abrindo);
+  chevron?.classList.toggle('open', abrindo);
+  _ataAberta = abrindo ? key : null;
+}
+
+// Atualiza contador e botão de histórico (nenhuma ata é exibida diretamente na página)
+function renderizarEntradasFiltradas() {
+  const empty     = document.getElementById('reunioes-empty');
+  const histBtn   = document.getElementById('historico-btn-wrap');
+  const histBadge = document.getElementById('historico-count-badge');
+
   // Popula dropdown de participantes (sem duplicatas)
   const sel = document.getElementById('filtro-participante');
-  if (sel && sel.options.length === 1) { // só repopula se vazio
+  if (sel && sel.options.length === 1) {
     EQUIPE_CINEA.forEach(p => {
       const opt = document.createElement('option');
       opt.value = p.nome; opt.textContent = p.nome;
@@ -5878,29 +7525,7 @@ function renderizarReunioes(data) {
     });
   }
 
-  renderizarEntradasFiltradas();
-}
-
-function filtrarReunioes() { renderizarEntradasFiltradas(); }
-
-function limparFiltros() {
-  ['filtro-texto','filtro-de','filtro-ate'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  const sel = document.getElementById('filtro-participante');
-  if (sel) sel.value = '';
-  renderizarEntradasFiltradas();
-}
-
-function renderizarEntradasFiltradas() {
-  const list  = document.getElementById('reunioes-list');
-  const empty = document.getElementById('reunioes-empty');
-  if (!list) return;
-
-  // Remove cards antigos
-  list.querySelectorAll('.reunion-card').forEach(c => c.remove());
-
-  // Lê filtros
+  // Aplica filtros para o contador
   const texto = (document.getElementById('filtro-texto')?.value || '').toLowerCase().trim();
   const de    =  document.getElementById('filtro-de')?.value   || '';
   const ate   =  document.getElementById('filtro-ate')?.value  || '';
@@ -5921,35 +7546,107 @@ function renderizarEntradasFiltradas() {
   const countEl = document.getElementById('filtro-count');
   if (countEl) {
     const temFiltro = texto || de || ate || part;
-    countEl.textContent = temFiltro ? `${entries.length} de ${total} ata${total !== 1 ? 's' : ''}` : (total ? `${total} ata${total !== 1 ? 's' : ''}` : '');
+    countEl.textContent = temFiltro
+      ? `${entries.length} de ${total} ata${total!==1?'s':''}`
+      : (total ? `${total} ata${total!==1?'s':''}` : '');
   }
 
-  if (!entries.length) {
-    if (empty) empty.style.display = 'block';
+  if (!total) {
+    if (empty)   empty.style.display   = 'block';
+    if (histBtn) histBtn.style.display = 'none';
     return;
   }
   if (empty) empty.style.display = 'none';
 
+  // Botão histórico aparece sempre que houver atas
+  if (histBtn) histBtn.style.display = 'block';
+  if (histBadge) {
+    histBadge.textContent = total > 0 ? `${total} ata${total!==1?'s':''}` : '';
+  }
+}
+
+// Abre modal com histórico completo
+function abrirHistorico() {
+  const modal = document.getElementById('historico-reunioes-modal');
+  if (modal) modal.style.display = 'flex';
+  // Popula dropdown de participantes se ainda vazio
+  const sel = document.getElementById('filtro-participante');
+  if (sel && sel.options.length === 1) {
+    EQUIPE_CINEA.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.nome; opt.textContent = p.nome;
+      sel.appendChild(opt);
+    });
+  }
+  renderHistoricoFiltrado();
+}
+
+function fecharHistorico() {
+  const modal = document.getElementById('historico-reunioes-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+// Renderiza lista filtrada dentro do modal de histórico
+function renderHistoricoFiltrado() {
+  const container = document.getElementById('historico-list');
+  const empty     = document.getElementById('historico-empty');
+  const countEl   = document.getElementById('filtro-count');
+  if (!container) return;
+
+  container.querySelectorAll('.ata-item').forEach(c => c.remove());
+
+  const texto = (document.getElementById('filtro-texto')?.value || '').toLowerCase().trim();
+  const de    =  document.getElementById('filtro-de')?.value   || '';
+  const ate   =  document.getElementById('filtro-ate')?.value  || '';
+  const part  =  document.getElementById('filtro-participante')?.value || '';
+  const total = Object.keys(_meetingsCache).length;
+
+  const entries = Object.entries(_meetingsCache)
+    .filter(([, m]) => {
+      if (texto && !`${m.pauta||''} ${m.resumo||''} ${m.decisoes||''}`.toLowerCase().includes(texto)) return false;
+      if (de  && (m.data||'') < de)  return false;
+      if (ate && (m.data||'') > ate) return false;
+      if (part && !(m.participantes||[]).includes(part)) return false;
+      return true;
+    })
+    .sort((a,b) => (b[1].data||'').localeCompare(a[1].data||''));
+
+  if (countEl) {
+    const temFiltro = texto || de || ate || part;
+    countEl.textContent = temFiltro
+      ? `${entries.length} de ${total} ata${total!==1?'s':''}`
+      : (total ? `${total} ata${total!==1?'s':''}` : '');
+  }
+
+  if (!entries.length) { if (empty) empty.style.display = 'block'; return; }
+  if (empty) empty.style.display = 'none';
+
+  const isAdmin = _currentUser?.role === 'admin';
   entries.forEach(([key, m]) => {
-    const card    = document.createElement('div');
-    card.className = 'reunion-card';
-    const dataFmt = m.data ? m.data.split('-').reverse().join('/') : '—';
-    card.innerHTML = `
-      <div class="reunion-actions">
-        <button class="reunion-action-btn"    onclick="editarReuniao('${key}')">✎ Editar</button>
-        <button class="reunion-action-btn dl" onclick="downloadReuniao('${key}')">⬇ Word</button>
-        <button class="reunion-action-btn del" onclick="deletarReuniao('${key}')">✕ Apagar</button>
-      </div>
-      <div class="reunion-date-badge">📅 ${dataFmt} · ⏰ ${m.horario||'—'}</div>
-      ${m.participantes?.length ? `<div class="reunion-section-lbl">Participantes</div><div class="reunion-tags">${m.participantes.map(p=>`<span class="reunion-tag">${p}</span>`).join('')}</div>` : ''}
-      ${m.pauta    ? `<div class="reunion-section-lbl">Pauta</div><div class="reunion-text">${m.pauta.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>` : ''}
-      ${m.resumo   ? `<div class="reunion-section-lbl">Resumo</div><div class="reunion-text">${m.resumo.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>` : ''}
-      ${m.decisoes ? `<div class="reunion-section-lbl">Decisões / Próximos passos</div><div class="reunion-text">${m.decisoes.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>` : ''}`;
-    list.insertBefore(card, empty || null);
+    const div = document.createElement('div');
+    div.innerHTML = _buildAtaItem(key, m, false, isAdmin);
+    container.insertBefore(div.firstElementChild, empty || null);
   });
 }
 
+function filtrarReunioes() {
+  renderizarEntradasFiltradas();
+  if (document.getElementById('historico-reunioes-modal')?.style.display === 'flex') {
+    renderHistoricoFiltrado();
+  }
+}
+
+function limparFiltros() {
+  ['filtro-texto','filtro-de','filtro-ate'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const sel = document.getElementById('filtro-participante');
+  if (sel) sel.value = '';
+  filtrarReunioes();
+}
+
 async function deletarReuniao(key) {
+  if (!_currentUser || _currentUser.role !== 'admin') { mostrarToast('🔒 Sem permissão', 'Apenas o administrador pode apagar atas.'); return; }
   if (!confirm('Mover esta reunião para a lixeira?')) return;
   try {
     const snap = await _db.ref('cinea/meetings/' + key).once('value');
@@ -5979,6 +7676,146 @@ async function editarReuniao(key) {
     });
   }, 80);
 }
+
+// ══════════════════ MURAL COLABORATIVO ══════════════════════════
+let _muralListener = null;
+const _MURAL_REF = 'cinea/mural/global'; // mural permanente, sem separação por data
+
+const _MURAL_CATS = {
+  ideia:    { label: '💡 Ideias',    cor: 'var(--gold)',   borda: 'rgba(241,196,15,0.45)'  },
+  problema: { label: '🔴 Problemas', cor: 'var(--red)',    borda: 'rgba(231,76,60,0.45)'   },
+  proposta: { label: '✅ Propostas', cor: 'var(--green)',  borda: 'rgba(39,174,96,0.45)'   }
+};
+
+function iniciarListenerMural() {
+  if (!_db || !_currentUser) { _renderMuralEstado(); return; }
+  pararListenerMural();
+  _muralListener = _db.ref(_MURAL_REF)
+    .on('value', snap => _renderMuralDados(snap.val() || {}));
+}
+
+function pararListenerMural() {
+  if (_muralListener) {
+    try { _db.ref(_MURAL_REF).off('value', _muralListener); } catch(_){}
+    _muralListener = null;
+  }
+}
+
+function _renderMuralEstado() {
+  const locked  = document.getElementById('mural-locked');
+  const content = document.getElementById('mural-content');
+  if (!_currentUser) {
+    if (locked)  locked.style.display  = 'flex';
+    if (content) content.style.display = 'none';
+  } else {
+    if (locked)  locked.style.display  = 'none';
+    if (content) content.style.display = 'block';
+  }
+}
+
+function _renderMuralDados(data) {
+  _renderMuralEstado();
+  const grid     = document.getElementById('mural-grid');
+  const adminBtns = document.getElementById('mural-admin-btns');
+  const dataLabel = document.getElementById('mural-data-label');
+  if (!grid || !_currentUser) return;
+
+  const isAdmin = _currentUser.role === 'admin';
+  if (adminBtns) adminBtns.style.display = isAdmin ? 'flex' : 'none';
+
+  const items = Object.entries(data).sort((a,b) => (a[1].ts||'').localeCompare(b[1].ts||''));
+
+  grid.innerHTML = Object.entries(_MURAL_CATS).map(([cat, info]) => {
+    const lista = items.filter(([,v]) => v.categoria === cat);
+    return `<div class="mural-col">
+      <div class="mural-col-header" style="color:${info.cor}">
+        <span>${info.label}</span>
+        <div style="display:flex;align-items:center;gap:6px;margin-left:auto">
+          <span style="background:rgba(255,255,255,0.05);border-radius:20px;padding:1px 8px;font-size:0.67rem;color:var(--text3)">${lista.length}</span>
+          <button onclick="toggleInputMural('${cat}')" title="Adicionar ponto"
+            style="width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:var(--text2);font-size:1rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;font-family:'DM Sans',sans-serif"
+            onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.07)'">+</button>
+        </div>
+      </div>
+      ${lista.length
+        ? lista.map(([key, p]) => `
+            <div class="mural-postit" style="border-left-color:${info.borda}">
+              <div class="mural-postit-autor">✍️ ${escapeHtml(p.autor || '?')}</div>
+              <div>${escapeHtml(p.texto || '')}</div>
+              ${isAdmin ? `<button class="mural-postit-del" onclick="deletarPostIt('${key}')" title="Remover">✕</button>` : ''}
+            </div>`).join('')
+        : `<div class="mural-empty" id="mural-empty-${cat}">Nenhum ponto ainda</div>`
+      }
+      <div id="mural-input-${cat}" style="display:none;margin-top:8px">
+        <textarea id="mural-ta-${cat}" class="mural-textarea" placeholder="Escreva aqui…" maxlength="300"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();adicionarPostItCat('${cat}');}"></textarea>
+        <div style="display:flex;gap:6px;margin-top:6px;justify-content:flex-end">
+          <button onclick="toggleInputMural('${cat}')"
+            style="background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text3);font-family:'DM Sans',sans-serif;font-size:0.75rem;padding:5px 12px;cursor:pointer">Cancelar</button>
+          <button onclick="adicionarPostItCat('${cat}')"
+            style="background:var(--purple);border:none;border-radius:8px;color:#fff;font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:600;padding:5px 14px;cursor:pointer">Enviar</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleInputMural(cat) {
+  const wrap = document.getElementById('mural-input-' + cat);
+  const ta   = document.getElementById('mural-ta-'    + cat);
+  if (!wrap) return;
+  const abrindo = wrap.style.display === 'none';
+  wrap.style.display = abrindo ? 'block' : 'none';
+  if (abrindo && ta) { ta.value = ''; setTimeout(() => ta.focus(), 60); }
+}
+
+async function adicionarPostItCat(cat) {
+  if (!_currentUser) return;
+  const ta    = document.getElementById('mural-ta-' + cat);
+  const texto = ta?.value.trim();
+  if (!texto) { ta?.focus(); return; }
+  try {
+    await _db.ref(_MURAL_REF).push({
+      texto,
+      categoria: cat,
+      autor: _currentUser.nome || _currentUser.matricula,
+      ts: new Date().toISOString()
+    });
+    if (ta) ta.value = '';
+    document.getElementById('mural-input-' + cat).style.display = 'none';
+  } catch(e) { mostrarToast('❌ Erro', 'Não foi possível enviar. Tente novamente.'); }
+}
+
+// mantida por compatibilidade mas não usada diretamente na UI
+async function adicionarPostIt() {
+  if (!_currentUser) return;
+  const textoEl = document.getElementById('mural-texto');
+  const catEl   = document.getElementById('mural-cat');
+  const texto   = textoEl?.value.trim();
+  if (!texto) { textoEl?.focus(); return; }
+  try {
+    await _db.ref(_MURAL_REF).push({
+      texto,
+      categoria: catEl?.value || 'ideia',
+      autor: _currentUser.nome || _currentUser.matricula,
+      ts: new Date().toISOString()
+    });
+    if (textoEl) { textoEl.value = ''; textoEl.focus(); }
+  } catch(e) { mostrarToast('❌ Erro', 'Não foi possível enviar. Tente novamente.'); }
+}
+
+async function deletarPostIt(key) {
+  if (!_currentUser || _currentUser.role !== 'admin') return;
+  await _db.ref(_MURAL_REF + '/' + key).remove();
+}
+
+async function limparMural() {
+  if (!_currentUser || _currentUser.role !== 'admin') return;
+  if (!confirm('Limpar todos os post-its do mural?')) return;
+  await _db.ref(_MURAL_REF).remove();
+  registrarLog('Limpou o mural colaborativo');
+}
+// ════════════════════════════════════════════════════════════════
 
 async function salvarNoGitHub(meeting, key) {
   const pat  = localStorage.getItem('cinea_gh_pat');
@@ -6097,6 +7934,7 @@ function salvarConfigGH() {
 let _lxAbaAtiva = 'reunioes';
 
 function abrirLixeira() {
+  if (!_currentUser || _currentUser.role !== 'admin') return;
   fecharUserDropdown?.();
   document.getElementById('lixeira-modal').style.display = 'flex';
   lixeiraAba('reunioes');
@@ -6391,16 +8229,65 @@ function pararListenerMeetings() {
 // ☁️ Inicia carregando do Firebase (cai para localStorage se offline)
 loadFromFirebase();
 carregarSemestresFirebase();
+carregarPageInfos();
+carregarVisibilidade();
+
+// 🔄 Migração única: move posts de datas antigas para mural/global
+(async function migrarMuralLegado() {
+  if (!_db) return;
+  // Aguarda auth
+  const MAX = 8000;
+  const t0 = Date.now();
+  while (!_fbAuthReady && Date.now() - t0 < MAX) {
+    await new Promise(r => setTimeout(r, 300));
+  }
+  if (!_fbAuthReady) return;
+  if (localStorage.getItem('cinea_mural_migrado_v1')) return; // já migrou
+  try {
+    const snap = await _db.ref('cinea/mural').once('value');
+    const data = snap.val();
+    if (!data) { localStorage.setItem('cinea_mural_migrado_v1', '1'); return; }
+    // Copia todos os posts de qualquer subchave que NÃO seja "global"
+    const promises = [];
+    Object.entries(data).forEach(([dia, posts]) => {
+      if (dia === 'global' || !posts || typeof posts !== 'object') return;
+      Object.values(posts).forEach(post => {
+        promises.push(_db.ref(_MURAL_REF).push(post));
+      });
+    });
+    if (promises.length) {
+      await Promise.all(promises);
+      console.log(`[CINEA] Migração do mural: ${promises.length} post(s) movidos para mural/global`);
+    }
+    localStorage.setItem('cinea_mural_migrado_v1', '1');
+  } catch(e) {
+    console.warn('[CINEA] Erro na migração do mural legado:', e);
+  }
+})();
 
 // 🔐 Restaura sessão salva (sobrevive F5 e fechamento do browser se "Manter conectado")
 (async function restaurarSessao() {
   const raw = localStorage.getItem('cinea_session') || sessionStorage.getItem('cinea_session');
   if (!raw) return;
+  // Usa dados salvos imediatamente (sem esperar Firebase) para UI instantânea
+  try {
+    const salvoRapido = JSON.parse(raw);
+    if (salvoRapido?.matricula) { _currentUser = salvoRapido; atualizarTopbarUser(); }
+  } catch(_) {}
   try {
     const salvo = JSON.parse(raw);
     if (!salvo?.matricula) return;
+    // Aguarda autenticação anônima antes de consultar o Firebase
+    if (!_fbAuthReady) {
+      await new Promise(resolve => {
+        const _unsub = _auth.onAuthStateChanged(user => {
+          _unsub(); if (user) _fbAuthReady = true; resolve();
+        });
+        setTimeout(resolve, 6000); // timeout de segurança
+      });
+    }
     // Verifica silenciosamente se o usuário ainda existe no Firebase
-    const snap = await _db.ref('cinea/users/' + salvo.matricula).once('value');
+    const snap = await _db.ref('cinea/users/' + sanitizarMat(salvo.matricula)).once('value');
     const u = snap.val();
     if (!u || !u.ativo) {
       // Usuário foi removido/desativado pelo admin — limpa sessão
@@ -6479,25 +8366,56 @@ async function carregarMinhasSugestoes() {
       listEl.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:40px">Você ainda não enviou nenhuma sugestão.<br><span style="font-size:0.75rem;opacity:0.7">Clique em ✍️ Nova sugestão para começar.</span></div>';
       return;
     }
-    listEl.innerHTML = entradas.map(([key, s]) => {
-      const st     = _SUG_STATUS[s.status] || _SUG_STATUS.nova;
-      const cat    = _CATEGORIAS[s.categoria] || s.categoria || '—';
-      const data_f = s.ts ? new Date(s.ts).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
-      return `<div class="minha-sug-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            ${s.ticket ? `<span class="ticket-code">${s.ticket}</span>` : ''}
-            <span class="sug-status ${st.cls}">${st.label}</span>
-          </div>
-          <span style="font-size:0.65rem;color:var(--text3)">${cat} · ${data_f}</span>
+    const _CONCLUIDO = ['implementada', 'descartada'];
+    const ativas     = entradas.filter(([,s]) => !_CONCLUIDO.includes(s.status));
+    const concluidas = entradas.filter(([,s]) =>  _CONCLUIDO.includes(s.status));
+    let html = '';
+    if (ativas.length > 0) {
+      html += ativas.map(([,s]) => renderMinhaSugCard(s)).join('');
+    } else {
+      html += '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:20px 0">Nenhuma sugestão em andamento. 🎉</div>';
+    }
+    if (concluidas.length > 0) {
+      html += `<div id="minhas-concluidas-wrap" style="margin-top:12px">
+        <button onclick="toggleMinhasConcluidas()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:600;padding:9px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+          <span>📁 Concluídas <span style="background:var(--border);border-radius:10px;padding:1px 8px;font-size:0.7rem;font-weight:700;margin-left:6px">${concluidas.length}</span></span>
+          <span id="minhas-concluidas-chevron" style="font-size:0.75rem;transition:transform 0.2s">▼</span>
+        </button>
+        <div id="minhas-concluidas-list" style="display:none;margin-top:8px">
+          ${concluidas.map(([,s]) => renderMinhaSugCard(s)).join('')}
         </div>
-        <div style="font-size:0.8rem;color:var(--text);line-height:1.5;margin-bottom:${s.feedback?'8px':'0'}">${escapeHtml(s.texto||'')}</div>
-        ${s.feedback ? `<div class="minha-sug-feedback"><strong style="color:var(--purple-l)">💬 Feedback do admin:</strong><br>${escapeHtml(s.feedback)}</div>` : ''}
       </div>`;
-    }).join('');
+    }
+    listEl.innerHTML = html;
   } catch(e) {
     listEl.innerHTML = '<div style="text-align:center;color:var(--red);font-size:0.82rem;padding:30px">Erro ao carregar sugestões.</div>';
   }
+}
+
+function renderMinhaSugCard(s) {
+  const st    = _SUG_STATUS[s.status] || _SUG_STATUS.nova;
+  const cat   = _CATEGORIAS[s.categoria] || s.categoria || '—';
+  const data_f = s.ts ? new Date(s.ts).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+  return `<div class="minha-sug-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        ${s.ticket ? `<span class="ticket-code">${s.ticket}</span>` : ''}
+        <span class="sug-status ${st.cls}">${st.label}</span>
+      </div>
+      <span style="font-size:0.65rem;color:var(--text3)">${cat} · ${data_f}</span>
+    </div>
+    <div style="font-size:0.8rem;color:var(--text);line-height:1.5;margin-bottom:${s.feedback?'8px':'0'}">${escapeHtml(s.texto||'')}</div>
+    ${s.feedback ? `<div class="minha-sug-feedback"><strong style="color:var(--purple-l)">💬 Feedback do admin:</strong><br>${escapeHtml(s.feedback)}</div>` : ''}
+  </div>`;
+}
+
+function toggleMinhasConcluidas() {
+  const list = document.getElementById('minhas-concluidas-list');
+  const chev = document.getElementById('minhas-concluidas-chevron');
+  if (!list) return;
+  const open = list.style.display !== 'none';
+  list.style.display = open ? 'none' : 'block';
+  if (chev) chev.style.transform = open ? '' : 'rotate(180deg)';
 }
 
 async function gerarTicketSugestao() {
@@ -6517,6 +8435,27 @@ async function enviarSugestao() {
   const categoria = document.getElementById('sug-categoria').value;
   const texto     = document.getElementById('sug-texto').value.trim();
   if (!texto) { alert('Por favor descreva sua sugestão antes de enviar.'); return; }
+
+  // ── Limite de tamanho ────────────────────────────────────────────────────────
+  if (texto.length > 2000) {
+    mostrarToast('⚠️ Sugestão muito longa', `Máximo de 2000 caracteres (atual: ${texto.length}).`);
+    return;
+  }
+
+  // ── Rate limit: máx 5 sugestões por 30 minutos por usuário ───────────────────
+  const _rlSugKey = 'cinea_rl_sug_' + _currentUser.matricula;
+  const _rlNow    = Date.now();
+  const _rlJanela = 30 * 60 * 1000;
+  let   _rlSug    = {};
+  try { _rlSug = JSON.parse(localStorage.getItem(_rlSugKey) || '{}'); } catch {}
+  if (!_rlSug.inicio || (_rlNow - _rlSug.inicio) >= _rlJanela) {
+    _rlSug = { inicio: _rlNow, count: 0 };
+  }
+  if (_rlSug.count >= 5) {
+    const restMin = Math.ceil((_rlJanela - (_rlNow - _rlSug.inicio)) / 60000);
+    mostrarToast('🔒 Limite atingido', `Você já enviou 5 sugestões. Aguarde ${restMin} min para enviar mais.`);
+    return;
+  }
 
   const btn = document.querySelector('#sug-modal button[onclick="enviarSugestao()"]');
   if (btn) { btn.disabled = true; btn.textContent = 'Gerando ticket...'; }
@@ -6545,8 +8484,13 @@ async function enviarSugestao() {
       lido:      false,
     }).catch(() => {});
 
+    // Incrementa contador de rate limit
+    _rlSug.count++;
+    localStorage.setItem(_rlSugKey, JSON.stringify(_rlSug));
+
     registrarLog(`Abriu ticket ${ticket} · ${_CATEGORIAS[categoria] || categoria}`);
     document.getElementById('sug-texto').value = '';
+    document.getElementById('sug-char-count').textContent = '0/2000';
     mostrarToast(`🎫 Ticket ${ticket} aberto!`, 'Clique em "Minhas sugestões" para acompanhar.');
     mudarTabSug('minhas');
   } catch(e) {
@@ -6767,55 +8711,113 @@ async function carregarSugestoes() {
   }
 }
 
+// ── Renderiza card de sugestão (visão admin) — reutilizado na lista ativa e concluída ──
+function renderSugCard(key, s, isConcluida) {
+  const st       = _SUG_STATUS[s.status] || _SUG_STATUS.nova;
+  const catLabel = _CATEGORIAS[s.categoria] || s.categoria || '—';
+  const data     = s.ts ? new Date(s.ts).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+  const acoes    = isConcluida
+    ? `<div class="sug-action-row">
+        <button class="sug-act-btn analise"  onclick="reabrirSugestao('${key}')">🔄 Reabrir</button>
+        <button class="sug-act-btn save-fb"  onclick="salvarFeedbackSugestao('${key}')">💾 Salvar feedback</button>
+       </div>`
+    : `<div class="sug-action-row">
+        <button class="sug-act-btn analise"      onclick="atualizarSugestao('${key}','analise')">🔍 Em análise</button>
+        <button class="sug-act-btn implementada" onclick="atualizarSugestao('${key}','implementada')">✅ Implementada</button>
+        <button class="sug-act-btn descartada"   onclick="atualizarSugestao('${key}','descartada')">❌ Descartar</button>
+        <button class="sug-act-btn save-fb"      onclick="salvarFeedbackSugestao('${key}')">💾 Salvar feedback</button>
+       </div>`;
+  return `<div class="sug-card" id="sugcard-${key}">
+    <div class="sug-card-header">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+          ${s.ticket ? `<span class="ticket-code">${s.ticket}</span>` : ''}
+          <span class="sug-status ${st.cls}">${st.label}</span>
+          <span style="font-size:0.72rem;color:var(--text3)">${catLabel}</span>
+        </div>
+        <div class="sug-card-meta">👤 ${s.autor || '—'} · ${data}</div>
+      </div>
+    </div>
+    <div class="sug-card-text">${escapeHtml(s.texto || '')}</div>
+    ${s.feedback ? `<div style="background:rgba(79,45,127,0.08);border:1px solid rgba(79,45,127,0.2);border-radius:8px;padding:8px 12px;font-size:0.75rem;color:var(--text2);margin-bottom:10px">
+      <strong style="color:var(--purple-l)">Feedback do admin:</strong><br>${escapeHtml(s.feedback)}
+    </div>` : ''}
+    <textarea class="sug-feedback-area" id="sug-fb-${key}" placeholder="Escreva um feedback para o solicitante (opcional)...">${escapeHtml(s.feedback || '')}</textarea>
+    ${acoes}
+  </div>`;
+}
+
+function toggleSugConcluidas() {
+  const list = document.getElementById('sug-concluidas-list');
+  const chev = document.getElementById('sug-concluidas-chevron');
+  if (!list) return;
+  const open = list.style.display !== 'none';
+  list.style.display = open ? 'none' : 'block';
+  if (chev) chev.style.transform = open ? '' : 'rotate(180deg)';
+}
+
+async function reabrirSugestao(key) {
+  if (!_currentUser || _currentUser.role !== 'admin') return;
+  if (!confirm('Reabrir esta sugestão? O status voltará para "Nova".')) return;
+  try {
+    await _db.ref('cinea/sugestoes/' + key).update({ status: 'nova', resolvidoPor: null, resolvidoEm: null });
+    _sugestoesCache[key] = { ..._sugestoesCache[key], status: 'nova', resolvidoPor: null, resolvidoEm: null };
+    registrarLog('Reabriu sugestão: ' + (_sugestoesCache[key]?.ticket || key));
+    filtrarSugestoes();
+    mostrarToast('🔄 Sugestão reaberta', 'Status voltou para Nova — agora visível na lista principal.');
+  } catch(e) {
+    alert('Erro ao reabrir sugestão.');
+    console.error(e);
+  }
+}
+
 function filtrarSugestoes() {
-  const filtro = document.getElementById('sug-admin-filtro').value;
-  const listEl = document.getElementById('sug-admin-list');
+  const filtro  = document.getElementById('sug-admin-filtro').value;
+  const listEl  = document.getElementById('sug-admin-list');
   const countEl = document.getElementById('sug-admin-count');
 
-  // Ordena do mais recente para o mais antigo
-  const entradas = Object.entries(_sugestoesCache)
-    .sort((a,b) => (b[1].ts||'').localeCompare(a[1].ts||''))
-    .filter(([,v]) => !filtro || v.status === filtro);
+  const _CONCLUIDO = ['implementada', 'descartada'];
+  const todas  = Object.entries(_sugestoesCache).sort((a,b) => (b[1].ts||'').localeCompare(a[1].ts||''));
+  const total  = todas.length;
+  const filtradas = todas.filter(([,v]) => !filtro || v.status === filtro);
 
-  if (entradas.length === 0) {
-    const total = Object.keys(_sugestoesCache).length;
+  if (filtradas.length === 0) {
     countEl.textContent = total + ' sugestão(ões) no total';
     listEl.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:40px">Nenhuma sugestão ' + (filtro ? 'com esse status' : 'recebida ainda') + '.</div>';
     return;
   }
 
-  const total = Object.keys(_sugestoesCache).length;
-  countEl.textContent = entradas.length + ' exibida(s) · ' + total + ' total';
+  // Com filtro específico: exibe todas as correspondentes sem separação
+  if (filtro) {
+    const isConcl = _CONCLUIDO.includes(filtro);
+    countEl.textContent = filtradas.length + ' exibida(s) · ' + total + ' total';
+    listEl.innerHTML = filtradas.map(([key, s]) => renderSugCard(key, s, isConcl)).join('');
+    return;
+  }
 
-  listEl.innerHTML = entradas.map(([key, s]) => {
-    const st    = _SUG_STATUS[s.status] || _SUG_STATUS.nova;
-    const catLabel = _CATEGORIAS[s.categoria] || s.categoria || '—';
-    const data  = s.ts ? new Date(s.ts).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+  // Sem filtro: separa ativas das concluídas
+  const ativas     = filtradas.filter(([,v]) => !_CONCLUIDO.includes(v.status));
+  const concluidas = filtradas.filter(([,v]) =>  _CONCLUIDO.includes(v.status));
+  countEl.textContent = ativas.length + ' em aberto · ' + concluidas.length + ' concluída(s) · ' + total + ' total';
 
-    return `<div class="sug-card" id="sugcard-${key}">
-      <div class="sug-card-header">
-        <div style="flex:1">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
-            ${s.ticket ? `<span class="ticket-code">${s.ticket}</span>` : ''}
-            <span class="sug-status ${st.cls}">${st.label}</span>
-            <span style="font-size:0.72rem;color:var(--text3)">${catLabel}</span>
-          </div>
-          <div class="sug-card-meta">👤 ${s.autor || '—'} · ${data}</div>
-        </div>
-      </div>
-      <div class="sug-card-text">${escapeHtml(s.texto || '')}</div>
-      ${s.feedback ? `<div style="background:rgba(79,45,127,0.08);border:1px solid rgba(79,45,127,0.2);border-radius:8px;padding:8px 12px;font-size:0.75rem;color:var(--text2);margin-bottom:10px">
-        <strong style="color:var(--purple-l)">Feedback do admin:</strong><br>${escapeHtml(s.feedback)}
-      </div>` : ''}
-      <textarea class="sug-feedback-area" id="sug-fb-${key}" placeholder="Escreva um feedback para o solicitante (opcional)...">${escapeHtml(s.feedback || '')}</textarea>
-      <div class="sug-action-row">
-        <button class="sug-act-btn analise"     onclick="atualizarSugestao('${key}','analise')">🔍 Em análise</button>
-        <button class="sug-act-btn implementada" onclick="atualizarSugestao('${key}','implementada')">✅ Implementada</button>
-        <button class="sug-act-btn descartada"  onclick="atualizarSugestao('${key}','descartada')">❌ Descartar</button>
-        <button class="sug-act-btn save-fb"     onclick="salvarFeedbackSugestao('${key}')">💾 Salvar feedback</button>
+  let html = '';
+  if (ativas.length === 0) {
+    html += '<div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:20px 0">Nenhuma sugestão em aberto no momento. 🎉</div>';
+  } else {
+    html += ativas.map(([key, s]) => renderSugCard(key, s, false)).join('');
+  }
+  if (concluidas.length > 0) {
+    html += `<div id="sug-concluidas-wrap" style="margin-top:16px">
+      <button onclick="toggleSugConcluidas()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:600;padding:10px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+        <span>📁 Concluídas <span style="background:var(--border);border-radius:10px;padding:1px 8px;font-size:0.7rem;font-weight:700;margin-left:6px">${concluidas.length}</span></span>
+        <span id="sug-concluidas-chevron" style="font-size:0.75rem;transition:transform 0.2s">▼</span>
+      </button>
+      <div id="sug-concluidas-list" style="display:none;margin-top:8px">
+        ${concluidas.map(([key, s]) => renderSugCard(key, s, true)).join('')}
       </div>
     </div>`;
-  }).join('');
+  }
+  listEl.innerHTML = html;
 }
 
 function escapeHtml(str) {
@@ -6887,7 +8889,7 @@ async function salvarFeedbackSugestao(key) {
            inputmode="numeric" oninput="somenteNumeros(this)" style="margin-bottom:4px"
            onkeydown="if(event.key==='Enter') enviarSolicitacaoReset()">
     <div id="reset-req-mat-hint" style="display:none;font-size:0.72rem;color:var(--gold);margin-bottom:14px">⚠️ A matrícula é composta apenas por números</div>
-    <button onclick="enviarSolicitacaoReset()" style="width:100%;padding:12px;background:var(--purple);border:none;border-radius:12px;color:#fff;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Enviar solicitação</button>
+    <button id="btn-enviar-reset" onclick="enviarSolicitacaoReset()" style="width:100%;padding:12px;background:var(--purple);border:none;border-radius:12px;color:#fff;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Enviar solicitação</button>
     <div id="reset-req-error" style="font-size:0.78rem;margin-top:10px;min-height:18px;text-align:center"></div>
     <button onclick="fecharSolicitarReset()" style="margin-top:12px;width:100%;background:transparent;border:none;color:var(--text3);font-size:0.77rem;cursor:pointer;font-family:'DM Sans',sans-serif">Voltar ao login</button>
   </div>
@@ -6895,16 +8897,23 @@ async function salvarFeedbackSugestao(key) {
 
 <!-- MODAL LOG DE ATIVIDADES -->
 <div id="log-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:600;align-items:center;justify-content:center;padding:20px">
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:680px;max-height:85vh;display:flex;flex-direction:column">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-shrink:0">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:720px;max-height:88vh;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-shrink:0">
       <div style="font-size:1rem;font-weight:700;color:var(--text)">📋 Log de Atividades</div>
       <div style="display:flex;gap:8px;align-items:center">
-        <button onclick="limparLog()" style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:8px;padding:5px 12px;font-size:0.72rem;color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif">🗑 Limpar log</button>
+        <button onclick="downloadLog()" style="background:rgba(39,174,96,0.08);border:1px solid rgba(39,174,96,0.25);border-radius:8px;padding:5px 12px;font-size:0.72rem;color:var(--green);cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Baixar CSV</button>
         <button onclick="fecharLog()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text2);width:32px;height:32px;cursor:pointer">✕</button>
       </div>
     </div>
-    <div id="log-list" style="overflow-y:auto;flex:1">
-      <div style="text-align:center;color:var(--text3);font-size:0.82rem;padding:30px">Carregando...</div>
+    <!-- Tabs -->
+    <div style="display:flex;gap:6px;margin-bottom:14px;flex-shrink:0">
+      <button id="log-tab-acessos" onclick="switchLogTab('acessos')" style="padding:6px 16px;border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;background:var(--purple);border:1px solid var(--purple);color:#fff">🔑 Acessos</button>
+      <button id="log-tab-alteracoes" onclick="switchLogTab('alteracoes')" style="padding:6px 16px;border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;background:var(--card2);border:1px solid var(--border);color:var(--text2)">✏️ Alterações</button>
+    </div>
+    <!-- Conteúdo das tabs -->
+    <div style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:0">
+      <div id="log-acessos-list"></div>
+      <div id="log-alteracoes-list" style="display:none"></div>
     </div>
   </div>
 </div>
@@ -6947,12 +8956,12 @@ async function salvarFeedbackSugestao(key) {
       <div class="gate-org">PUC Minas · NED</div>
     </div>
     <div class="gate-notice">🔒 Acesso restrito à equipe CINEA</div>
-    <div class="modal-label">Matrícula</div>
-    <input id="gate-mat" class="modal-input" type="text" placeholder="Somente números"
+    <div class="modal-label">Código de Pessoa</div>
+    <input id="gate-mat" class="modal-input" type="text" placeholder="Informe seu código de pessoa"
       autocomplete="username" autofocus inputmode="numeric"
       oninput="somenteNumeros(this)"
       onkeydown="if(event.key==='Enter')document.getElementById('gate-senha').focus()">
-    <div id="gate-mat-hint" style="display:none;font-size:0.72rem;color:var(--gold);margin-top:4px">⚠️ A matrícula é composta apenas por números</div>
+    <div id="gate-mat-hint" style="display:none;font-size:0.72rem;color:var(--gold);margin-top:4px">⚠️ O código de pessoa é composto apenas por números</div>
     <div class="modal-label" style="margin-top:13px">Senha</div>
     <div class="pw-wrap">
       <input id="gate-senha" class="modal-input" type="password" placeholder="Digite a sua senha"
@@ -6979,10 +8988,10 @@ async function salvarFeedbackSugestao(key) {
       <div style="font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--purple);font-weight:700">CINEA</div>
       <div style="font-size:0.78rem;color:var(--text3);margin-top:4px">NED · PUC Minas</div>
     </div>
-    <label class="reuniao-label">Matrícula</label>
-    <input id="login-matricula" class="reuniao-input" type="text" placeholder="Somente números" autocomplete="username"
+    <label class="reuniao-label">Código de Pessoa</label>
+    <input id="login-matricula" class="reuniao-input" type="text" placeholder="Informe seu código de pessoa" autocomplete="username"
            inputmode="numeric" oninput="somenteNumeros(this)" style="margin-bottom:4px">
-    <div id="login-matricula-hint" style="display:none;font-size:0.72rem;color:var(--gold);margin-bottom:10px">⚠️ A matrícula é composta apenas por números</div>
+    <div id="login-matricula-hint" style="display:none;font-size:0.72rem;color:var(--gold);margin-bottom:10px">⚠️ O código de pessoa é composto apenas por números</div>
     <label class="reuniao-label">Senha</label>
     <div class="pw-wrap" style="margin-bottom:20px">
       <input id="login-senha" class="reuniao-input" type="password" placeholder="Digite a sua senha" autocomplete="current-password"
@@ -7069,13 +9078,13 @@ async function salvarFeedbackSugestao(key) {
     <div class="participantes-grid" id="participantes-grid"></div>
 
     <label class="reuniao-label" style="margin-top:16px;display:block">Pauta</label>
-    <textarea id="mtg-pauta" class="reuniao-input reuniao-textarea" placeholder="Tópicos a discutir..."></textarea>
+    <textarea id="mtg-pauta" class="reuniao-input reuniao-textarea" placeholder="Tópicos a discutir..." maxlength="3000"></textarea>
 
     <label class="reuniao-label" style="margin-top:16px;display:block">Resumo da reunião</label>
-    <textarea id="mtg-resumo" class="reuniao-input reuniao-textarea" placeholder="O que foi discutido e encaminhado..."></textarea>
+    <textarea id="mtg-resumo" class="reuniao-input reuniao-textarea" placeholder="O que foi discutido e encaminhado..." maxlength="3000"></textarea>
 
     <label class="reuniao-label" style="margin-top:16px;display:block">Decisões / Próximos passos</label>
-    <textarea id="mtg-decisoes" class="reuniao-input reuniao-textarea" placeholder="Decisões tomadas, responsáveis, prazos..."></textarea>
+    <textarea id="mtg-decisoes" class="reuniao-input reuniao-textarea" placeholder="Decisões tomadas, responsáveis, prazos..." maxlength="3000"></textarea>
 
     <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:24px">
       <button onclick="fecharFormReuniao()" style="padding:9px 20px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.85rem;cursor:pointer">Cancelar</button>
@@ -7226,7 +9235,8 @@ async function salvarFeedbackSugestao(key) {
       </div>
       <div style="margin-bottom:20px">
         <label style="font-size:0.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Descrição da sugestão</label>
-        <textarea id="sug-texto" placeholder="Descreva sua ideia de melhoria..." style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;padding:12px;resize:vertical;min-height:110px;line-height:1.5"></textarea>
+        <textarea id="sug-texto" placeholder="Descreva sua ideia de melhoria..." maxlength="2000" oninput="document.getElementById('sug-char-count').textContent=this.value.length+'/2000'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;padding:12px;resize:vertical;min-height:110px;line-height:1.5"></textarea>
+        <div id="sug-char-count" style="font-size:0.68rem;color:var(--text3);text-align:right;margin-top:3px">0/2000</div>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div style="font-size:0.72rem;color:var(--text3)">Enviando como: <strong id="sug-autor-nome" style="color:var(--text2)">—</strong></div>
@@ -7333,6 +9343,23 @@ async function salvarFeedbackSugestao(key) {
     <div class="notif-toast-sub"  id="toast-sub">—</div>
   </div>
   <button class="notif-toast-close" onclick="fecharToast()">✕</button>
+</div>
+
+<!-- MODAL INFO PÁGINA (admin) -->
+<div id="page-info-modal" onclick="if(event.target===this)fecharInfoModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:700;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:480px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div style="font-size:1rem;font-weight:700;color:var(--text)">✏️ Informação da página</div>
+      <button onclick="fecharInfoModal()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text2);width:32px;height:32px;cursor:pointer">✕</button>
+    </div>
+    <label class="reuniao-label">Texto informativo (deixe vazio para ocultar)</label>
+    <textarea id="page-info-textarea" class="reuniao-input" rows="4" placeholder="Ex: Próxima reunião: 20/05 às 14h · Pauta: revisão de metas" style="resize:vertical;min-height:80px;width:100%;margin-bottom:16px"></textarea>
+    <div style="font-size:0.72rem;color:var(--text3);margin-bottom:16px">Este texto aparece em destaque no topo da página para todos os membros.</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="fecharInfoModal()" style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:9px 18px;font-size:0.82rem;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif">Cancelar</button>
+      <button onclick="salvarInfoPagina()" style="background:var(--purple);border:none;border-radius:10px;padding:9px 18px;font-size:0.82rem;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600">💾 Salvar</button>
+    </div>
+  </div>
 </div>
 </body>
 </html>
