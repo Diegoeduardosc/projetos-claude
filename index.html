@@ -2863,7 +2863,7 @@ body.admin-mode .bi-config-btn { display: inline-flex; }
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;flex-wrap:wrap;gap:8px">
           <div>
             <div style="font-size:1rem;font-weight:600;color:var(--text)">🗂️ Mural Interativo de Reunião — Post-it</div>
-            <div style="font-size:0.73rem;color:var(--text3);margin-top:3px">Contribuições visíveis para todos em tempo real · <span id="mural-data-label"></span></div>
+            <div style="font-size:0.73rem;color:var(--text3);margin-top:3px">Contribuições visíveis para todos em tempo real · Mural permanente</div>
           </div>
           <div id="mural-admin-btns" style="display:none">
             <button onclick="limparMural()" style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.22);border-radius:8px;padding:5px 12px;font-size:0.72rem;color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif">🗑 Limpar mural</button>
@@ -7236,6 +7236,7 @@ async function editarReuniao(key) {
 
 // ══════════════════ MURAL COLABORATIVO ══════════════════════════
 let _muralListener = null;
+const _MURAL_REF = 'cinea/mural/global'; // mural permanente, sem separação por data
 
 const _MURAL_CATS = {
   ideia:    { label: '💡 Ideias',    cor: 'var(--gold)',   borda: 'rgba(241,196,15,0.45)'  },
@@ -7243,18 +7244,16 @@ const _MURAL_CATS = {
   proposta: { label: '✅ Propostas', cor: 'var(--green)',  borda: 'rgba(39,174,96,0.45)'   }
 };
 
-function _muralHoje() { return new Date().toISOString().slice(0,10); }
-
 function iniciarListenerMural() {
   if (!_db || !_currentUser) { _renderMuralEstado(); return; }
   pararListenerMural();
-  _muralListener = _db.ref('cinea/mural/' + _muralHoje())
+  _muralListener = _db.ref(_MURAL_REF)
     .on('value', snap => _renderMuralDados(snap.val() || {}));
 }
 
 function pararListenerMural() {
   if (_muralListener) {
-    try { _db.ref('cinea/mural/' + _muralHoje()).off('value', _muralListener); } catch(_){}
+    try { _db.ref(_MURAL_REF).off('value', _muralListener); } catch(_){}
     _muralListener = null;
   }
 }
@@ -7280,10 +7279,6 @@ function _renderMuralDados(data) {
 
   const isAdmin = _currentUser.role === 'admin';
   if (adminBtns) adminBtns.style.display = isAdmin ? 'flex' : 'none';
-  if (dataLabel) {
-    const [y,m,d] = _muralHoje().split('-');
-    dataLabel.textContent = `Hoje, ${d}/${m}/${y}`;
-  }
 
   const items = Object.entries(data).sort((a,b) => (a[1].ts||'').localeCompare(b[1].ts||''));
 
@@ -7337,7 +7332,7 @@ async function adicionarPostItCat(cat) {
   const texto = ta?.value.trim();
   if (!texto) { ta?.focus(); return; }
   try {
-    await _db.ref('cinea/mural/' + _muralHoje()).push({
+    await _db.ref(_MURAL_REF).push({
       texto,
       categoria: cat,
       autor: _currentUser.nome || _currentUser.matricula,
@@ -7356,7 +7351,7 @@ async function adicionarPostIt() {
   const texto   = textoEl?.value.trim();
   if (!texto) { textoEl?.focus(); return; }
   try {
-    await _db.ref('cinea/mural/' + _muralHoje()).push({
+    await _db.ref(_MURAL_REF).push({
       texto,
       categoria: catEl?.value || 'ideia',
       autor: _currentUser.nome || _currentUser.matricula,
@@ -7368,14 +7363,14 @@ async function adicionarPostIt() {
 
 async function deletarPostIt(key) {
   if (!_currentUser || _currentUser.role !== 'admin') return;
-  await _db.ref('cinea/mural/' + _muralHoje() + '/' + key).remove();
+  await _db.ref(_MURAL_REF + '/' + key).remove();
 }
 
 async function limparMural() {
   if (!_currentUser || _currentUser.role !== 'admin') return;
-  if (!confirm('Limpar todos os post-its do mural de hoje?')) return;
-  await _db.ref('cinea/mural/' + _muralHoje()).remove();
-  registrarLog('Limpou o mural colaborativo da reunião');
+  if (!confirm('Limpar todos os post-its do mural?')) return;
+  await _db.ref(_MURAL_REF).remove();
+  registrarLog('Limpou o mural colaborativo');
 }
 // ════════════════════════════════════════════════════════════════
 
@@ -7792,6 +7787,39 @@ function pararListenerMeetings() {
 loadFromFirebase();
 carregarSemestresFirebase();
 carregarPageInfos();
+
+// 🔄 Migração única: move posts de datas antigas para mural/global
+(async function migrarMuralLegado() {
+  if (!_db) return;
+  // Aguarda auth
+  const MAX = 8000;
+  const t0 = Date.now();
+  while (!_fbAuthReady && Date.now() - t0 < MAX) {
+    await new Promise(r => setTimeout(r, 300));
+  }
+  if (!_fbAuthReady) return;
+  if (localStorage.getItem('cinea_mural_migrado_v1')) return; // já migrou
+  try {
+    const snap = await _db.ref('cinea/mural').once('value');
+    const data = snap.val();
+    if (!data) { localStorage.setItem('cinea_mural_migrado_v1', '1'); return; }
+    // Copia todos os posts de qualquer subchave que NÃO seja "global"
+    const promises = [];
+    Object.entries(data).forEach(([dia, posts]) => {
+      if (dia === 'global' || !posts || typeof posts !== 'object') return;
+      Object.values(posts).forEach(post => {
+        promises.push(_db.ref(_MURAL_REF).push(post));
+      });
+    });
+    if (promises.length) {
+      await Promise.all(promises);
+      console.log(`[CINEA] Migração do mural: ${promises.length} post(s) movidos para mural/global`);
+    }
+    localStorage.setItem('cinea_mural_migrado_v1', '1');
+  } catch(e) {
+    console.warn('[CINEA] Erro na migração do mural legado:', e);
+  }
+})();
 
 // 🔐 Restaura sessão salva (sobrevive F5 e fechamento do browser se "Manter conectado")
 (async function restaurarSessao() {
