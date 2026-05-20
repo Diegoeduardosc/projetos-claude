@@ -3508,6 +3508,11 @@ function _initAuth() {
       _fbAuthReady = true;
       _authRetryCount = 0;
       console.log('[CINEA] Auth anônima OK' + (_authRetryCount > 0 ? ' (retry ' + _authRetryCount + ')' : ''));
+      // Se o listener de visibilidade não foi estabelecido ainda (falhou por falta de auth),
+      // retenta agora que a autenticação anônima está confirmada.
+      if (typeof _visListenerAtivo !== 'undefined' && !_visListenerAtivo) {
+        carregarVisibilidade();
+      }
     })
     .catch(e => {
       console.warn('[CINEA] Auth anônima falhou (tentativa ' + (_authRetryCount + 1) + '):', e.message);
@@ -5294,9 +5299,10 @@ const TEXT_ED_SELS = [
   '.sidebar-brand', '.sidebar-sub',
   '.sidebar-gestor-label', '.sidebar-gestor-avatar', '.sidebar-gestor-name', '.sidebar-gestor-role',
   // Rótulos de métricas, cabeçalhos de seção e textos de aviso dos departamentos
-  '.stat-label', '.card-title', '.dept-data-hint',
-  // Navegação lateral
-  '.nav-label', '.nav-item-text'
+  '.stat-label', '.card-title', '.dept-data-hint'
+  // NOTA: .nav-label e .nav-item-text foram removidos intencionalmente.
+  // Nomes de páginas são fixos no HTML; salvá-los por índice numérico causa
+  // duplicação de rótulos quando a ordem dos itens de nav muda.
 ];
 
 function toggleEditMode() {
@@ -5791,6 +5797,15 @@ function updateAllKPIs() {
 
 // ═══ RESTORE SAVED EDITS ON LOAD ═══
 function loadSavedEdits() {
+  // Limpa chaves obsoletas de nav items salvas por índice posicional.
+  // Sem isso, se a ordem dos itens de nav mudou desde o último save, o
+  // label errado ("Reuniões" onde deveria estar "Google Sheets", etc.) é
+  // restaurado — causa o bug de duplicação visível na sidebar.
+  for (let i = 0; i < 20; i++) {
+    localStorage.removeItem('cinea_ed__nav_item_text_' + i);
+    localStorage.removeItem('cinea_ed__nav_label_' + i);
+  }
+
   // Text fields
   TEXT_ED_SELS.forEach(sel => {
     document.querySelectorAll(sel).forEach((el, i) => {
