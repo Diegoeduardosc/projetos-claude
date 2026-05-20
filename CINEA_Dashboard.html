@@ -7739,7 +7739,8 @@ async function editarReuniao(key) {
 }
 
 // ══════════════════ MURAL COLABORATIVO ══════════════════════════
-let _muralListener = null;
+let _muralListener  = null;
+let _muralEnviando  = false; // guard anti-double-submit
 const _MURAL_REF = 'cinea/mural/global'; // mural permanente, sem separação por data
 
 const _MURAL_CATS = {
@@ -7831,10 +7832,11 @@ function toggleInputMural(cat) {
 }
 
 async function adicionarPostItCat(cat) {
-  if (!_currentUser) return;
+  if (!_currentUser || _muralEnviando) return; // bloqueia double-submit
   const ta    = document.getElementById('mural-ta-' + cat);
   const texto = ta?.value.trim();
   if (!texto) { ta?.focus(); return; }
+  _muralEnviando = true;
   try {
     await _db.ref(_MURAL_REF).push({
       texto,
@@ -7843,8 +7845,13 @@ async function adicionarPostItCat(cat) {
       ts: new Date().toISOString()
     });
     if (ta) ta.value = '';
-    document.getElementById('mural-input-' + cat).style.display = 'none';
-  } catch(e) { mostrarToast('❌ Erro', 'Não foi possível enviar. Tente novamente.'); }
+    const inputWrap = document.getElementById('mural-input-' + cat);
+    if (inputWrap) inputWrap.style.display = 'none';
+  } catch(e) {
+    mostrarToast('❌ Erro', 'Não foi possível enviar. Tente novamente.');
+  } finally {
+    _muralEnviando = false; // libera sempre, mesmo com erro
+  }
 }
 
 // mantida por compatibilidade mas não usada diretamente na UI
@@ -8294,8 +8301,14 @@ carregarPageInfos();
 carregarVisibilidade();
 
 // 🔄 Migração única: move posts de datas antigas para mural/global
+// IMPORTANTE: a guarda é armazenada no FIREBASE (não localStorage) para que
+// a migração rode somente UMA vez globalmente, independente do browser/dispositivo.
+// Além disso, os paths de origem são deletados após a cópia para que futuras
+// execuções (browser sem flag local) sejam sempre no-op.
 (async function migrarMuralLegado() {
   if (!_db) return;
+  // Atalho local: se já migrou neste browser, não faz nem o round-trip ao Firebase
+  if (localStorage.getItem('cinea_mural_migrado_v1')) return;
   // Aguarda auth
   const MAX = 8000;
   const t0 = Date.now();
@@ -8303,24 +8316,40 @@ carregarVisibilidade();
     await new Promise(r => setTimeout(r, 300));
   }
   if (!_fbAuthReady) return;
-  if (localStorage.getItem('cinea_mural_migrado_v1')) return; // já migrou
   try {
+    // Verifica flag GLOBAL no Firebase antes de qualquer coisa
+    const flagSnap = await _db.ref('cinea/mural_meta/migrado_v1').once('value');
+    if (flagSnap.val() === true) {
+      localStorage.setItem('cinea_mural_migrado_v1', '1'); // sincroniza flag local
+      return;
+    }
+    // Marca migração em andamento ANTES de ler os dados (evita corrida entre browsers)
+    await _db.ref('cinea/mural_meta/migrado_v1').set(true);
+    localStorage.setItem('cinea_mural_migrado_v1', '1');
+
     const snap = await _db.ref('cinea/mural').once('value');
     const data = snap.val();
-    if (!data) { localStorage.setItem('cinea_mural_migrado_v1', '1'); return; }
-    // Copia todos os posts de qualquer subchave que NÃO seja "global"
-    const promises = [];
+    if (!data) return;
+
+    // Copia todos os posts de qualquer subchave que NÃO seja "global" nem "_meta"
+    const postPushes = [];
+    const pathsParaDeletar = [];
     Object.entries(data).forEach(([dia, posts]) => {
-      if (dia === 'global' || !posts || typeof posts !== 'object') return;
+      if (dia === 'global' || dia === 'mural_meta' || !posts || typeof posts !== 'object') return;
       Object.values(posts).forEach(post => {
-        promises.push(_db.ref(_MURAL_REF).push(post));
+        postPushes.push(_db.ref(_MURAL_REF).push(post));
       });
+      // Marca path original para deletar APÓS cópia bem-sucedida
+      pathsParaDeletar.push('cinea/mural/' + dia);
     });
-    if (promises.length) {
-      await Promise.all(promises);
-      console.log(`[CINEA] Migração do mural: ${promises.length} post(s) movidos para mural/global`);
+
+    if (postPushes.length) {
+      await Promise.all(postPushes);
+      console.log(`[CINEA] Migração do mural: ${postPushes.length} post(s) movidos para mural/global`);
+      // Deleta os paths originais — sem isso a migração re-insere em cada browser novo
+      await Promise.all(pathsParaDeletar.map(p => _db.ref(p).remove()));
+      console.log(`[CINEA] Migração do mural: ${pathsParaDeletar.length} path(s) antigo(s) removidos`);
     }
-    localStorage.setItem('cinea_mural_migrado_v1', '1');
   } catch(e) {
     console.warn('[CINEA] Erro na migração do mural legado:', e);
   }
