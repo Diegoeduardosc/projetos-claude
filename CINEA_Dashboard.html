@@ -7217,18 +7217,23 @@ async function salvarGsUrl() {
 // ════════════════════════════════════════════════
 // VISIBILIDADE DE PÁGINAS
 // ════════════════════════════════════════════════
+// FIREBASE RULES: cinea/page_visibility deve ter ".read": "auth != null" e ".write": "auth != null"
 const _ALL_PAGE_IDS = ['overview','indicadores','gsheets','roadmap','ideas','hub','inov','tec','tarefas','equipe','meeting'];
+
+// Caminho standalone — mesmo nível de cinea/tasks e cinea/meetings (sem depender de cinea/config)
+const _VIS_REF = 'cinea/page_visibility';
 
 let _visListenerAtivo = false;
 function carregarVisibilidade() {
   if (!_db || _visListenerAtivo) return;
   _visListenerAtivo = true;
-  _db.ref('cinea/config/page_visibility').on('value', snap => {
+  _db.ref(_VIS_REF).on('value', snap => {
     _pageVis = snap.val() || {};
     _applyVisibilidade();
   }, e => {
     console.warn('[CINEA] Erro no listener de visibilidade:', e);
-    _visListenerAtivo = false; // permite nova tentativa
+    mostrarToast('⚠️ Visibilidade', 'Erro ao carregar estado das páginas: ' + e.message);
+    _visListenerAtivo = false;
   });
 }
 
@@ -7275,9 +7280,10 @@ async function togglePageVisibility(pageId) {
   );
   if (_db) {
     try {
-      await _db.ref('cinea/config/page_visibility/' + pageId).set(atualmenteOculta ? null : false);
+      await _db.ref(_VIS_REF + '/' + pageId).set(atualmenteOculta ? null : false);
     } catch(e) {
-      console.warn('[CINEA] Erro ao salvar visibilidade:', e);
+      console.error('[CINEA] Erro ao salvar visibilidade:', e);
+      mostrarToast('❌ Erro Firebase', 'Visibilidade não foi salva: ' + e.message);
     }
   }
 }
@@ -7292,12 +7298,14 @@ async function restaurarTodasPaginas() {
   if (!confirm(`Restaurar visibilidade de ${paginasOcultas.length} página(s) oculta(s)?\n\nTodas as páginas voltarão a aparecer para os membros.`)) return;
   _pageVis = {};
   _applyVisibilidade();
-  mostrarToast('👁 Visibilidade restaurada', 'Todas as páginas estão visíveis novamente.');
   if (_db) {
     try {
-      await _db.ref('cinea/config/page_visibility').remove();
+      // Deleta cada filho individualmente para garantir compatibilidade com Firebase Rules
+      await Promise.all(paginasOcultas.map(k => _db.ref(_VIS_REF + '/' + k).remove()));
+      mostrarToast('👁 Visibilidade restaurada', `${paginasOcultas.length} página(s) visível(is) para todos.`);
     } catch(e) {
-      console.warn('[CINEA] Erro ao restaurar visibilidade:', e);
+      console.error('[CINEA] Erro ao restaurar visibilidade:', e);
+      mostrarToast('❌ Erro', 'Não foi possível salvar no Firebase: ' + e.message);
     }
   }
 }
