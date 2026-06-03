@@ -174,57 +174,57 @@
 
     /* Hero right — card illustration */
     .hero-right {
-      display: flex; flex-direction: column; justify-content: flex-end;
+      display: flex; flex-direction: column; justify-content: center;
       position: relative;
     }
     .hero-illustration {
-      background: rgba(255,255,255,.07);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,.14);
-      border-radius: var(--r-lg) var(--r-lg) 0 0;
-      padding: 28px 28px 0;
-      overflow: hidden;
+      background: rgba(255,255,255,.1);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: var(--r-lg);
+      padding: 28px;
     }
     .hi-tag {
       display: inline-flex; align-items: center; gap: 6px;
       background: rgba(0,192,112,.15); color: var(--green);
-      font-size: .72rem; font-weight: 700; padding: 5px 12px;
+      font-size: .78rem; font-weight: 700; padding: 6px 14px;
       border-radius: 50px; border: 1px solid rgba(0,192,112,.3);
-      margin-bottom: 18px;
+      margin-bottom: 20px;
     }
-    .hi-services { display: flex; flex-direction: column; gap: 8px; margin-bottom: 0; }
+    .hi-services { display: flex; flex-direction: column; gap: 10px; }
     .hi-row {
-      display: flex; align-items: center; gap: 12px;
-      background: rgba(255,255,255,.08); border-radius: 10px;
-      padding: 11px 14px; text-decoration: none;
+      display: flex; align-items: center; gap: 14px;
+      background: rgba(255,255,255,.08); border-radius: 12px;
+      padding: 13px 16px; text-decoration: none;
       transition: background .15s, transform .15s;
     }
-    .hi-row:hover { background: rgba(255,255,255,.15); transform: translateX(3px); }
+    .hi-row:hover { background: rgba(255,255,255,.16); transform: translateX(4px); }
     .hi-ico {
-      width: 32px; height: 32px; border-radius: 8px;
-      background: var(--blue); display: flex; align-items: center;
+      width: 40px; height: 40px; border-radius: 10px;
+      background: #F97316; display: flex; align-items: center;
       justify-content: center; flex-shrink: 0;
     }
-    .hi-ico svg { width: 16px; height: 16px; fill: #fff; }
+    .hi-ico svg { width: 20px; height: 20px; fill: #fff; }
     .hi-info { flex: 1; }
-    .hi-info b { display: block; font-size: .825rem; font-weight: 700; color: #fff; }
-    .hi-info small { font-size: .72rem; color: rgba(255,255,255,.55); }
+    .hi-info b { display: block; font-size: .9rem; font-weight: 700; color: #fff; }
+    .hi-info small { font-size: .75rem; color: rgba(255,255,255,.6); }
     .hi-badge {
-      font-size: .65rem; font-weight: 700; padding: 3px 8px;
-      border-radius: 50px; background: rgba(0,192,112,.2);
-      color: var(--green); white-space: nowrap;
+      font-size: .7rem; font-weight: 700; padding: 3px 10px;
+      border-radius: 50px; background: #F97316;
+      color: #fff; white-space: nowrap;
     }
+    .hi-arrow { color: rgba(255,255,255,.5); font-size: 1rem; }
     .hi-stats {
       display: grid; grid-template-columns: 1fr 1fr;
       gap: 1px; background: rgba(255,255,255,.1);
-      margin-top: 16px; border-top: 1px solid rgba(255,255,255,.1);
+      margin-top: 20px; border-top: 1px solid rgba(255,255,255,.12);
     }
     .hi-stat {
-      padding: 16px; background: rgba(255,255,255,.05);
+      padding: 18px; background: rgba(255,255,255,.04);
       text-align: center;
     }
-    .hi-stat b { display: block; font-size: 1.375rem; font-weight: 900; color: #fff; }
-    .hi-stat small { font-size: .72rem; color: rgba(255,255,255,.5); }
+    .hi-stat b { display: block; font-size: 1.5rem; font-weight: 900; color: #fff; }
+    .hi-stat small { font-size: .74rem; color: rgba(255,255,255,.5); }
 
     /* ===================== STRIP ===================== */
     .strip { background: var(--green); padding: 12px 0; text-align: center; }
