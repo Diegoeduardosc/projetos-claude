@@ -4,806 +4,702 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sanzio Serviços Contábeis | MEI, CNPJ e Imposto de Renda em BH</title>
-  <meta name="description" content="Escritório de contabilidade especializado em MEI, abertura de CNPJ, declaração anual e Imposto de Renda. Atendimento ágil em Belo Horizonte. Fale agora pelo WhatsApp!" />
+  <meta name="description" content="Escritório de contabilidade especializado em MEI, abertura de CNPJ, declaração anual e Imposto de Renda. Atendimento ágil em BH. Fale pelo WhatsApp!" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
-    /* ===== RESET ===== */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-    body { font-family: 'Inter', sans-serif; color: #111827; background: #fff; overflow-x: hidden; }
+    body { font-family: 'Inter', sans-serif; color: #1a1a2e; background: #fff; overflow-x: hidden; }
 
-    /* ===== DESIGN TOKENS ===== */
     :root {
-      --blue:        #0033B7;
-      --blue-dark:   #001A5E;
-      --blue-mid:    #0044EE;
-      --blue-light:  #EEF3FF;
-      --blue-border: #C7D7FF;
-      --gray-50:     #F8F9FB;
-      --gray-100:    #F1F3F7;
-      --gray-300:    #D1D5DB;
-      --gray-500:    #6B7280;
-      --gray-700:    #374151;
-      --gray-900:    #111827;
-      --white:       #FFFFFF;
-      --green:       #25D366;
-      --radius-sm:   8px;
-      --radius:      12px;
-      --radius-lg:   20px;
+      --blue:      #0033B7;
+      --blue-dark: #001A6E;
+      --blue-xd:   #000F42;
+      --blue-mid:  #0044EE;
+      --blue-lt:   #EEF3FF;
+      --blue-bd:   #C7D7FF;
+      --green:     #00C070;
+      --green-dk:  #009A5A;
+      --gray-50:   #F9FAFB;
+      --gray-100:  #F3F4F6;
+      --gray-200:  #E5E7EB;
+      --gray-500:  #6B7280;
+      --gray-700:  #374151;
+      --gray-900:  #111827;
+      --white:     #FFFFFF;
+      --wa:        #25D366;
+      --r:         12px;
+      --r-lg:      20px;
     }
 
-    /* ===== UTILITIES ===== */
     .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
-    .section-label {
-      display: inline-block;
-      font-size: .75rem; font-weight: 700; letter-spacing: .1em;
-      text-transform: uppercase; color: var(--blue);
-      margin-bottom: 14px;
-    }
-    .section-title {
-      font-size: clamp(1.75rem, 4vw, 2.625rem);
-      font-weight: 800; line-height: 1.15; color: var(--gray-900);
-      margin-bottom: 16px;
-    }
-    .section-sub {
-      font-size: 1.0625rem; color: var(--gray-500);
-      line-height: 1.75; max-width: 560px;
-    }
+
+    /* BUTTONS */
     .btn {
       display: inline-flex; align-items: center; gap: 8px;
       font-family: inherit; font-weight: 700; font-size: .9375rem;
       border: none; cursor: pointer; border-radius: 50px;
       padding: 14px 28px; text-decoration: none;
-      transition: all .2s ease;
+      transition: transform .18s, box-shadow .18s, background .18s;
+      white-space: nowrap;
     }
-    .btn:hover { transform: translateY(-1px); }
-    .btn-blue {
-      background: var(--blue); color: var(--white);
-      box-shadow: 0 4px 16px rgba(0,51,183,.28);
-    }
-    .btn-blue:hover { background: var(--blue-dark); box-shadow: 0 6px 24px rgba(0,51,183,.38); }
-    .btn-outline {
-      background: transparent; color: var(--blue);
-      border: 2px solid var(--blue-border);
-    }
-    .btn-outline:hover { background: var(--blue-light); border-color: var(--blue); }
-    .btn-green {
-      background: var(--green); color: var(--white);
-      box-shadow: 0 4px 16px rgba(37,211,102,.35);
-    }
-    .btn-green:hover { background: #1DAA56; box-shadow: 0 6px 24px rgba(37,211,102,.45); }
-    .btn-white-outline {
-      background: transparent; color: var(--white);
-      border: 2px solid rgba(255,255,255,.4);
-    }
-    .btn-white-outline:hover { background: rgba(255,255,255,.1); }
-    .btn-lg { padding: 17px 36px; font-size: 1rem; }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-green { background: var(--green); color: #fff; box-shadow: 0 4px 16px rgba(0,192,112,.3); }
+    .btn-green:hover { background: var(--green-dk); box-shadow: 0 6px 24px rgba(0,192,112,.4); }
+    .btn-white { background: #fff; color: var(--blue); }
+    .btn-white:hover { background: var(--blue-lt); }
+    .btn-ghost { background: rgba(255,255,255,.12); color: #fff; border: 1.5px solid rgba(255,255,255,.3); }
+    .btn-ghost:hover { background: rgba(255,255,255,.2); }
+    .btn-blue { background: var(--blue); color: #fff; box-shadow: 0 4px 16px rgba(0,51,183,.25); }
+    .btn-blue:hover { background: var(--blue-dark); }
+    .btn-outline { background: transparent; color: var(--blue); border: 1.5px solid var(--blue-bd); }
+    .btn-outline:hover { background: var(--blue-lt); }
+    .btn-lg { padding: 16px 34px; font-size: 1rem; }
 
-    /* ===== ANIMATIONS ===== */
-    .fade-up {
-      opacity: 0; transform: translateY(24px);
-      transition: opacity .55s ease, transform .55s ease;
+    /* LABEL */
+    .label {
+      font-size: .72rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--blue); margin-bottom: 12px;
+      display: block;
     }
-    .fade-up.visible { opacity: 1; transform: translateY(0); }
+    .label-white { color: rgba(255,255,255,.65); }
 
-    /* ===== HEADER ===== */
+    /* HEADINGS */
+    .h2 {
+      font-size: clamp(1.625rem, 3.5vw, 2.375rem);
+      font-weight: 800; line-height: 1.18; color: var(--gray-900);
+    }
+    .h2-white { color: #fff; }
+    .sub {
+      font-size: 1rem; color: var(--gray-500); line-height: 1.75;
+      max-width: 560px;
+    }
+    .sub-white { color: rgba(255,255,255,.72); }
+
+    /* ANIMATIONS */
+    .anim { opacity: 0; transform: translateY(20px); transition: opacity .5s ease, transform .5s ease; }
+    .anim.in { opacity: 1; transform: none; }
+
+    /* ===================== HEADER ===================== */
     header {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(255,255,255,.96);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--gray-100);
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(255,255,255,.97);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--gray-200);
     }
-    .header-inner {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 24px; max-width: 1140px; margin: 0 auto;
+    .hd {
+      max-width: 1140px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; gap: 32px; height: 64px;
     }
-    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-    .logo-mark {
-      width: 38px; height: 38px;
-      background: var(--blue); border-radius: var(--radius-sm);
-      display: flex; align-items: center; justify-content: center;
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
+    .logo-sq {
+      width: 36px; height: 36px; background: var(--blue);
+      border-radius: 9px; display: flex; align-items: center; justify-content: center;
     }
-    .logo-mark svg { width: 20px; height: 20px; fill: white; }
-    .logo-text strong {
-      display: block; font-size: .875rem; font-weight: 800;
-      color: var(--gray-900); line-height: 1.2;
-    }
-    .logo-text span { font-size: .72rem; color: var(--gray-500); }
-    nav { display: flex; align-items: center; gap: 4px; }
-    nav a {
-      font-size: .875rem; font-weight: 500; color: var(--gray-700);
-      text-decoration: none; padding: 8px 14px; border-radius: var(--radius-sm);
+    .logo-sq svg { width: 19px; height: 19px; fill: #fff; }
+    .logo-text b { display: block; font-size: .84rem; font-weight: 800; color: var(--gray-900); }
+    .logo-text small { font-size: .7rem; color: var(--gray-500); font-weight: 400; }
+    .hd-nav { display: flex; align-items: center; gap: 2px; flex: 1; }
+    .hd-nav a {
+      font-size: .84rem; font-weight: 500; color: var(--gray-700);
+      text-decoration: none; padding: 7px 13px; border-radius: 8px;
       transition: background .15s, color .15s;
     }
-    nav a:hover { background: var(--gray-50); color: var(--blue); }
-    .header-actions { display: flex; align-items: center; gap: 10px; }
-    .header-phone {
-      font-size: .875rem; font-weight: 600; color: var(--gray-700);
-      text-decoration: none; display: flex; align-items: center; gap: 6px;
-      padding: 8px 14px; border-radius: var(--radius-sm);
-      transition: color .15s;
+    .hd-nav a:hover { background: var(--gray-100); color: var(--blue); }
+    .hd-right { display: flex; align-items: center; gap: 10px; }
+    .hd-phone {
+      font-size: .84rem; font-weight: 600; color: var(--gray-700);
+      text-decoration: none; display: flex; align-items: center; gap: 5px;
     }
-    .header-phone:hover { color: var(--blue); }
-    .header-phone svg { width: 14px; height: 14px; fill: var(--blue); }
-    .hamburger {
-      display: none; background: none; border: none;
-      cursor: pointer; padding: 8px; flex-direction: column; gap: 5px;
-    }
-    .hamburger span {
-      display: block; width: 22px; height: 2px;
-      background: var(--gray-900); border-radius: 2px;
-    }
+    .hd-phone svg { width: 13px; height: 13px; fill: var(--blue); }
+    .hd-phone:hover { color: var(--blue); }
+    .hburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 8px; }
+    .hburger span { display: block; width: 20px; height: 2px; background: var(--gray-900); border-radius: 2px; }
 
-    /* ===== HERO ===== */
+    /* ===================== HERO ===================== */
     #hero {
-      background: var(--white);
-      padding: 72px 0 64px;
-      position: relative; overflow: hidden;
+      background: linear-gradient(130deg, var(--blue-xd) 0%, var(--blue-dark) 50%, var(--blue) 100%);
+      padding: 72px 0 0; position: relative; overflow: hidden;
     }
-    .hero-bg-shape {
-      position: absolute; top: -120px; right: -80px;
-      width: 600px; height: 600px; border-radius: 50%;
-      background: var(--blue-light); opacity: .6;
-      pointer-events: none;
-    }
-    .hero-bg-dots {
-      position: absolute; bottom: 0; left: 0;
-      width: 300px; height: 300px; opacity: .04;
-      background-image: radial-gradient(var(--blue) 1.5px, transparent 1.5px);
-      background-size: 24px 24px;
+    .hero-dots {
+      position: absolute; inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 28px 28px;
       pointer-events: none;
     }
     .hero-grid {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 56px; align-items: center;
+      display: grid; grid-template-columns: 1fr 480px;
+      gap: 40px; align-items: flex-end;
       position: relative; z-index: 1;
     }
-    .hero-tag {
+    .hero-left { padding-bottom: 64px; }
+    .hero-pill {
       display: inline-flex; align-items: center; gap: 8px;
-      background: var(--blue-light); color: var(--blue);
-      font-size: .78rem; font-weight: 700; padding: 6px 14px;
-      border-radius: 50px; margin-bottom: 20px;
-      border: 1px solid var(--blue-border);
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+      color: rgba(255,255,255,.9); font-size: .75rem; font-weight: 600;
+      padding: 7px 14px; border-radius: 50px; margin-bottom: 24px;
     }
-    .hero-tag .dot {
-      width: 7px; height: 7px; background: var(--green);
-      border-radius: 50%; animation: blink 2s infinite;
+    .hero-pill .dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+    .hero-h1 {
+      font-size: clamp(2rem, 4.5vw, 3.25rem);
+      font-weight: 900; line-height: 1.1; color: #fff;
+      margin-bottom: 20px;
     }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
-    .hero-title {
-      font-size: clamp(2.25rem, 5vw, 3.5rem);
-      font-weight: 900; line-height: 1.1;
-      color: var(--gray-900); margin-bottom: 20px;
-    }
-    .hero-title mark {
-      background: none; color: var(--blue);
-      position: relative; white-space: nowrap;
-    }
-    .hero-sub {
-      font-size: 1.0625rem; color: var(--gray-500);
-      line-height: 1.75; margin-bottom: 32px; max-width: 480px;
-    }
+    .hero-h1 em { font-style: normal; color: var(--green); }
+    .hero-desc { font-size: 1.0625rem; color: rgba(255,255,255,.72); line-height: 1.75; margin-bottom: 32px; max-width: 480px; }
     .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 40px; }
-    .hero-trust {
-      display: flex; align-items: center; gap: 20px;
-      padding-top: 28px; border-top: 1px solid var(--gray-100);
-      flex-wrap: wrap;
-    }
-    .trust-item { display: flex; align-items: center; gap: 8px; }
-    .trust-item svg { width: 18px; height: 18px; fill: var(--blue); flex-shrink: 0; }
-    .trust-item span { font-size: .825rem; color: var(--gray-500); font-weight: 500; }
-    .trust-item strong { color: var(--gray-900); }
+    .hero-trust { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .htrust { display: flex; align-items: center; gap: 7px; }
+    .htrust svg { width: 16px; height: 16px; fill: var(--green); flex-shrink: 0; }
+    .htrust span { font-size: .82rem; color: rgba(255,255,255,.7); }
+    .htrust strong { color: #fff; }
 
-    /* Hero right — abstract card */
-    .hero-visual {
-      display: flex; flex-direction: column; gap: 16px;
+    /* Hero right — card illustration */
+    .hero-right {
+      display: flex; flex-direction: column; justify-content: flex-end;
+      position: relative;
     }
-    .hero-card-main {
-      background: var(--white);
-      border: 1px solid var(--gray-100);
-      border-radius: var(--radius-lg);
-      padding: 28px;
-      box-shadow: 0 8px 40px rgba(0,51,183,.08);
+    .hero-illustration {
+      background: rgba(255,255,255,.07);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: var(--r-lg) var(--r-lg) 0 0;
+      padding: 28px 28px 0;
+      overflow: hidden;
     }
-    .hero-card-main p {
-      font-size: .8rem; font-weight: 700; color: var(--gray-500);
-      text-transform: uppercase; letter-spacing: .06em; margin-bottom: 18px;
+    .hi-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(0,192,112,.15); color: var(--green);
+      font-size: .72rem; font-weight: 700; padding: 5px 12px;
+      border-radius: 50px; border: 1px solid rgba(0,192,112,.3);
+      margin-bottom: 18px;
     }
-    .service-quick-list { display: flex; flex-direction: column; gap: 10px; }
-    .service-quick-item {
+    .hi-services { display: flex; flex-direction: column; gap: 8px; margin-bottom: 0; }
+    .hi-row {
       display: flex; align-items: center; gap: 12px;
-      padding: 12px 14px; border-radius: var(--radius);
-      background: var(--gray-50); text-decoration: none;
+      background: rgba(255,255,255,.08); border-radius: 10px;
+      padding: 11px 14px; text-decoration: none;
       transition: background .15s, transform .15s;
     }
-    .service-quick-item:hover { background: var(--blue-light); transform: translateX(3px); }
-    .sq-icon {
-      width: 36px; height: 36px; border-radius: var(--radius-sm);
+    .hi-row:hover { background: rgba(255,255,255,.15); transform: translateX(3px); }
+    .hi-ico {
+      width: 32px; height: 32px; border-radius: 8px;
       background: var(--blue); display: flex; align-items: center;
       justify-content: center; flex-shrink: 0;
     }
-    .sq-icon svg { width: 18px; height: 18px; fill: white; }
-    .sq-info { flex: 1; }
-    .sq-info strong { display: block; font-size: .875rem; font-weight: 700; color: var(--gray-900); }
-    .sq-info span { font-size: .75rem; color: var(--gray-500); }
-    .sq-badge {
-      font-size: .68rem; font-weight: 700; padding: 3px 9px;
-      border-radius: 50px; background: var(--blue-light); color: var(--blue);
+    .hi-ico svg { width: 16px; height: 16px; fill: #fff; }
+    .hi-info { flex: 1; }
+    .hi-info b { display: block; font-size: .825rem; font-weight: 700; color: #fff; }
+    .hi-info small { font-size: .72rem; color: rgba(255,255,255,.55); }
+    .hi-badge {
+      font-size: .65rem; font-weight: 700; padding: 3px 8px;
+      border-radius: 50px; background: rgba(0,192,112,.2);
+      color: var(--green); white-space: nowrap;
     }
-    .hero-card-mini {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    .hi-stats {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1px; background: rgba(255,255,255,.1);
+      margin-top: 16px; border-top: 1px solid rgba(255,255,255,.1);
     }
-    .mini-card {
-      background: var(--white); border: 1px solid var(--gray-100);
-      border-radius: var(--radius); padding: 18px;
-      box-shadow: 0 2px 12px rgba(0,0,0,.05);
-    }
-    .mini-card .mini-val {
-      font-size: 1.5rem; font-weight: 900; color: var(--blue); line-height: 1;
-    }
-    .mini-card .mini-label { font-size: .75rem; color: var(--gray-500); margin-top: 4px; }
-    .mini-card.accent { background: var(--blue); }
-    .mini-card.accent .mini-val { color: white; }
-    .mini-card.accent .mini-label { color: rgba(255,255,255,.7); }
-
-    /* ===== BENEFÍCIOS RÁPIDOS ===== */
-    #beneficios {
-      padding: 48px 0;
-      border-top: 1px solid var(--gray-100);
-      border-bottom: 1px solid var(--gray-100);
-    }
-    .beneficios-grid {
-      display: grid; grid-template-columns: repeat(4, 1fr);
-      gap: 32px;
-    }
-    .ben-item { display: flex; align-items: flex-start; gap: 14px; }
-    .ben-icon {
-      width: 44px; height: 44px; border-radius: var(--radius);
-      background: var(--blue-light); display: flex;
-      align-items: center; justify-content: center; flex-shrink: 0;
-    }
-    .ben-icon svg { width: 22px; height: 22px; fill: var(--blue); }
-    .ben-info h4 { font-size: .9375rem; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; }
-    .ben-info p { font-size: .8125rem; color: var(--gray-500); line-height: 1.6; }
-
-    /* ===== DORES ===== */
-    #dores { padding: 88px 0; background: var(--gray-50); }
-    .dores-header { margin-bottom: 52px; }
-    .dores-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-    .dor-card {
-      background: var(--white); border-radius: var(--radius);
-      padding: 28px; border: 1px solid var(--gray-100);
-      transition: border-color .2s, box-shadow .2s, transform .2s;
-    }
-    .dor-card:hover {
-      border-color: var(--blue-border);
-      box-shadow: 0 8px 32px rgba(0,51,183,.08);
-      transform: translateY(-3px);
-    }
-    .dor-num {
-      font-size: .75rem; font-weight: 700; color: var(--blue);
-      letter-spacing: .08em; margin-bottom: 14px;
-    }
-    .dor-card h3 { font-size: 1rem; font-weight: 700; color: var(--gray-900); margin-bottom: 8px; }
-    .dor-card p { font-size: .875rem; color: var(--gray-500); line-height: 1.65; }
-
-    /* ===== SERVIÇOS ===== */
-    #servicos { padding: 88px 0; }
-    .servicos-header { margin-bottom: 52px; }
-    .servicos-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
-    .srv-card {
-      border: 1px solid var(--gray-100); border-radius: var(--radius-lg);
-      padding: 36px; transition: border-color .2s, box-shadow .2s, transform .2s;
-      position: relative; overflow: hidden;
-    }
-    .srv-card:hover {
-      border-color: var(--blue-border);
-      box-shadow: 0 12px 48px rgba(0,51,183,.1);
-      transform: translateY(-4px);
-    }
-    .srv-card::after {
-      content: ''; position: absolute; top: 0; left: 0;
-      right: 0; height: 3px;
-      background: var(--blue); opacity: 0;
-      transition: opacity .2s;
-    }
-    .srv-card:hover::after { opacity: 1; }
-    .srv-icon-wrap {
-      width: 52px; height: 52px; border-radius: var(--radius);
-      background: var(--blue-light); display: flex;
-      align-items: center; justify-content: center; margin-bottom: 20px;
-    }
-    .srv-icon-wrap svg { width: 26px; height: 26px; fill: var(--blue); }
-    .srv-card h3 { font-size: 1.1875rem; font-weight: 800; color: var(--gray-900); margin-bottom: 10px; }
-    .srv-card > p { font-size: .9rem; color: var(--gray-500); line-height: 1.7; margin-bottom: 22px; }
-    .srv-list { list-style: none; display: flex; flex-direction: column; gap: 9px; margin-bottom: 28px; }
-    .srv-list li {
-      display: flex; align-items: center; gap: 10px;
-      font-size: .875rem; color: var(--gray-700);
-    }
-    .srv-list li::before {
-      content: '';
-      width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
-      background: var(--blue);
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M13.5 3.5L6 11 2.5 7.5' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
-      background-size: 10px; background-repeat: no-repeat; background-position: center;
-    }
-
-    /* ===== COMO FUNCIONA ===== */
-    #como-funciona { padding: 88px 0; background: var(--blue-light); }
-    .como-header { text-align: center; margin-bottom: 56px; }
-    .como-header .section-sub { margin: 0 auto; }
-    .steps-row {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 40px; position: relative;
-    }
-    .steps-row::before {
-      content: '';
-      position: absolute; top: 28px; left: calc(50%/3 + 28px);
-      right: calc(50%/3 + 28px); height: 2px;
-      background: var(--blue-border);
-    }
-    .step { text-align: center; }
-    .step-circle {
-      width: 56px; height: 56px; border-radius: 50%;
-      background: var(--blue); color: white;
-      font-size: 1.25rem; font-weight: 900;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 20px; position: relative; z-index: 1;
-    }
-    .step h3 { font-size: 1rem; font-weight: 700; color: var(--gray-900); margin-bottom: 8px; }
-    .step p { font-size: .875rem; color: var(--gray-500); line-height: 1.65; }
-
-    /* ===== NÚMEROS ===== */
-    #numeros { padding: 88px 0; }
-    .numeros-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--gray-100); }
-    .num-cell {
-      background: var(--white); padding: 40px 32px;
+    .hi-stat {
+      padding: 16px; background: rgba(255,255,255,.05);
       text-align: center;
     }
-    .num-val {
-      font-size: 2.75rem; font-weight: 900; color: var(--blue);
-      line-height: 1; margin-bottom: 8px;
-    }
-    .num-val sup { font-size: 1.5rem; }
-    .num-label { font-size: .875rem; color: var(--gray-500); font-weight: 500; }
+    .hi-stat b { display: block; font-size: 1.375rem; font-weight: 900; color: #fff; }
+    .hi-stat small { font-size: .72rem; color: rgba(255,255,255,.5); }
 
-    /* ===== DEPOIMENTOS ===== */
-    #depoimentos { padding: 88px 0; background: var(--gray-50); }
-    .depo-header { text-align: center; margin-bottom: 52px; }
-    .depo-header .section-sub { margin: 0 auto; }
-    .google-badge {
-      display: inline-flex; align-items: center; gap: 10px;
-      background: var(--white); border: 1px solid var(--gray-100);
-      border-radius: 50px; padding: 10px 20px; margin-bottom: 32px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.06);
-    }
-    .google-badge svg { width: 20px; height: 20px; }
-    .google-badge span { font-size: .875rem; font-weight: 600; color: var(--gray-700); }
-    .stars-inline { color: #FBBF24; font-size: .875rem; }
-    .depo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-    .depo-card {
-      background: var(--white); border-radius: var(--radius);
-      padding: 28px; border: 1px solid var(--gray-100);
-      transition: box-shadow .2s, transform .2s;
-    }
-    .depo-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,.08); transform: translateY(-3px); }
-    .depo-stars { color: #FBBF24; font-size: .9rem; margin-bottom: 14px; }
-    .depo-text { font-size: .9375rem; color: var(--gray-700); line-height: 1.7; margin-bottom: 20px; }
-    .depo-author { display: flex; align-items: center; gap: 12px; }
-    .depo-avatar {
-      width: 42px; height: 42px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--blue), var(--blue-mid));
-      color: white; font-weight: 700; font-size: .875rem;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
-    .depo-name { font-weight: 700; font-size: .875rem; color: var(--gray-900); }
-    .depo-role { font-size: .775rem; color: var(--gray-500); }
+    /* ===================== STRIP ===================== */
+    .strip { background: var(--green); padding: 12px 0; text-align: center; }
+    .strip p { font-size: .875rem; font-weight: 600; color: #fff; }
+    .strip a { color: #fff; font-weight: 800; text-decoration: underline; }
 
-    /* ===== FAQ ===== */
-    #faq { padding: 88px 0; }
-    .faq-layout {
-      display: grid; grid-template-columns: 1fr 2fr; gap: 64px;
-      align-items: start;
+    /* ===================== BENEFÍCIOS ===================== */
+    #beneficios { padding: 72px 0; }
+    .ben-head { text-align: center; margin-bottom: 48px; }
+    .ben-head .sub { margin: 12px auto 0; }
+    .ben-grid {
+      display: grid; grid-template-columns: 340px 1fr;
+      gap: 48px; align-items: center;
     }
-    .faq-left .section-sub { margin-top: 12px; }
-    .faq-left a { display: inline-block; margin-top: 28px; }
-    .faq-list { display: flex; flex-direction: column; gap: 8px; }
-    .faq-item {
-      border: 1px solid var(--gray-100); border-radius: var(--radius);
-      overflow: hidden; background: var(--white);
-      transition: border-color .2s;
+    .ben-photo {
+      background: var(--blue-lt); border-radius: var(--r-lg);
+      height: 360px; display: flex; align-items: center; justify-content: center;
+      overflow: hidden; position: relative;
     }
-    .faq-item.open { border-color: var(--blue-border); }
-    .faq-btn {
-      width: 100%; display: flex; align-items: center;
-      justify-content: space-between; gap: 16px;
-      padding: 18px 22px; background: none; border: none;
-      cursor: pointer; text-align: left;
-      font-family: inherit; font-size: .9375rem; font-weight: 600;
-      color: var(--gray-900);
+    .ben-photo-inner {
+      width: 100%; height: 100%;
+      background: linear-gradient(135deg, var(--blue-lt) 0%, var(--blue-bd) 100%);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 12px;
     }
-    .faq-icon {
-      width: 26px; height: 26px; border-radius: 50%;
-      background: var(--gray-100); display: flex; align-items: center;
-      justify-content: center; flex-shrink: 0; transition: background .2s, transform .3s;
+    .ben-photo-icon {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: var(--blue); display: flex; align-items: center; justify-content: center;
     }
-    .faq-item.open .faq-icon { background: var(--blue); transform: rotate(45deg); }
-    .faq-icon svg { width: 12px; height: 12px; fill: var(--gray-700); }
-    .faq-item.open .faq-icon svg { fill: white; }
-    .faq-ans {
-      max-height: 0; overflow: hidden;
-      transition: max-height .3s ease, padding .3s;
-      font-size: .9rem; color: var(--gray-500); line-height: 1.7;
-      padding: 0 22px;
+    .ben-photo-icon svg { width: 40px; height: 40px; fill: #fff; }
+    .ben-photo-text { font-size: .875rem; color: var(--blue); font-weight: 600; text-align: center; }
+    .ben-list { display: flex; flex-direction: column; gap: 20px; }
+    .ben-item {
+      display: flex; gap: 16px; align-items: flex-start;
+      padding: 20px; border-radius: var(--r);
+      border: 1px solid var(--gray-200);
+      transition: border-color .2s, box-shadow .2s;
     }
-    .faq-item.open .faq-ans { max-height: 240px; padding: 0 22px 18px; }
+    .ben-item:hover { border-color: var(--blue-bd); box-shadow: 0 4px 20px rgba(0,51,183,.08); }
+    .ben-ico {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: var(--blue-lt); display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0;
+    }
+    .ben-ico svg { width: 22px; height: 22px; fill: var(--blue); }
+    .ben-item h4 { font-size: .9375rem; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; }
+    .ben-item p { font-size: .8125rem; color: var(--gray-500); line-height: 1.65; }
 
-    /* ===== CTA FINAL ===== */
-    #cta-final {
-      padding: 88px 0;
-      background: var(--blue); text-align: center;
+    /* ===================== STATS ===================== */
+    #stats { background: var(--blue-xd); padding: 60px 0; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+    .stat-cell {
+      text-align: center; padding: 32px 20px;
+      border-right: 1px solid rgba(255,255,255,.08);
+    }
+    .stat-cell:last-child { border-right: none; }
+    .stat-num { font-size: 2.5rem; font-weight: 900; color: #fff; line-height: 1; margin-bottom: 6px; }
+    .stat-num span { color: var(--green); }
+    .stat-label { font-size: .825rem; color: rgba(255,255,255,.55); }
+
+    /* ===================== SERVIÇOS ===================== */
+    #servicos { padding: 80px 0; background: var(--gray-50); }
+    .srv-head { text-align: center; margin-bottom: 52px; }
+    .srv-head .sub { margin: 12px auto 0; }
+    .srv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .srv-card {
+      background: #fff; border-radius: var(--r-lg);
+      border: 1px solid var(--gray-200); padding: 32px;
+      transition: border-color .2s, box-shadow .2s, transform .2s;
       position: relative; overflow: hidden;
     }
-    #cta-final::before {
-      content: ''; position: absolute; inset: 0;
-      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='1.5'/%3E%3C/g%3E%3C/svg%3E");
+    .srv-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--blue), var(--blue-mid));
+      transform: scaleX(0); transform-origin: left; transition: transform .3s;
     }
-    #cta-final > * { position: relative; z-index: 1; }
-    #cta-final h2 {
-      font-size: clamp(1.75rem, 4vw, 2.75rem);
-      font-weight: 900; color: var(--white); margin-bottom: 14px;
+    .srv-card:hover { border-color: var(--blue-bd); box-shadow: 0 8px 40px rgba(0,51,183,.1); transform: translateY(-3px); }
+    .srv-card:hover::before { transform: scaleX(1); }
+    .srv-ico {
+      width: 50px; height: 50px; border-radius: 12px;
+      background: var(--blue-lt); display: flex;
+      align-items: center; justify-content: center; margin-bottom: 18px;
     }
-    #cta-final p {
-      font-size: 1.0625rem; color: rgba(255,255,255,.75);
-      margin-bottom: 36px; max-width: 520px; margin-left: auto; margin-right: auto;
-      line-height: 1.7;
+    .srv-ico svg { width: 24px; height: 24px; fill: var(--blue); }
+    .srv-card h3 { font-size: 1.125rem; font-weight: 800; color: var(--gray-900); margin-bottom: 8px; }
+    .srv-card > p { font-size: .875rem; color: var(--gray-500); line-height: 1.7; margin-bottom: 18px; }
+    .srv-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 22px; }
+    .srv-tag {
+      font-size: .75rem; font-weight: 600; padding: 4px 11px;
+      border-radius: 50px; background: var(--blue-lt); color: var(--blue);
+      border: 1px solid var(--blue-bd);
     }
-    .cta-final-btns { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
-    .cta-note {
-      margin-top: 20px; font-size: .8rem;
-      color: rgba(255,255,255,.5);
-      display: flex; align-items: center; justify-content: center; gap: 16px;
-      flex-wrap: wrap;
-    }
-    .cta-note span::before { content: '·'; margin-right: 16px; }
-    .cta-note span:first-child::before { display: none; }
 
-    /* ===== FOOTER ===== */
-    footer { background: var(--blue-dark); padding: 56px 0 24px; }
-    .footer-top {
+    /* ===================== COMO FUNCIONA ===================== */
+    #como { padding: 80px 0; }
+    .como-head { text-align: center; margin-bottom: 56px; }
+    .como-head .sub { margin: 12px auto 0; }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; position: relative; }
+    .steps::before {
+      content: ''; position: absolute;
+      top: 27px; left: calc(16.5% + 27px); right: calc(16.5% + 27px);
+      height: 2px; background: var(--blue-bd);
+    }
+    .step { text-align: center; }
+    .step-n {
+      width: 54px; height: 54px; border-radius: 50%;
+      background: var(--blue); color: #fff;
+      font-size: 1.25rem; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 18px; position: relative; z-index: 1;
+      box-shadow: 0 4px 16px rgba(0,51,183,.3);
+    }
+    .step h3 { font-size: 1rem; font-weight: 700; color: var(--gray-900); margin-bottom: 8px; }
+    .step p { font-size: .84rem; color: var(--gray-500); line-height: 1.65; }
+
+    /* ===================== DORES ===================== */
+    #dores { padding: 80px 0; background: var(--gray-50); }
+    .dores-head { text-align: center; margin-bottom: 52px; }
+    .dores-head .sub { margin: 12px auto 0; }
+    .dores-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .dor {
+      background: #fff; border-radius: var(--r);
+      border: 1px solid var(--gray-200); padding: 26px;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .dor:hover { border-color: var(--blue-bd); box-shadow: 0 4px 20px rgba(0,51,183,.07); }
+    .dor-n { font-size: .7rem; font-weight: 700; color: var(--blue); letter-spacing: .1em; margin-bottom: 12px; }
+    .dor h3 { font-size: .9375rem; font-weight: 700; color: var(--gray-900); margin-bottom: 7px; }
+    .dor p { font-size: .825rem; color: var(--gray-500); line-height: 1.65; }
+
+    /* ===================== DEPOIMENTOS ===================== */
+    #depo { padding: 80px 0; }
+    .depo-head { text-align: center; margin-bottom: 48px; }
+    .depo-head .sub { margin: 12px auto 0; }
+    .google-row {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--gray-50); border: 1px solid var(--gray-200);
+      border-radius: 50px; padding: 9px 18px; margin-bottom: 36px;
+    }
+    .google-row span { font-size: .84rem; font-weight: 600; color: var(--gray-700); }
+    .depo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .depo-card {
+      background: #fff; border-radius: var(--r);
+      border: 1px solid var(--gray-200); padding: 26px;
+      transition: box-shadow .2s, transform .2s;
+    }
+    .depo-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,.07); transform: translateY(-3px); }
+    .depo-stars { color: #F59E0B; margin-bottom: 13px; font-size: .9rem; }
+    .depo-text { font-size: .9rem; color: var(--gray-700); line-height: 1.7; margin-bottom: 18px; }
+    .depo-author { display: flex; align-items: center; gap: 11px; }
+    .depo-av {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--blue-mid));
+      color: #fff; font-weight: 700; font-size: .825rem;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .depo-name { font-weight: 700; font-size: .84rem; color: var(--gray-900); }
+    .depo-role { font-size: .75rem; color: var(--gray-500); }
+
+    /* ===================== FAQ ===================== */
+    #faq { padding: 80px 0; background: var(--gray-50); }
+    .faq-wrap {
+      display: grid; grid-template-columns: 1fr 2fr;
+      gap: 60px; align-items: start;
+    }
+    .faq-left .sub { margin-top: 10px; }
+    .faq-left .btn { margin-top: 24px; }
+    .faq-col { display: flex; flex-direction: column; gap: 8px; }
+    .fi {
+      background: #fff; border-radius: var(--r);
+      border: 1px solid var(--gray-200); overflow: hidden;
+      transition: border-color .2s;
+    }
+    .fi.open { border-color: var(--blue-bd); }
+    .fi-btn {
+      width: 100%; display: flex; align-items: center;
+      justify-content: space-between; gap: 14px;
+      padding: 17px 20px; background: none; border: none;
+      cursor: pointer; text-align: left;
+      font-family: inherit; font-size: .9rem; font-weight: 600; color: var(--gray-900);
+    }
+    .fi-ic {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--gray-100); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s, transform .3s;
+    }
+    .fi.open .fi-ic { background: var(--blue); transform: rotate(45deg); }
+    .fi-ic svg { width: 11px; height: 11px; fill: var(--gray-700); }
+    .fi.open .fi-ic svg { fill: #fff; }
+    .fi-ans {
+      max-height: 0; overflow: hidden;
+      transition: max-height .3s, padding .3s;
+      font-size: .875rem; color: var(--gray-500); line-height: 1.7;
+      padding: 0 20px;
+    }
+    .fi.open .fi-ans { max-height: 200px; padding: 0 20px 16px; }
+
+    /* ===================== CTA FINAL ===================== */
+    #cta {
+      background: linear-gradient(130deg, var(--blue-xd), var(--blue-dark), var(--blue));
+      padding: 80px 0; text-align: center; position: relative; overflow: hidden;
+    }
+    #cta::before {
+      content: ''; position: absolute; inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    #cta > * { position: relative; z-index: 1; }
+    #cta .h2 { margin-bottom: 12px; }
+    #cta .sub { margin: 0 auto 32px; }
+    .cta-btns { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .cta-note { margin-top: 18px; font-size: .78rem; color: rgba(255,255,255,.45); display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+
+    /* ===================== FOOTER ===================== */
+    footer { background: var(--blue-xd); padding: 52px 0 24px; }
+    .ft-grid {
       display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
       gap: 40px; padding-bottom: 40px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
+      border-bottom: 1px solid rgba(255,255,255,.07);
     }
-    .footer-brand .logo { margin-bottom: 14px; }
-    .footer-brand .logo-text strong { color: var(--white); }
-    .footer-brand p {
-      font-size: .875rem; color: rgba(255,255,255,.5);
-      line-height: 1.7; margin-bottom: 20px;
+    .ft-brand p { font-size: .84rem; color: rgba(255,255,255,.45); line-height: 1.7; margin: 12px 0 18px; }
+    .ft-socials { display: flex; gap: 8px; }
+    .ft-soc {
+      width: 34px; height: 34px; border-radius: 8px;
+      background: rgba(255,255,255,.07); display: flex; align-items: center;
+      justify-content: center; text-decoration: none; transition: background .2s;
     }
-    .footer-socials { display: flex; gap: 8px; }
-    .social-link {
-      width: 36px; height: 36px; border-radius: var(--radius-sm);
-      background: rgba(255,255,255,.07); display: flex;
-      align-items: center; justify-content: center;
-      text-decoration: none; transition: background .2s;
+    .ft-soc:hover { background: var(--blue); }
+    .ft-soc svg { width: 15px; height: 15px; fill: #fff; }
+    .ft-col h4 {
+      font-size: .7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: rgba(255,255,255,.3); margin-bottom: 14px;
     }
-    .social-link:hover { background: var(--blue); }
-    .social-link svg { width: 16px; height: 16px; fill: white; }
-    .footer-col h4 {
-      font-size: .72rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: .1em; color: rgba(255,255,255,.35);
-      margin-bottom: 16px;
-    }
-    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-    .footer-col ul li a {
-      font-size: .875rem; color: rgba(255,255,255,.55);
-      text-decoration: none; transition: color .15s;
-    }
-    .footer-col ul li a:hover { color: var(--white); }
-    .footer-contact-row {
-      display: flex; align-items: center; gap: 8px;
-      font-size: .875rem; color: rgba(255,255,255,.55); margin-bottom: 10px;
-    }
-    .footer-contact-row svg { width: 14px; height: 14px; fill: rgba(255,255,255,.4); flex-shrink: 0; }
-    .footer-bottom {
+    .ft-col ul { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+    .ft-col ul a { font-size: .84rem; color: rgba(255,255,255,.5); text-decoration: none; transition: color .15s; }
+    .ft-col ul a:hover { color: #fff; }
+    .ft-contact { display: flex; flex-direction: column; gap: 9px; }
+    .ft-ci { display: flex; gap: 8px; align-items: flex-start; }
+    .ft-ci svg { width: 13px; height: 13px; fill: rgba(255,255,255,.35); flex-shrink: 0; margin-top: 2px; }
+    .ft-ci span { font-size: .84rem; color: rgba(255,255,255,.5); line-height: 1.4; }
+    .ft-bottom {
       padding-top: 24px; display: flex;
-      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+      justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 10px;
     }
-    .footer-bottom p { font-size: .78rem; color: rgba(255,255,255,.3); }
+    .ft-bottom p { font-size: .76rem; color: rgba(255,255,255,.25); }
 
-    /* ===== WHATSAPP FLOAT ===== */
-    .wa-float {
-      position: fixed; bottom: 24px; right: 24px; z-index: 999;
-    }
-    .wa-float-btn {
-      width: 56px; height: 56px; border-radius: 50%;
-      background: #25D366; display: flex; align-items: center;
+    /* ===================== WA FLOAT ===================== */
+    .wa {
+      position: fixed; bottom: 22px; right: 22px; z-index: 999;
+      width: 54px; height: 54px; border-radius: 50%;
+      background: var(--wa); display: flex; align-items: center;
       justify-content: center; text-decoration: none;
-      box-shadow: 0 4px 16px rgba(37,211,102,.45);
-      animation: wa-ring 2.8s infinite;
-      transition: transform .2s;
+      box-shadow: 0 4px 16px rgba(37,211,102,.4);
+      animation: wap 2.5s infinite; transition: transform .2s;
     }
-    .wa-float-btn:hover { transform: scale(1.1); }
-    .wa-float-btn svg { width: 28px; height: 28px; fill: white; }
-    @keyframes wa-ring {
-      0%,100%{ box-shadow: 0 4px 16px rgba(37,211,102,.45); }
-      50%{ box-shadow: 0 4px 32px rgba(37,211,102,.6), 0 0 0 10px rgba(37,211,102,.08); }
+    .wa:hover { transform: scale(1.1); }
+    .wa svg { width: 27px; height: 27px; fill: #fff; }
+    @keyframes wap {
+      0%,100%{ box-shadow: 0 4px 16px rgba(37,211,102,.4); }
+      50%{ box-shadow: 0 4px 32px rgba(37,211,102,.55), 0 0 0 9px rgba(37,211,102,.07); }
     }
 
-    /* ===== MOBILE MENU ===== */
-    .mobile-nav {
-      position: fixed; inset: 0; z-index: 200;
-      background: var(--white); padding: 24px;
-      transform: translateX(100%); transition: transform .3s ease;
+    /* ===================== MOBILE NAV ===================== */
+    .mnav {
+      position: fixed; inset: 0; z-index: 300;
+      background: #fff; padding: 20px 24px;
+      transform: translateX(100%); transition: transform .3s;
       display: flex; flex-direction: column; gap: 8px;
     }
-    .mobile-nav.open { transform: translateX(0); }
-    .mobile-nav-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 24px;
-    }
-    .mobile-nav-close {
-      background: none; border: none; font-size: 1.5rem;
-      cursor: pointer; color: var(--gray-700); padding: 4px;
-    }
-    .mobile-nav a {
-      font-size: 1.0625rem; font-weight: 600; color: var(--gray-900);
-      text-decoration: none; padding: 14px 0;
+    .mnav.open { transform: none; }
+    .mnav-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .mnav-close { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--gray-700); }
+    .mnav a {
+      font-size: 1rem; font-weight: 600; color: var(--gray-900);
+      text-decoration: none; padding: 13px 0;
       border-bottom: 1px solid var(--gray-100);
     }
-    .mobile-nav .btn { margin-top: 16px; justify-content: center; }
+    .mnav .btn { margin-top: 16px; justify-content: center; }
 
-    /* ===== RESPONSIVE ===== */
+    /* ===================== RESPONSIVE ===================== */
     @media (max-width: 1024px) {
-      .beneficios-grid { grid-template-columns: repeat(2, 1fr); }
-      .numeros-grid { grid-template-columns: repeat(2, 1fr); }
-      .footer-top { grid-template-columns: 1fr 1fr; }
-    }
-    @media (max-width: 900px) {
       .hero-grid { grid-template-columns: 1fr; }
-      .hero-visual { display: none; }
-      .faq-layout { grid-template-columns: 1fr; gap: 32px; }
+      .hero-right { display: none; }
+      .ben-grid { grid-template-columns: 1fr; }
+      .ben-photo { display: none; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .ft-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 820px) {
+      .faq-wrap { grid-template-columns: 1fr; gap: 28px; }
     }
     @media (max-width: 768px) {
-      nav { display: none; }
-      .header-phone { display: none; }
-      .hamburger { display: flex; }
+      .hd-nav { display: none; }
+      .hd-phone { display: none; }
+      .hd-right .btn { display: none; }
+      .hburg { display: flex; }
+      .hburger { display: flex; }
+      .hburger { display: flex; }
+      .srv-grid { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr; gap: 24px; }
+      .steps::before { display: none; }
       .dores-grid { grid-template-columns: 1fr; }
-      .servicos-grid { grid-template-columns: 1fr; }
-      .steps-row { grid-template-columns: 1fr; gap: 28px; }
-      .steps-row::before { display: none; }
       .depo-grid { grid-template-columns: 1fr; }
+      .hero-left { padding-bottom: 48px; }
     }
-    @media (max-width: 600px) {
-      .beneficios-grid { grid-template-columns: 1fr; }
-      .numeros-grid { grid-template-columns: 1fr 1fr; }
+    @media (max-width: 540px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
       .hero-ctas { flex-direction: column; }
       .hero-ctas .btn { justify-content: center; }
-      .cta-final-btns { flex-direction: column; align-items: center; }
-      .footer-top { grid-template-columns: 1fr; }
+      .cta-btns { flex-direction: column; align-items: center; }
+      .ft-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
   <!-- MOBILE NAV -->
-  <nav class="mobile-nav" id="mobileNav">
-    <div class="mobile-nav-header">
+  <div class="mnav" id="mnav">
+    <div class="mnav-hd">
       <a href="#" class="logo">
-        <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M3 3h18v2H3zm0 4h18v2H3zm0 4h12v2H3zm0 4h12v2H3zm0 4h18v2H3z"/></svg></div>
-        <div class="logo-text"><strong>Sanzio</strong><span>Serviços Contábeis</span></div>
+        <div class="logo-sq"><svg viewBox="0 0 24 24"><path d="M3 3h18v2H3zm0 4h18v2H3zm0 4h12v2H3zm0 4h12v2H3zm0 4h18v2H3z"/></svg></div>
+        <div class="logo-text"><b>Sanzio</b><small>Serviços Contábeis</small></div>
       </a>
-      <button class="mobile-nav-close" onclick="toggleNav()">✕</button>
+      <button class="mnav-close" onclick="tNav()">✕</button>
     </div>
-    <a href="#servicos" onclick="toggleNav()">Serviços</a>
-    <a href="#como-funciona" onclick="toggleNav()">Como Funciona</a>
-    <a href="#depoimentos" onclick="toggleNav()">Depoimentos</a>
-    <a href="#faq" onclick="toggleNav()">Dúvidas</a>
-    <a href="https://wa.me/5531986549394?text=Olá!%20Vim%20pelo%20site%20e%20gostaria%20de%20mais%20informações." class="btn btn-blue btn-lg" target="_blank" rel="noopener" onclick="toggleNav()">
-      Falar no WhatsApp
-    </a>
-  </nav>
+    <a href="#servicos" onclick="tNav()">Serviços</a>
+    <a href="#como" onclick="tNav()">Como Funciona</a>
+    <a href="#depo" onclick="tNav()">Depoimentos</a>
+    <a href="#faq" onclick="tNav()">Dúvidas</a>
+    <a href="https://wa.me/5531986549394?text=Olá!%20Vim%20pelo%20site." class="btn btn-green btn-lg" target="_blank" rel="noopener" onclick="tNav()">Falar no WhatsApp</a>
+  </div>
 
   <!-- HEADER -->
   <header>
-    <div class="header-inner">
+    <div class="hd">
       <a href="#" class="logo">
-        <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M3 3h18v2H3zm0 4h18v2H3zm0 4h12v2H3zm0 4h12v2H3zm0 4h18v2H3z"/></svg></div>
-        <div class="logo-text">
-          <strong>Sanzio Serviços Contábeis</strong>
-          <span>Contabilidade especializada em MEI e CNPJ</span>
-        </div>
+        <div class="logo-sq"><svg viewBox="0 0 24 24"><path d="M3 3h18v2H3zm0 4h18v2H3zm0 4h12v2H3zm0 4h12v2H3zm0 4h18v2H3z"/></svg></div>
+        <div class="logo-text"><b>Sanzio Serviços Contábeis</b><small>Contabilidade para MEI e CNPJ</small></div>
       </a>
-      <nav>
+      <div class="hd-nav">
         <a href="#servicos">Serviços</a>
-        <a href="#como-funciona">Como Funciona</a>
-        <a href="#depoimentos">Depoimentos</a>
+        <a href="#como">Como Funciona</a>
+        <a href="#depo">Depoimentos</a>
         <a href="#faq">Dúvidas</a>
-      </nav>
-      <div class="header-actions">
-        <a href="tel:+5531986549394" class="header-phone">
+      </div>
+      <div class="hd-right">
+        <a href="tel:+5531986549394" class="hd-phone">
           <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
           (31) 98654-9394
         </a>
-        <a href="https://wa.me/5531986549394?text=Olá!%20Vim%20pelo%20site%20e%20gostaria%20de%20mais%20informações." class="btn btn-blue" target="_blank" rel="noopener">
-          Falar no WhatsApp
-        </a>
-        <button class="hamburger" onclick="toggleNav()">
-          <span></span><span></span><span></span>
-        </button>
+        <a href="https://wa.me/5531986549394?text=Olá!%20Vim%20pelo%20site." class="btn btn-green" target="_blank" rel="noopener">Falar no WhatsApp</a>
+        <button class="hburger" onclick="tNav()"><span></span><span></span><span></span></button>
       </div>
     </div>
   </header>
 
+  <!-- STRIP -->
+  <div class="strip">
+    <p>🔔 MEI com débitos? Regularize antes do desenquadramento automático. <a href="https://wa.me/5531986549394?text=Quero%20regularizar%20meu%20MEI!" target="_blank" rel="noopener">Falar agora →</a></p>
+  </div>
+
   <!-- HERO -->
   <section id="hero">
-    <div class="hero-bg-shape"></div>
-    <div class="hero-bg-dots"></div>
+    <div class="hero-dots"></div>
     <div class="container hero-grid">
-      <div>
-        <div class="hero-tag">
-          <span class="dot"></span>
-          Atendimento disponível agora
+      <div class="hero-left">
+        <div class="hero-pill">
+          <span class="dot"></span> Atendimento disponível agora
         </div>
-        <h1 class="hero-title">
-          Você cuida do seu negócio.<br/>
+        <h1 class="hero-h1">
+          Você cuida da sua empresa.<br/>
           A gente cuida da sua<br/>
-          <mark>contabilidade.</mark>
+          <em>contabilidade.</em>
         </h1>
-        <p class="hero-sub">
-          MEI, CNPJ, Declaração Anual e Imposto de Renda sem burocracia. Resolução rápida via WhatsApp, sem sair de casa.
+        <p class="hero-desc">
+          Deixe a burocracia com a gente. Resolvemos tudo, desde a abertura do CNPJ até a declaração do Imposto de Renda, 100% online e sem complicação.
         </p>
         <div class="hero-ctas">
-          <a href="https://wa.me/5531986549394?text=Olá!%20Quero%20resolver%20minha%20situação%20contábil!" class="btn btn-blue btn-lg" target="_blank" rel="noopener">
+          <a href="https://wa.me/5531986549394?text=Quero%20abrir%20minha%20empresa!" class="btn btn-green btn-lg" target="_blank" rel="noopener">
             <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.116 1.522 5.847L.057 23.899l6.203-1.473A11.955 11.955 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.894 0-3.668-.497-5.205-1.367l-.374-.218-3.877.92.98-3.787-.241-.388A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
             Falar no WhatsApp
           </a>
-          <a href="#servicos" class="btn btn-outline btn-lg">Ver serviços</a>
+          <a href="#servicos" class="btn btn-ghost btn-lg">Ver serviços</a>
         </div>
         <div class="hero-trust">
-          <div class="trust-item">
-            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            <span><strong>+1.800 clientes</strong> atendidos</span>
+          <div class="htrust">
+            <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            <span><strong>Empresa regularizada</strong></span>
           </div>
-          <div class="trust-item">
-            <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
-            <span>Resposta em <strong>minutos</strong></span>
+          <div class="htrust">
+            <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            <span><strong>Suporte especializado</strong></span>
           </div>
-          <div class="trust-item">
-            <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
-            <span>100% <strong>online e seguro</strong></span>
+          <div class="htrust">
+            <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            <span><strong>100% online</strong></span>
           </div>
         </div>
       </div>
-
-      <!-- VISUAL RIGHT -->
-      <div class="hero-visual">
-        <div class="hero-card-main">
-          <p>Resolva agora mesmo</p>
-          <div class="service-quick-list">
-            <a href="https://wa.me/5531986549394?text=Quero%20abrir%20meu%20MEI!" class="service-quick-item" target="_blank" rel="noopener">
-              <div class="sq-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
-              <div class="sq-info">
-                <strong>Abertura de MEI</strong>
-                <span>100% online e sem complicação</span>
-              </div>
-              <span class="sq-badge">GRÁTIS</span>
+      <div class="hero-right">
+        <div class="hero-illustration">
+          <div class="hi-tag">✅ Resolva agora mesmo</div>
+          <div class="hi-services">
+            <a href="https://wa.me/5531986549394?text=Quero%20abrir%20meu%20MEI!" class="hi-row" target="_blank" rel="noopener">
+              <div class="hi-ico"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+              <div class="hi-info"><b>Abertura de MEI</b><small>Rápido, fácil e online</small></div>
+              <span class="hi-badge">GRÁTIS</span>
             </a>
-            <a href="https://wa.me/5531986549394?text=Preciso%20da%20declaração%20anual%20do%20MEI!" class="service-quick-item" target="_blank" rel="noopener">
-              <div class="sq-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg></div>
-              <div class="sq-info">
-                <strong>Declaração Anual MEI</strong>
-                <span>Evite multas da Receita Federal</span>
-              </div>
+            <a href="https://wa.me/5531986549394?text=Preciso%20da%20declaração%20anual!" class="hi-row" target="_blank" rel="noopener">
+              <div class="hi-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg></div>
+              <div class="hi-info"><b>Declaração Anual MEI</b><small>Evite multas da Receita</small></div>
             </a>
-            <a href="https://wa.me/5531986549394?text=Quero%20abrir%20um%20CNPJ!" class="service-quick-item" target="_blank" rel="noopener">
-              <div class="sq-icon"><svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg></div>
-              <div class="sq-info">
-                <strong>Abertura de CNPJ</strong>
-                <span>Simples Nacional, ME, Ltda</span>
-              </div>
+            <a href="https://wa.me/5531986549394?text=Quero%20abrir%20um%20CNPJ!" class="hi-row" target="_blank" rel="noopener">
+              <div class="hi-ico"><svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg></div>
+              <div class="hi-info"><b>Abertura de CNPJ</b><small>ME, Ltda, Simples Nacional</small></div>
             </a>
-            <a href="https://wa.me/5531986549394?text=Preciso%20declarar%20meu%20Imposto%20de%20Renda!" class="service-quick-item" target="_blank" rel="noopener">
-              <div class="sq-icon"><svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg></div>
-              <div class="sq-info">
-                <strong>Imposto de Renda PF</strong>
-                <span>Declaração sem erro e sem stress</span>
-              </div>
+            <a href="https://wa.me/5531986549394?text=Preciso%20declarar%20meu%20IR!" class="hi-row" target="_blank" rel="noopener">
+              <div class="hi-ico"><svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg></div>
+              <div class="hi-info"><b>Imposto de Renda PF</b><small>Declaração sem stress</small></div>
             </a>
           </div>
-        </div>
-        <div class="hero-card-mini">
-          <div class="mini-card">
-            <div class="mini-val">1.8K<sup>+</sup></div>
-            <div class="mini-label">Clientes atendidos</div>
-          </div>
-          <div class="mini-card accent">
-            <div class="mini-val">5★</div>
-            <div class="mini-label">Avaliação média</div>
+          <div class="hi-stats">
+            <div class="hi-stat"><b>1.8K+</b><small>Clientes atendidos</small></div>
+            <div class="hi-stat"><b>5 ★</b><small>Avaliação média</small></div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- BENEFÍCIOS RÁPIDOS -->
+  <!-- BENEFÍCIOS -->
   <section id="beneficios">
     <div class="container">
-      <div class="beneficios-grid">
-        <div class="ben-item fade-up">
-          <div class="ben-icon"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg></div>
-          <div class="ben-info">
-            <h4>100% Online</h4>
-            <p>Sem filas, sem deslocamento. Tudo resolvido pelo WhatsApp ou e-mail.</p>
+      <div class="ben-head anim">
+        <span class="label">Tudo que sua empresa precisa para crescer!</span>
+        <h2 class="h2">Temos especialistas dedicados ao seu negócio</h2>
+        <p class="sub">que cuidam dos processos da sua empresa.</p>
+      </div>
+      <div class="ben-grid">
+        <div class="ben-photo anim">
+          <div class="ben-photo-inner">
+            <div class="ben-photo-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </div>
+            <p class="ben-photo-text">Atendimento perfeito,<br/>negócio perfeito.</p>
           </div>
         </div>
-        <div class="ben-item fade-up">
-          <div class="ben-icon"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg></div>
-          <div class="ben-info">
-            <h4>Resposta Rápida</h4>
-            <p>Atendemos de segunda a sábado. Resposta em minutos, não dias.</p>
+        <div class="ben-list">
+          <div class="ben-item anim">
+            <div class="ben-ico"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg></div>
+            <div><h4>Praticidade</h4><p>100% online, de onde estiver, sem sair de casa e sem burocracia desnecessária.</p></div>
           </div>
-        </div>
-        <div class="ben-item fade-up">
-          <div class="ben-icon"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg></div>
-          <div class="ben-info">
-            <h4>Sem Erros</h4>
-            <p>Contadores experientes cuidam de tudo para evitar multas e problemas com a Receita.</p>
+          <div class="ben-item anim">
+            <div class="ben-ico"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+            <div><h4>Especialista Contábil</h4><p>Um contador dedicado ao seu negócio, do início ao fim, com atendimento humanizado.</p></div>
           </div>
-        </div>
-        <div class="ben-item fade-up">
-          <div class="ben-icon"><svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg></div>
-          <div class="ben-info">
-            <h4>Preço Justo</h4>
-            <p>Planos acessíveis para MEI e pequenas empresas. Sem letras miúdas.</p>
+          <div class="ben-item anim">
+            <div class="ben-ico"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg></div>
+            <div><h4>Transparência</h4><p>Você acompanha cada etapa do processo. Nada de surpresas ou cobranças escondidas.</p></div>
+          </div>
+          <div class="ben-item anim">
+            <div class="ben-ico"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg></div>
+            <div><h4>Segurança</h4><p>Seus dados protegidos e suas obrigações fiscais sempre em dia, sem risco de multas.</p></div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- DORES -->
-  <section id="dores">
+  <!-- STATS -->
+  <section id="stats">
     <div class="container">
-      <div class="dores-header fade-up">
-        <span class="section-label">Problemas que resolvemos</span>
-        <h2 class="section-title">Sua situação é mais comum<br/>do que você imagina</h2>
-        <p class="section-sub">Milhares de MEIs e empreendedores enfrentam esses problemas todo ano. A gente resolve por você.</p>
-      </div>
-      <div class="dores-grid">
-        <div class="dor-card fade-up">
-          <div class="dor-num">01</div>
-          <h3>MEI com débitos em aberto</h3>
-          <p>Parcelas do DAS atrasadas podem levar ao desenquadramento automático pela Receita Federal. Ainda dá para regularizar.</p>
+      <div class="stats-grid">
+        <div class="stat-cell anim">
+          <div class="stat-num">+<span>1.800</span></div>
+          <div class="stat-label">empreendedores atendidos</div>
         </div>
-        <div class="dor-card fade-up">
-          <div class="dor-num">02</div>
-          <h3>Declaração Anual não entregue</h3>
-          <p>Esquecer de enviar a DASN gera multa mínima de R$50 que cresce com o tempo. Resolvemos rápido e evitamos mais custos.</p>
+        <div class="stat-cell anim">
+          <div class="stat-num"><span>98</span>%</div>
+          <div class="stat-label">satisfação dos clientes</div>
         </div>
-        <div class="dor-card fade-up">
-          <div class="dor-num">03</div>
-          <h3>CPF ou CNPJ bloqueado</h3>
-          <p>Situação irregular impede emissão de notas, crédito e contratos. Regularizamos sem burocracia e de forma rápida.</p>
+        <div class="stat-cell anim">
+          <div class="stat-num"><span>5</span> ★</div>
+          <div class="stat-label">avaliação média no Google</div>
         </div>
-        <div class="dor-card fade-up">
-          <div class="dor-num">04</div>
-          <h3>Quer abrir empresa mas não sabe como</h3>
-          <p>MEI, ME ou LTDA? Te orientamos sobre o enquadramento certo para o seu negócio e cuidamos de toda a abertura.</p>
-        </div>
-        <div class="dor-card fade-up">
-          <div class="dor-num">05</div>
-          <h3>Imposto de Renda assustando</h3>
-          <p>A declaração do IR parece complicada, mas não precisa ser. Fazemos com precisão e aproveitamos todas as deduções legais.</p>
-        </div>
-        <div class="dor-card fade-up">
-          <div class="dor-num">06</div>
-          <h3>Contador que não responde</h3>
-          <p>Você não precisa ficar esperando. Nossa equipe responde rápido e mantém você informado em cada etapa do processo.</p>
+        <div class="stat-cell anim">
+          <div class="stat-num">&lt;<span>24h</span></div>
+          <div class="stat-label">tempo de resposta</div>
         </div>
       </div>
     </div>
@@ -812,171 +708,173 @@
   <!-- SERVIÇOS -->
   <section id="servicos">
     <div class="container">
-      <div class="servicos-header fade-up">
-        <span class="section-label">Nossos Serviços</span>
-        <h2 class="section-title">Tudo que você precisa<br/>em um só lugar</h2>
-        <p class="section-sub">Serviços contábeis completos para MEI, autônomos e pequenas empresas em Belo Horizonte e em todo o Brasil.</p>
+      <div class="srv-head anim">
+        <span class="label">Nossos Serviços</span>
+        <h2 class="h2">Contabilidade para cada situação do jeito certo</h2>
+        <p class="sub">Independente da sua área de atuação, temos a solução para o seu negócio.</p>
       </div>
-      <div class="servicos-grid">
-
-        <div class="srv-card fade-up">
-          <div class="srv-icon-wrap"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+      <div class="srv-grid">
+        <div class="srv-card anim">
+          <div class="srv-ico"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
           <h3>MEI — Microempreendedor Individual</h3>
-          <p>Cuidamos de todas as etapas do seu MEI, da abertura ao encerramento, passando por declarações e regularizações.</p>
-          <ul class="srv-list">
-            <li>Abertura de MEI (gratuita)</li>
-            <li>Declaração Anual (DASN-SIMEI)</li>
-            <li>Parcelamento de débitos em aberto</li>
-            <li>Regularização de pendências</li>
-            <li>Encerramento de MEI</li>
-          </ul>
-          <a href="https://wa.me/5531986549394?text=Quero%20saber%20mais%20sobre%20serviços%20para%20MEI!" class="btn btn-blue" target="_blank" rel="noopener">Falar sobre MEI</a>
+          <p>Cuidamos de todas as etapas do seu MEI, da abertura ao encerramento, passando por declarações e regularizações com a Receita Federal.</p>
+          <div class="srv-tags">
+            <span class="srv-tag">Abertura gratuita</span>
+            <span class="srv-tag">Declaração Anual</span>
+            <span class="srv-tag">Parcelamento DAS</span>
+            <span class="srv-tag">Regularização</span>
+            <span class="srv-tag">Encerramento</span>
+          </div>
+          <a href="https://wa.me/5531986549394?text=Quero%20saber%20sobre%20MEI!" class="btn btn-blue" target="_blank" rel="noopener">Falar sobre MEI</a>
         </div>
-
-        <div class="srv-card fade-up">
-          <div class="srv-icon-wrap"><svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg></div>
+        <div class="srv-card anim">
+          <div class="srv-ico"><svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg></div>
           <h3>Abertura de CNPJ / Empresa</h3>
-          <p>Quer formalizar seu negócio e ter mais credibilidade no mercado? A gente cuida de tudo, do início ao CNPJ em mãos.</p>
-          <ul class="srv-list">
-            <li>Abertura de empresa (Ltda, ME, EPP)</li>
-            <li>Escolha do regime tributário ideal</li>
-            <li>Inscrição no Simples Nacional</li>
-            <li>Alterações contratuais</li>
-            <li>Encerramento de empresa</li>
-          </ul>
-          <a href="https://wa.me/5531986549394?text=Quero%20abrir%20um%20CNPJ%20ou%20empresa!" class="btn btn-blue" target="_blank" rel="noopener">Abrir minha empresa</a>
+          <p>Quer formalizar seu negócio? A gente cuida de tudo, do enquadramento correto ao CNPJ em mãos, de forma rápida e sem burocracia.</p>
+          <div class="srv-tags">
+            <span class="srv-tag">Ltda / ME / EPP</span>
+            <span class="srv-tag">Simples Nacional</span>
+            <span class="srv-tag">Regime tributário</span>
+            <span class="srv-tag">Alterações</span>
+            <span class="srv-tag">Encerramento</span>
+          </div>
+          <a href="https://wa.me/5531986549394?text=Quero%20abrir%20um%20CNPJ!" class="btn btn-blue" target="_blank" rel="noopener">Abrir minha empresa</a>
         </div>
-
-        <div class="srv-card fade-up">
-          <div class="srv-icon-wrap"><svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg></div>
+        <div class="srv-card anim">
+          <div class="srv-ico"><svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg></div>
           <h3>Imposto de Renda Pessoa Física</h3>
-          <p>Declaração do IR feita com atenção, aproveitando todas as deduções legais para você pagar menos e ter mais tranquilidade.</p>
-          <ul class="srv-list">
-            <li>Declaração IRPF completa</li>
-            <li>Análise de deduções (saúde, educação)</li>
-            <li>Retificação de declarações anteriores</li>
-            <li>Regularização de CPF na Receita</li>
-            <li>Orientação sobre restituição</li>
-          </ul>
+          <p>Declaração do IR feita com atenção e aproveitando todas as deduções legais. Você paga menos e fica tranquilo com a Receita Federal.</p>
+          <div class="srv-tags">
+            <span class="srv-tag">IRPF completo</span>
+            <span class="srv-tag">Deduções (saúde, educação)</span>
+            <span class="srv-tag">Retificação</span>
+            <span class="srv-tag">Regularização CPF</span>
+          </div>
           <a href="https://wa.me/5531986549394?text=Quero%20declarar%20meu%20Imposto%20de%20Renda!" class="btn btn-blue" target="_blank" rel="noopener">Declarar meu IR</a>
         </div>
-
-        <div class="srv-card fade-up">
-          <div class="srv-icon-wrap"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></div>
+        <div class="srv-card anim">
+          <div class="srv-ico"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></div>
           <h3>Consultoria e Regularizações</h3>
-          <p>Com dúvidas sobre sua situação fiscal? Resolvemos pendências, orientamos e encontramos o melhor caminho para o seu caso.</p>
-          <ul class="srv-list">
-            <li>Análise do regime tributário ideal</li>
-            <li>Regularização de débitos</li>
-            <li>Parcelamento Receita Federal</li>
-            <li>Emissão de certidões negativas</li>
-            <li>Orientação sobre nota fiscal</li>
-          </ul>
-          <a href="https://wa.me/5531986549394?text=Preciso%20de%20uma%20consultoria%20contábil!" class="btn btn-blue" target="_blank" rel="noopener">Quero uma consultoria</a>
+          <p>Situação irregular, dívidas com a Receita ou dúvidas sobre sua empresa? Te orientamos e resolvemos tudo de forma rápida e eficiente.</p>
+          <div class="srv-tags">
+            <span class="srv-tag">Parcelamento Receita</span>
+            <span class="srv-tag">Certidões negativas</span>
+            <span class="srv-tag">Nota fiscal</span>
+            <span class="srv-tag">Planejamento tributário</span>
+          </div>
+          <a href="https://wa.me/5531986549394?text=Preciso%20de%20uma%20consultoria!" class="btn btn-blue" target="_blank" rel="noopener">Quero uma consultoria</a>
         </div>
-
       </div>
     </div>
   </section>
 
   <!-- COMO FUNCIONA -->
-  <section id="como-funciona">
+  <section id="como">
     <div class="container">
-      <div class="como-header fade-up">
-        <span class="section-label">Como Funciona</span>
-        <h2 class="section-title">3 passos para resolver tudo</h2>
-        <p class="section-sub">Sem burocracia, sem filas. Tudo 100% online, no seu tempo.</p>
+      <div class="como-head anim">
+        <span class="label">Como Funciona</span>
+        <h2 class="h2">Uma contabilidade que te acompanha em cada momento</h2>
+        <p class="sub">Desde a escolha do melhor regime tributário até a entrega de todas as obrigações, aqui está o caminho mais simples para deixar sua empresa nas mãos certas.</p>
       </div>
-      <div class="steps-row">
-        <div class="step fade-up">
-          <div class="step-circle">1</div>
+      <div class="steps">
+        <div class="step anim">
+          <div class="step-n">1</div>
           <h3>Entre em contato</h3>
           <p>Mande uma mensagem pelo WhatsApp. Atendemos rápido, de segunda a sábado, sem enrolação.</p>
         </div>
-        <div class="step fade-up">
-          <div class="step-circle">2</div>
+        <div class="step anim">
+          <div class="step-n">2</div>
           <h3>Envie os documentos</h3>
-          <p>Solicitamos apenas o necessário, tudo via WhatsApp ou e-mail. Simples e seguro.</p>
+          <p>Pedimos apenas o necessário, tudo via WhatsApp ou e-mail. Simples, seguro e sem filas.</p>
         </div>
-        <div class="step fade-up">
-          <div class="step-circle">3</div>
-          <h3>Receba a solução</h3>
-          <p>Cuidamos de toda a parte burocrática e te entregamos o resultado. Você só precisa aprovar.</p>
+        <div class="step anim">
+          <div class="step-n">3</div>
+          <h3>CNPJ / solução pronto!</h3>
+          <p>Cuidamos de tudo e te entregamos o resultado. Você só precisa aprovar e pronto.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- NÚMEROS -->
-  <section id="numeros">
+  <!-- DORES -->
+  <section id="dores">
     <div class="container">
-      <div class="numeros-grid">
-        <div class="num-cell fade-up">
-          <div class="num-val">1.8K<sup>+</sup></div>
-          <div class="num-label">Clientes atendidos</div>
+      <div class="dores-head anim">
+        <span class="label">Somos especialistas em resolver</span>
+        <h2 class="h2">Problemas que resolvemos todo dia</h2>
+        <p class="sub">Milhares de MEIs e empreendedores passam por isso. A gente cuida de tudo para você.</p>
+      </div>
+      <div class="dores-grid">
+        <div class="dor anim">
+          <div class="dor-n">01</div>
+          <h3>MEI com débitos em aberto</h3>
+          <p>Parcelas do DAS atrasadas podem levar ao desenquadramento automático pela Receita. Ainda dá para regularizar.</p>
         </div>
-        <div class="num-cell fade-up">
-          <div class="num-val">98%</div>
-          <div class="num-label">Satisfação dos clientes</div>
+        <div class="dor anim">
+          <div class="dor-n">02</div>
+          <h3>Declaração Anual atrasada</h3>
+          <p>Esquecer de enviar a DASN gera multa mínima de R$50 que cresce com o tempo. Resolvemos rápido.</p>
         </div>
-        <div class="num-cell fade-up">
-          <div class="num-val">5★</div>
-          <div class="num-label">Avaliação média</div>
+        <div class="dor anim">
+          <div class="dor-n">03</div>
+          <h3>CPF ou CNPJ bloqueado</h3>
+          <p>Situação irregular impede notas fiscais, crédito e contratos. Regularizamos sem burocracia.</p>
         </div>
-        <div class="num-cell fade-up">
-          <div class="num-val">&lt;24h</div>
-          <div class="num-label">Prazo de resposta</div>
+        <div class="dor anim">
+          <div class="dor-n">04</div>
+          <h3>Quer abrir empresa mas não sabe como</h3>
+          <p>MEI, ME ou LTDA? Te orientamos sobre o melhor enquadramento e cuidamos de toda a abertura.</p>
+        </div>
+        <div class="dor anim">
+          <div class="dor-n">05</div>
+          <h3>Imposto de Renda assustando</h3>
+          <p>Fazemos sua declaração com precisão e aproveitamos todas as deduções legais para você pagar menos.</p>
+        </div>
+        <div class="dor anim">
+          <div class="dor-n">06</div>
+          <h3>Contador que não responde</h3>
+          <p>Nossa equipe responde rápido e mantém você informado em cada etapa, sem deixar você no escuro.</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- DEPOIMENTOS -->
-  <section id="depoimentos">
+  <section id="depo">
     <div class="container">
-      <div class="depo-header fade-up">
-        <span class="section-label">Depoimentos</span>
-        <h2 class="section-title">O que nossos clientes dizem</h2>
-        <p class="section-sub">Mais de 1.800 clientes satisfeitos em Belo Horizonte e em todo o Brasil.</p>
+      <div class="depo-head anim">
+        <span class="label">Depoimentos</span>
+        <h2 class="h2">O que nossos clientes dizem</h2>
+        <p class="sub">Mais de 1.800 empreendedores satisfeitos em BH e em todo o Brasil.</p>
         <br/>
-        <div class="google-badge">
-          <svg viewBox="0 0 24 24" width="20" height="20"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-          <span class="stars-inline">⭐⭐⭐⭐⭐</span>
-          <span><strong>4.9</strong> no Google</span>
+        <div class="google-row">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          <span>⭐⭐⭐⭐⭐ <strong>4.9</strong> no Google · +50 avaliações</span>
         </div>
       </div>
       <div class="depo-grid">
-        <div class="depo-card fade-up">
+        <div class="depo-card anim">
           <div class="depo-stars">⭐⭐⭐⭐⭐</div>
           <p class="depo-text">"Resolvi minha situação com o MEI em menos de 1 dia. O Sanzio é muito atencioso e explica tudo direitinho. Super recomendo para quem quer resolver rápido sem dor de cabeça!"</p>
           <div class="depo-author">
-            <div class="depo-avatar">JM</div>
-            <div>
-              <div class="depo-name">Juliana Martins</div>
-              <div class="depo-role">MEI — Costureira, BH</div>
-            </div>
+            <div class="depo-av">JM</div>
+            <div><div class="depo-name">Juliana Martins</div><div class="depo-role">MEI · Costureira, BH</div></div>
           </div>
         </div>
-        <div class="depo-card fade-up">
+        <div class="depo-card anim">
           <div class="depo-stars">⭐⭐⭐⭐⭐</div>
           <p class="depo-text">"Abri minha empresa com o Sanzio e foi tudo muito tranquilo. Atendeu rápido, mandou tudo pelo WhatsApp e resolveu em 2 dias. Profissionalismo de alto nível. Nota 10!"</p>
           <div class="depo-author">
-            <div class="depo-avatar" style="background:linear-gradient(135deg,#0055FF,#001A5E)">RC</div>
-            <div>
-              <div class="depo-name">Ricardo Costa</div>
-              <div class="depo-role">Empreendedor, BH</div>
-            </div>
+            <div class="depo-av" style="background:linear-gradient(135deg,#0055FF,#001A5E)">RC</div>
+            <div><div class="depo-name">Ricardo Costa</div><div class="depo-role">Empreendedor, BH</div></div>
           </div>
         </div>
-        <div class="depo-card fade-up">
+        <div class="depo-card anim">
           <div class="depo-stars">⭐⭐⭐⭐⭐</div>
           <p class="depo-text">"Estava com medo de fazer o Imposto de Renda e o Sanzio me ajudou em tudo com muita paciência. Consegui uma restituição que não esperava. Excelente serviço!"</p>
           <div class="depo-author">
-            <div class="depo-avatar" style="background:linear-gradient(135deg,#0055FF,#003399)">AS</div>
-            <div>
-              <div class="depo-name">Ana Silva</div>
-              <div class="depo-role">Professora, BH</div>
-            </div>
+            <div class="depo-av" style="background:linear-gradient(135deg,#0055FF,#003399)">AS</div>
+            <div><div class="depo-name">Ana Silva</div><div class="depo-role">Professora, BH</div></div>
           </div>
         </div>
       </div>
@@ -986,57 +884,37 @@
   <!-- FAQ -->
   <section id="faq">
     <div class="container">
-      <div class="faq-layout">
-        <div class="faq-left fade-up">
-          <span class="section-label">Dúvidas Frequentes</span>
-          <h2 class="section-title">Perguntas que todo MEI faz</h2>
-          <p class="section-sub">Não encontrou o que procura? É só chamar no WhatsApp que respondemos na hora.</p>
-          <a href="https://wa.me/5531986549394?text=Tenho%20uma%20dúvida%20sobre%20contabilidade!" class="btn btn-blue" target="_blank" rel="noopener">
-            Tirar dúvida agora
-          </a>
+      <div class="faq-wrap">
+        <div class="anim">
+          <span class="label">Dúvidas Frequentes</span>
+          <h2 class="h2">Perguntas que todo MEI faz</h2>
+          <p class="sub">Não encontrou o que procura? É só chamar no WhatsApp.</p>
+          <a href="https://wa.me/5531986549394?text=Tenho%20uma%20dúvida!" class="btn btn-blue" target="_blank" rel="noopener" style="margin-top:24px">Tirar dúvida agora</a>
         </div>
-        <div class="faq-list fade-up">
-          <div class="faq-item">
-            <button class="faq-btn" onclick="toggleFaq(this)">
-              Quanto custa para abrir um MEI?
-              <span class="faq-icon"><svg viewBox="0 0 24 24"><path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></span>
-            </button>
-            <div class="faq-ans">A abertura de MEI é <strong>gratuita</strong> na Receita Federal. Cobramos apenas pela assessoria para garantir que tudo seja feito corretamente, sem erros que possam gerar problemas no futuro.</div>
+        <div class="faq-col anim">
+          <div class="fi">
+            <button class="fi-btn" onclick="tFaq(this)">Quanto custa para abrir um MEI?<span class="fi-ic"><svg viewBox="0 0 24 24"><path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></span></button>
+            <div class="fi-ans">A abertura de MEI é <strong>gratuita</strong> na Receita Federal. Cobramos apenas pela assessoria para garantir que tudo seja feito corretamente, sem erros que possam gerar problemas futuros.</div>
           </div>
-          <div class="faq-item">
-            <button class="faq-btn" onclick="toggleFaq(this)">
-              O MEI é obrigado a fazer a Declaração Anual?
-              <span class="faq-icon"><svg viewBox="0 0 24 24"><path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></span>
-            </button>
-            <div class="faq-ans">Sim! Todo MEI deve entregar a DASN-SIMEI até 31 de maio de cada ano. O não envio gera multa mínima de R$50 e pode levar ao cancelamento do CNPJ pela Receita Federal.</div>
+          <div class="fi">
+            <button class="fi-btn" onclick="tFaq(this)">O MEI é obrigado a fazer a Declaração Anual?<span class="fi-ic"><svg viewBox="0 0 24 24"><path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></span></button>
+            <div class="fi-ans">Sim! Todo MEI deve entregar a DASN-SIMEI até 31 de maio de cada ano. O não envio gera multa mínima de R$50 e pode levar ao cancelamento do CNPJ pela Receita Federal.</div>
           </div>
-          <div class="faq-item">
-            <button class="faq-btn" onclick="toggleFaq(this)">
-              O que acontece se eu não pagar o DAS do MEI?
-              <span class="faq-icon"><svg viewBox="0 0 24 24"><path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></span>
-            </button>
-            <div class="faq-ans">Após 12 meses sem pagamento, a Receita pode cancelar o MEI automaticamente. Os valores em aberto geram juros e multa — mas ainda é possível parcelar os débitos em até 60 vezes.</div>
+          <div class="fi">
+            <button class="fi-btn" onclick="tFaq(this)">O que acontece se eu não pagar o DAS do MEI?<span class="fi-ic"><svg viewBox="0 0 24 24"><path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></span></button>
+            <div class="fi-ans">Após 12 meses sem pagamento, a Receita pode cancelar o MEI automaticamente. Os valores em atraso geram juros e multa — mas ainda é possível parcelar os débitos em até 60 vezes.</div>
           </div>
-          <div class="faq-item">
-            <button class="faq-btn" onclick="toggleFaq(this)">
-              Qual a diferença entre MEI, ME e CNPJ Ltda?
-              <span class="faq-icon"><svg viewBox="0 0 24 24"><path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></span>
-            </button>
-            <div class="faq-ans">MEI aceita faturamento até R$81.000/ano. ME até R$360.000/ano. LTDA não tem limite mas tem mais obrigações contábeis. Te orientamos gratuitamente sobre o melhor enquadramento para o seu negócio.</div>
+          <div class="fi">
+            <button class="fi-btn" onclick="tFaq(this)">Qual a diferença entre MEI, ME e CNPJ Ltda?<span class="fi-ic"><svg viewBox="0 0 24 24"><path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></span></button>
+            <div class="fi-ans">MEI aceita faturamento até R$81.000/ano. ME até R$360.000/ano. LTDA não tem limite mas tem mais obrigações. Te orientamos gratuitamente sobre o melhor enquadramento para o seu negócio.</div>
           </div>
-          <div class="faq-item">
-            <button class="faq-btn" onclick="toggleFaq(this)">
-              Preciso declarar Imposto de Renda sendo MEI?
-              <span class="faq-icon"><svg viewBox="0 0 24 24"><path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></span>
-            </button>
-            <div class="faq-ans">Depende do seu rendimento total como pessoa física. Se você recebeu mais de R$30.639,90 em 2024 (ou se enquadra em outros critérios da Receita), precisa declarar mesmo sendo MEI.</div>
+          <div class="fi">
+            <button class="fi-btn" onclick="tFaq(this)">Preciso declarar Imposto de Renda sendo MEI?<span class="fi-ic"><svg viewBox="0 0 24 24"><path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></span></button>
+            <div class="fi-ans">Depende do seu rendimento como pessoa física. Se recebeu mais de R$30.639,90 em 2024 (ou se enquadra em outros critérios da Receita), precisa declarar mesmo sendo MEI.</div>
           </div>
-          <div class="faq-item">
-            <button class="faq-btn" onclick="toggleFaq(this)">
-              O atendimento é presencial ou online?
-              <span class="faq-icon"><svg viewBox="0 0 24 24"><path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></span>
-            </button>
-            <div class="faq-ans">100% online via WhatsApp. Atendemos clientes de Belo Horizonte e de todo o Brasil sem necessidade de deslocamento. Tudo é resolvido digitalmente com segurança.</div>
+          <div class="fi">
+            <button class="fi-btn" onclick="tFaq(this)">O atendimento é presencial ou online?<span class="fi-ic"><svg viewBox="0 0 24 24"><path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></span></button>
+            <div class="fi-ans">100% online via WhatsApp. Atendemos de BH e todo o Brasil sem necessidade de deslocamento. Tudo é resolvido digitalmente com total segurança.</div>
           </div>
         </div>
       </div>
@@ -1044,24 +922,26 @@
   </section>
 
   <!-- CTA FINAL -->
-  <section id="cta-final">
+  <section id="cta">
     <div class="container">
-      <h2>Pronto para resolver sua situação de vez?</h2>
-      <p>Fale agora com nossa equipe. Respondemos rápido e sem compromisso. Atendemos de segunda a sábado.</p>
-      <div class="cta-final-btns">
-        <a href="https://wa.me/5531986549394?text=Olá!%20Vim%20pelo%20site%20e%20quero%20resolver%20minha%20situação%20contábil!" class="btn btn-green btn-lg" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.116 1.522 5.847L.057 23.899l6.203-1.473A11.955 11.955 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.894 0-3.668-.497-5.205-1.367l-.374-.218-3.877.92.98-3.787-.241-.388A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+      <h2 class="h2 h2-white">Onde você estiver, a sua contabilidade<br/>estará com você!</h2>
+      <p class="sub sub-white" style="margin:14px auto 32px">Fale agora com a nossa equipe. Respondemos rápido, sem compromisso, de segunda a sábado.</p>
+      <div class="cta-btns">
+        <a href="https://wa.me/5531986549394?text=Olá!%20Vim%20pelo%20site%20e%20quero%20resolver%20minha%20situação!" class="btn btn-green btn-lg" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.116 1.522 5.847L.057 23.899l6.203-1.473A11.955 11.955 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.894 0-3.668-.497-5.205-1.367l-.374-.218-3.877.92.98-3.787-.241-.388A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
           Falar no WhatsApp
         </a>
-        <a href="tel:+5531986549394" class="btn btn-white-outline btn-lg">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:white"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+        <a href="tel:+5531986549394" class="btn btn-ghost btn-lg">
+          <svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:white"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
           (31) 98654-9394
         </a>
       </div>
       <div class="cta-note">
         <span>Sem compromisso</span>
+        <span>·</span>
         <span>Resposta em minutos</span>
-        <span>100% online</span>
+        <span>·</span>
+        <span>Atendemos todo o Brasil</span>
       </div>
     </div>
   </section>
@@ -1069,23 +949,23 @@
   <!-- FOOTER -->
   <footer>
     <div class="container">
-      <div class="footer-top">
-        <div class="footer-brand">
-          <a href="#" class="logo">
-            <div class="logo-mark" style="background:rgba(255,255,255,.12)"><svg viewBox="0 0 24 24"><path d="M3 3h18v2H3zm0 4h18v2H3zm0 4h12v2H3zm0 4h12v2H3zm0 4h18v2H3z"/></svg></div>
-            <div class="logo-text"><strong>Sanzio Serviços Contábeis</strong><span style="color:rgba(255,255,255,.4)">Contabilidade especializada em MEI</span></div>
+      <div class="ft-grid">
+        <div class="ft-brand">
+          <a href="#" class="logo" style="margin-bottom:12px;display:inline-flex">
+            <div class="logo-sq" style="background:rgba(255,255,255,.1)"><svg viewBox="0 0 24 24"><path d="M3 3h18v2H3zm0 4h18v2H3zm0 4h12v2H3zm0 4h12v2H3zm0 4h18v2H3z"/></svg></div>
+            <div class="logo-text"><b style="color:#fff">Sanzio Serviços Contábeis</b><small>Contabilidade especializada em MEI</small></div>
           </a>
           <p>Atendimento perfeito para um negócio perfeito. Especialistas em MEI, CNPJ e Imposto de Renda em BH e todo o Brasil.</p>
-          <div class="footer-socials">
-            <a href="https://www.instagram.com/contabilidadesanzio/" target="_blank" rel="noopener" class="social-link">
+          <div class="ft-socials">
+            <a href="https://www.instagram.com/contabilidadesanzio/" target="_blank" rel="noopener" class="ft-soc">
               <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
             </a>
-            <a href="https://wa.me/5531986549394" target="_blank" rel="noopener" class="social-link">
+            <a href="https://wa.me/5531986549394" target="_blank" rel="noopener" class="ft-soc">
               <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.116 1.522 5.847L.057 23.899l6.203-1.473A11.955 11.955 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.894 0-3.668-.497-5.205-1.367l-.374-.218-3.877.92.98-3.787-.241-.388A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
             </a>
           </div>
         </div>
-        <div class="footer-col">
+        <div class="ft-col">
           <h4>Serviços</h4>
           <ul>
             <li><a href="#servicos">MEI — Abertura e Regularização</a></li>
@@ -1095,71 +975,60 @@
             <li><a href="#servicos">Parcelamento de Débitos</a></li>
           </ul>
         </div>
-        <div class="footer-col">
+        <div class="ft-col">
           <h4>Navegação</h4>
           <ul>
             <li><a href="#hero">Início</a></li>
-            <li><a href="#dores">Problemas que Resolvemos</a></li>
-            <li><a href="#como-funciona">Como Funciona</a></li>
-            <li><a href="#depoimentos">Depoimentos</a></li>
+            <li><a href="#beneficios">Por que a Sanzio?</a></li>
+            <li><a href="#como">Como Funciona</a></li>
+            <li><a href="#depo">Depoimentos</a></li>
             <li><a href="#faq">Dúvidas Frequentes</a></li>
           </ul>
         </div>
-        <div class="footer-col">
+        <div class="ft-col">
           <h4>Contato</h4>
-          <div class="footer-contact-row">
-            <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.116 1.522 5.847L.057 23.899l6.203-1.473A11.955 11.955 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.894 0-3.668-.497-5.205-1.367l-.374-.218-3.877.92.98-3.787-.241-.388A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-            (31) 98654-9394
-          </div>
-          <div class="footer-contact-row">
-            <svg viewBox="0 0 24 24"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 01-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 017.8 2m-.2 2A3.6 3.6 0 004 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 003.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 011.25 1.25A1.25 1.25 0 0117.25 8 1.25 1.25 0 0116 6.75a1.25 1.25 0 011.25-1.25M12 7a5 5 0 015 5 5 5 0 01-5 5 5 5 0 01-5-5 5 5 0 015-5m0 2a3 3 0 00-3 3 3 3 0 003 3 3 3 0 003-3 3 3 0 00-3-3z"/></svg>
-            @contabilidadesanzio
-          </div>
-          <div class="footer-contact-row">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Belo Horizonte — MG
+          <div class="ft-contact">
+            <div class="ft-ci"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg><span>(31) 98654-9394</span></div>
+            <div class="ft-ci"><svg viewBox="0 0 24 24"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 01-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 017.8 2m-.2 2A3.6 3.6 0 004 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 003.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 011.25 1.25A1.25 1.25 0 0117.25 8 1.25 1.25 0 0116 6.75a1.25 1.25 0 011.25-1.25M12 7a5 5 0 015 5 5 5 0 01-5 5 5 5 0 01-5-5 5 5 0 015-5m0 2a3 3 0 00-3 3 3 3 0 003 3 3 3 0 003-3 3 3 0 00-3-3z"/></svg><span>@contabilidadesanzio</span></div>
+            <div class="ft-ci"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg><span>Belo Horizonte — MG<br/>100% online</span></div>
           </div>
         </div>
       </div>
-      <div class="footer-bottom">
+      <div class="ft-bottom">
         <p>© 2026 Sanzio Serviços Contábeis. Todos os direitos reservados.</p>
         <p>Contabilidade especializada em MEI e pequenas empresas</p>
       </div>
     </div>
   </footer>
 
-  <!-- WHATSAPP FLOAT -->
-  <div class="wa-float">
-    <a href="https://wa.me/5531986549394?text=Olá!%20Vim%20pelo%20site%20e%20gostaria%20de%20mais%20informações." class="wa-float-btn" target="_blank" rel="noopener" aria-label="WhatsApp">
-      <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.116 1.522 5.847L.057 23.899l6.203-1.473A11.955 11.955 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.894 0-3.668-.497-5.205-1.367l-.374-.218-3.877.92.98-3.787-.241-.388A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-    </a>
-  </div>
+  <!-- WA FLOAT -->
+  <a href="https://wa.me/5531986549394?text=Olá!%20Vim%20pelo%20site." class="wa" target="_blank" rel="noopener" aria-label="WhatsApp">
+    <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.116 1.522 5.847L.057 23.899l6.203-1.473A11.955 11.955 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.894 0-3.668-.497-5.205-1.367l-.374-.218-3.877.92.98-3.787-.241-.388A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+  </a>
 
   <script>
-    function toggleNav() {
-      document.getElementById('mobileNav').classList.toggle('open');
+    function tNav() { document.getElementById('mnav').classList.toggle('open'); }
+    function tFaq(btn) {
+      const fi = btn.closest('.fi');
+      const open = fi.classList.contains('open');
+      document.querySelectorAll('.fi').forEach(f => f.classList.remove('open'));
+      if (!open) fi.classList.add('open');
     }
-    function toggleFaq(btn) {
-      const item = btn.closest('.faq-item');
-      const isOpen = item.classList.contains('open');
-      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
-      if (!isOpen) item.classList.add('open');
-    }
-    const observer = new IntersectionObserver((entries) => {
+    const obs = new IntersectionObserver((entries) => {
       entries.forEach((e, i) => {
-        if (e.isIntersecting) setTimeout(() => e.target.classList.add('visible'), i * 70);
+        if (e.isIntersecting) setTimeout(() => e.target.classList.add('in'), i * 60);
       });
     }, { threshold: 0.08 });
-    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
-    const navLinks = document.querySelectorAll('header nav a');
+    document.querySelectorAll('.anim').forEach(el => obs.observe(el));
     window.addEventListener('scroll', () => {
       let cur = '';
       document.querySelectorAll('section[id]').forEach(s => {
-        if (window.scrollY >= s.offsetTop - 90) cur = s.id;
+        if (window.scrollY >= s.offsetTop - 80) cur = s.id;
       });
-      navLinks.forEach(a => {
-        a.style.color = a.getAttribute('href') === '#' + cur ? 'var(--blue)' : '';
-        a.style.fontWeight = a.getAttribute('href') === '#' + cur ? '700' : '';
+      document.querySelectorAll('.hd-nav a').forEach(a => {
+        const active = a.getAttribute('href') === '#' + cur;
+        a.style.color = active ? 'var(--blue)' : '';
+        a.style.fontWeight = active ? '700' : '';
       });
     });
   </script>
