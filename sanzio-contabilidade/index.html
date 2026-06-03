@@ -157,7 +157,16 @@
     .hero-h1 em { font-style: normal; color: var(--green); }
     .hero-desc { font-size: 1.0625rem; color: rgba(255,255,255,.72); line-height: 1.75; margin-bottom: 32px; max-width: 480px; }
     .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 40px; }
-    .hero-trust { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .hero-trust { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding-top: 28px; border-top: 1px solid rgba(255,255,255,.15); }
+    .trust-avatars { display: flex; }
+    .trust-av {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: 2.5px solid rgba(255,255,255,.8);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem; font-weight: 800; color: #fff;
+      margin-left: -10px; flex-shrink: 0;
+    }
+    .trust-avatars .trust-av:first-child { margin-left: 0; }
     .htrust { display: flex; align-items: center; gap: 7px; }
     .htrust svg { width: 16px; height: 16px; fill: var(--green); flex-shrink: 0; }
     .htrust span { font-size: .82rem; color: rgba(255,255,255,.7); }
@@ -704,17 +713,15 @@
           <a href="#servicos" class="btn btn-ghost btn-lg">Ver serviços</a>
         </div>
         <div class="hero-trust">
-          <div class="htrust">
-            <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-            <span><strong>Empresa regularizada</strong></span>
+          <div class="trust-avatars">
+            <div class="trust-av" style="background:#3B82F6">JM</div>
+            <div class="trust-av" style="background:#F97316">AS</div>
+            <div class="trust-av" style="background:#10B981">RC</div>
+            <div class="trust-av" style="background:#8B5CF6">KP</div>
           </div>
-          <div class="htrust">
-            <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-            <span><strong>Suporte especializado</strong></span>
-          </div>
-          <div class="htrust">
-            <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-            <span><strong>100% online</strong></span>
+          <div>
+            <div style="font-size:.9rem;color:#fff;font-weight:700;"><strong>+1.800 clientes</strong> atendidos com sucesso</div>
+            <div style="font-size:.8rem;color:rgba(255,255,255,.75);margin-top:3px;">⭐⭐⭐⭐⭐ Avaliação 5 estrelas</div>
           </div>
         </div>
       </div>
