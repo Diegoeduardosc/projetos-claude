@@ -1,0 +1,25 @@
+# Dados sensíveis — nunca commitar
+*.xlsx
+*.xls
+*.csv
+
+# Memória e configurações privadas do Claude
+.claude/
+
+# Scripts de outros projetos
+analise_*.py
+optimazer-landing.html
+sanzio-contabilidade/
+
+# Pastas de dados internos
+DashBoard_Cinea/Planilhas/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# OS
+.DS_Store
+Thumbs.db
