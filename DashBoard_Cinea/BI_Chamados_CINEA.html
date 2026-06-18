@@ -9,22 +9,28 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f5f7; color: #1a1a2e; min-height: 100vh; }
 
-  header { background: #1f497d; color: #fff; padding: 1.25rem 2rem; display: flex; align-items: center; justify-content: space-between; }
-  header h1 { font-size: 1.2rem; font-weight: 600; letter-spacing: .02em; }
-  header span { font-size: 12px; opacity: .75; }
+  header { background: #1f497d; color: #fff; padding: 1.1rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  header h1 { font-size: 1.15rem; font-weight: 600; letter-spacing: .02em; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .header-ref { font-size: 12px; opacity: .7; }
+  #btnDownload { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); color: #fff; padding: 6px 14px; border-radius: 6px; cursor: pointer; text-decoration: none; transition: background .15s; }
+  #btnDownload:hover { background: rgba(255,255,255,.25); }
+  #btnDownload svg { flex-shrink: 0; }
 
-  .container { max-width: 1200px; margin: 0 auto; padding: 1.5rem 2rem; }
+  .container { max-width: 1260px; margin: 0 auto; padding: 1.5rem 2rem; }
 
-  .filters { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 1.5rem; background: #fff; border-radius: 10px; padding: .85rem 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
+  .filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 1.5rem; background: #fff; border-radius: 10px; padding: .85rem 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
   .filters label { font-size: 12px; color: #6b7280; font-weight: 500; }
   .filters select { font-size: 13px; padding: 5px 10px; border-radius: 6px; border: 1px solid #d1d5db; background: #f9fafb; color: #111827; cursor: pointer; }
   .filters select:focus { outline: 2px solid #1f497d; border-color: transparent; }
-  .filters .sep { width: 1px; height: 24px; background: #e5e7eb; margin: 0 4px; }
+  .sep { width: 1px; height: 24px; background: #e5e7eb; margin: 0 2px; }
   #btnReset { font-size: 12px; padding: 5px 12px; border-radius: 6px; border: 1px solid #d1d5db; background: transparent; color: #6b7280; cursor: pointer; }
   #btnReset:hover { background: #f3f4f6; }
 
   .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 1.5rem; }
-  .kpi { background: #fff; border-radius: 12px; padding: 1.1rem 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.07); border-left: 4px solid #e5e7eb; }
+  .kpi { background: #fff; border-radius: 12px; padding: 1.1rem 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.07); border-left: 4px solid #e5e7eb; cursor: pointer; transition: box-shadow .15s, transform .1s; position: relative; }
+  .kpi:hover { box-shadow: 0 4px 12px rgba(0,0,0,.12); transform: translateY(-1px); }
+  .kpi.active { outline: 2px solid currentColor; outline-offset: 2px; }
   .kpi.total  { border-color: #1f497d; }
   .kpi.danger { border-color: #dc2626; }
   .kpi.warn   { border-color: #d97706; }
@@ -36,6 +42,7 @@
   .kpi.warn   .kpi-value { color: #d97706; }
   .kpi.ok     .kpi-value { color: #16a34a; }
   .kpi-sub { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+  .kpi-hint { font-size: 10px; color: #c4c9d4; margin-top: 6px; }
 
   .charts-row { display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; margin-bottom: 1.5rem; }
   .card { background: #fff; border-radius: 12px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
@@ -48,29 +55,37 @@
   .table-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.07); overflow: hidden; }
   .table-header { padding: 1rem 1.25rem; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; }
   .table-header span { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #6b7280; }
-  #rowCount { font-size: 12px; color: #9ca3af; }
-  .table-wrap { overflow-x: auto; max-height: 480px; overflow-y: auto; }
+  #rowCount { font-size: 12px; color: #9ca3af; font-weight: 400; text-transform: none; letter-spacing: 0; }
+  .table-wrap { overflow-x: auto; max-height: 500px; overflow-y: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   thead { position: sticky; top: 0; z-index: 1; }
   th { background: #f9fafb; font-size: 11px; font-weight: 600; color: #6b7280; text-align: left; padding: 9px 12px; border-bottom: 1px solid #e5e7eb; white-space: nowrap; cursor: pointer; user-select: none; }
   th:hover { background: #f3f4f6; }
-  th .sort-arrow { margin-left: 4px; opacity: .4; }
-  th.asc .sort-arrow::after { content: '↑'; opacity: 1; }
-  th.desc .sort-arrow::after { content: '↓'; opacity: 1; }
-  th .sort-arrow::after { content: '↕'; }
+  th.asc  .arr::after { content: ' ↑'; }
+  th.desc .arr::after { content: ' ↓'; }
+  th .arr::after { content: ' ↕'; opacity: .35; }
+  th.asc  .arr::after, th.desc .arr::after { opacity: 1; }
   td { padding: 8px 12px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: #fafafa; }
+
   .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
   .badge-danger { background: #fef2f2; color: #dc2626; }
   .badge-warn   { background: #fffbeb; color: #d97706; }
   .badge-ok     { background: #f0fdf4; color: #16a34a; }
-  .badge-info   { background: #eff6ff; color: #2563eb; }
-  .cod { font-weight: 600; color: #1f497d; font-size: 12px; }
-  .days-neg { color: #dc2626; font-weight: 600; }
-  .days-warn { color: #d97706; font-weight: 600; }
 
-  .no-resp { color: #9ca3af; font-style: italic; }
+  .cod { font-weight: 700; color: #1f497d; font-size: 12px; font-family: monospace; }
+  .days-neg  { color: #dc2626; font-weight: 600; }
+  .days-warn { color: #d97706; font-weight: 600; }
+  .no-resp   { color: #9ca3af; font-style: italic; }
+
+  .csc-path { font-size: 11px; color: #6b7280; display: block; margin-top: 2px; line-height: 1.4; }
+  .csc-leaf { font-weight: 600; color: #374151; }
+
+  /* tooltip CSC */
+  .has-tip { position: relative; cursor: help; }
+  .has-tip:hover .tip { display: block; }
+  .tip { display: none; position: absolute; left: 0; top: 100%; z-index: 99; background: #1f2937; color: #f9fafb; font-size: 11px; padding: 6px 10px; border-radius: 6px; white-space: normal; width: 340px; line-height: 1.5; margin-top: 4px; box-shadow: 0 4px 12px rgba(0,0,0,.25); pointer-events: none; }
 
   footer { text-align: center; font-size: 11px; color: #9ca3af; padding: 1.5rem; margin-top: 1rem; }
 
@@ -89,7 +104,13 @@
 
 <header>
   <h1>Dashboard de Chamados — CINEA / NED</h1>
-  <span>Referência: 18/06/2026</span>
+  <div class="header-right">
+    <span class="header-ref">Referência: 18/06/2026</span>
+    <a id="btnDownload" href="#" download="BI_Chamados_CINEA.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Baixar dashboard
+    </a>
+  </div>
 </header>
 
 <div class="container">
@@ -101,6 +122,9 @@
     <label>Responsável</label>
     <select id="fResp"><option value="">Todos</option></select>
     <div class="sep"></div>
+    <label>Serviço CSC</label>
+    <select id="fCsc"><option value="">Todos</option></select>
+    <div class="sep"></div>
     <label>SLA</label>
     <select id="fSla">
       <option value="">Todos</option>
@@ -109,14 +133,14 @@
       <option value="NO PRAZO">No prazo</option>
     </select>
     <div class="sep"></div>
-    <button id="btnReset">Limpar filtros</button>
+    <button id="btnReset">✕ Limpar filtros</button>
   </div>
 
   <div class="kpi-grid">
-    <div class="kpi total"><div class="kpi-label">Total de chamados</div><div class="kpi-value" id="kTotal">—</div><div class="kpi-sub">em aberto</div></div>
-    <div class="kpi danger"><div class="kpi-label">Vencidos</div><div class="kpi-value" id="kVencido">—</div><div class="kpi-sub">prazo expirado</div></div>
-    <div class="kpi warn"><div class="kpi-label">Urgentes</div><div class="kpi-value" id="kUrgente">—</div><div class="kpi-sub">vence em até 3 dias</div></div>
-    <div class="kpi ok"><div class="kpi-label">No prazo</div><div class="kpi-value" id="kOk">—</div><div class="kpi-sub">prazo vigente</div></div>
+    <div class="kpi total"  data-filter="">  <div class="kpi-label">Total de chamados</div><div class="kpi-value" id="kTotal">—</div><div class="kpi-sub">em aberto</div><div class="kpi-hint">clique para ver todos</div></div>
+    <div class="kpi danger" data-filter="VENCIDO"><div class="kpi-label">Vencidos</div><div class="kpi-value" id="kVencido">—</div><div class="kpi-sub">prazo expirado</div><div class="kpi-hint">clique para filtrar</div></div>
+    <div class="kpi warn"   data-filter="URGENTE"><div class="kpi-label">Urgentes</div><div class="kpi-value" id="kUrgente">—</div><div class="kpi-sub">vence em até 3 dias</div><div class="kpi-hint">clique para filtrar</div></div>
+    <div class="kpi ok"     data-filter="NO PRAZO"><div class="kpi-label">No prazo</div><div class="kpi-value" id="kOk">—</div><div class="kpi-sub">prazo vigente</div><div class="kpi-hint">clique para filtrar</div></div>
   </div>
 
   <div class="charts-row">
@@ -144,14 +168,15 @@
       <table>
         <thead>
           <tr>
-            <th data-col="cod">Código<span class="sort-arrow"></span></th>
-            <th data-col="un">Unidade<span class="sort-arrow"></span></th>
-            <th data-col="ab">Abertura<span class="sort-arrow"></span></th>
-            <th data-col="sla">SLA<span class="sort-arrow"></span></th>
-            <th data-col="prev">Previsão<span class="sort-arrow"></span></th>
-            <th data-col="diff">Dias rest.<span class="sort-arrow"></span></th>
-            <th data-col="slaSt">Status SLA<span class="sort-arrow"></span></th>
-            <th data-col="resp">Responsável<span class="sort-arrow"></span></th>
+            <th data-col="cod">Código<span class="arr"></span></th>
+            <th data-col="un">Unidade<span class="arr"></span></th>
+            <th data-col="cscLeaf">Serviço CSC<span class="arr"></span></th>
+            <th data-col="ab">Abertura<span class="arr"></span></th>
+            <th data-col="sla">SLA<span class="arr"></span></th>
+            <th data-col="prev">Previsão<span class="arr"></span></th>
+            <th data-col="diff">Dias rest.<span class="arr"></span></th>
+            <th data-col="slaCat">Status SLA<span class="arr"></span></th>
+            <th data-col="resp">Responsável<span class="arr"></span></th>
           </tr>
         </thead>
         <tbody id="tBody"></tbody>
@@ -166,117 +191,118 @@
 <script>
 const TODAY = new Date('2026-06-18');
 
+// [codigo, unidade, abertura, sla, previsao, status, resp, cscPath]
 const RAW = [
-["932007","PUC POÇOS DE CALDAS","2026-06-11","1.01","2026-06-18","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["919760","PUC MINAS VIRTUAL","2026-05-18","1.35","2026-06-16","RESPONDIDO PELO USUÁRIO","Claudia Maria Rodrigues de Almeida"],
-["800576","PUC CORAÇÃO EUCARÍSTICO","2025-10-07",">200%","2025-12-03","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["885914","PUC CORAÇÃO EUCARÍSTICO","2026-03-20","1.51","2026-05-20","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["899931","PUC POÇOS DE CALDAS","2026-04-15","0.22","2027-01-27","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["899906","PUC POÇOS DE CALDAS","2026-04-15","0.22","2027-01-27","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["899935","PUC POÇOS DE CALDAS","2026-04-15","0.22","2027-01-27","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["899938","PUC POÇOS DE CALDAS","2026-04-15","0.22","2027-01-27","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["905608","PUC CORAÇÃO EUCARÍSTICO","2026-04-24","2","2026-05-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["905322","PUC CORAÇÃO EUCARÍSTICO","2026-04-23","2","2026-05-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["904190","PUC CORAÇÃO EUCARÍSTICO","2026-04-22","2","2026-04-29","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["905615","PUC CORAÇÃO EUCARÍSTICO","2026-04-24","2","2026-05-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["917495","PUC MINAS VIRTUAL","2026-05-13","2","2026-05-21","EM ATENDIMENTO","Jefferson Ubiratan de Araujo Medeiros"],
-["906707","PUC CORAÇÃO EUCARÍSTICO","2026-04-27","2","2026-05-05","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["909180","PUC CORAÇÃO EUCARÍSTICO","2026-04-30","2","2026-05-08","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["909165","PUC CORAÇÃO EUCARÍSTICO","2026-04-30","2","2026-05-08","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["906021","PUC CORAÇÃO EUCARÍSTICO","2026-04-24","2","2026-05-05","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["896332","PUC MINAS VIRTUAL","2026-04-09",">200%","2026-04-17","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["906701","PUC CORAÇÃO EUCARÍSTICO","2026-04-27","2","2026-05-05","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["773219","PUC MINAS VIRTUAL","2025-08-26",">200%","2025-09-03","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["853625","PUC MINAS VIRTUAL","2026-01-29",">200%","2026-02-06","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["932227","PUC CORAÇÃO EUCARÍSTICO","2026-06-11","0.94","2026-06-19","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["934675","PUC CORAÇÃO EUCARÍSTICO","2026-06-15","0.55","2026-06-23","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["892789","PUC MINAS LOURDES","2026-04-06","0.39","2026-10-06","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["894935","PUC MINAS LOURDES","2026-04-08","0.38","2026-10-08","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["935504","PUC CORAÇÃO EUCARÍSTICO","2026-06-16","0.34","2026-06-24","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["915912","PUC MINAS VIRTUAL","2026-05-11","0.3","2026-09-17","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["916179","PUC MINAS VIRTUAL","2026-05-11","0.3","2026-09-18","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["917212","PUC MINAS VIRTUAL","2026-05-12","0.29","2026-09-21","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["918574","PUC MINAS LOURDES","2026-05-14","0.26","2026-09-23","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["897179","PUC BARREIRO","2026-04-10","0.23","2027-01-22","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["900433","PUC CORAÇÃO EUCARÍSTICO","2026-04-15","0.22","2027-01-28","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["900428","PUC CORAÇÃO EUCARÍSTICO","2026-04-15","0.22","2027-01-28","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["900431","PUC CORAÇÃO EUCARÍSTICO","2026-04-15","0.22","2027-01-28","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["903396","PUC BETIM","2026-04-20","0.2","2027-02-01","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["903391","PUC BETIM","2026-04-20","0.2","2027-02-01","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["903401","PUC BETIM","2026-04-20","0.2","2027-02-01","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["916345","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-02","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["916239","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-02","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["916339","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-02","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["916271","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-02","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["916272","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-02","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["916276","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-02","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["916294","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-02","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["916285","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-02","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["906201","PUC CORAÇÃO EUCARÍSTICO","2026-04-25","0.19","2027-02-05","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["915940","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-01","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["916232","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-02","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["916252","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-02","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["915950","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-01","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["917923","PUC MINAS VIRTUAL","2026-05-13","0.18","2026-12-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["917928","PUC MINAS VIRTUAL","2026-05-13","0.18","2026-12-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["917924","PUC MINAS VIRTUAL","2026-05-13","0.18","2026-12-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["917216","PUC MINAS VIRTUAL","2026-05-12","0.18","2026-12-03","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["917217","PUC MINAS VIRTUAL","2026-05-12","0.18","2026-12-03","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["917215","PUC MINAS VIRTUAL","2026-05-12","0.18","2026-12-03","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["917210","PUC MINAS VIRTUAL","2026-05-12","0.18","2026-12-03","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["917810","PUC MINAS VIRTUAL","2026-05-13","0.18","2026-12-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["917929","PUC MINAS VIRTUAL","2026-05-13","0.18","2026-12-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["918603","PUC MINAS LOURDES","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO",""],
-["918474","PUC MINAS VIRTUAL","2026-05-14","0.17","2026-12-04","EM ATENDIMENTO",""],
-["918835","PUC MINAS LOURDES","2026-05-15","0.17","2026-12-07","EM ATENDIMENTO",""],
-["918499","PUC MINAS VIRTUAL","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["918492","PUC MINAS VIRTUAL","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["918501","PUC MINAS VIRTUAL","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["918547","PUC MINAS LOURDES","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["918541","PUC MINAS LOURDES","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["918491","PUC MINAS VIRTUAL","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["918551","PUC MINAS LOURDES","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["918554","PUC MINAS LOURDES","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["918552","PUC MINAS LOURDES","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["918485","PUC MINAS VIRTUAL","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO",""],
-["918482","PUC MINAS VIRTUAL","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO",""],
-["771802","PUC SÃO GABRIEL","2025-08-25","0.16","2026-10-29","EM ATENDIMENTO",""],
-["919193","PUC MINAS LOURDES","2026-05-15","0.16","2026-12-08","EM ATENDIMENTO",""],
-["771799","PUC SÃO GABRIEL","2025-08-25","0.16","2026-10-29","EM ATENDIMENTO",""],
-["920728","PUC MINAS VIRTUAL","2026-05-19","0.15","2026-12-10","EM ATENDIMENTO",""],
-["920730","PUC MINAS VIRTUAL","2026-05-19","0.15","2026-12-10","EM ATENDIMENTO",""],
-["920719","PUC MINAS VIRTUAL","2026-05-19","0.15","2026-12-10","EM ATENDIMENTO",""],
-["920724","PUC MINAS VIRTUAL","2026-05-19","0.15","2026-12-10","EM ATENDIMENTO",""],
-["921341","PUC CORAÇÃO EUCARÍSTICO","2026-05-20","0.1","2027-03-03","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["921338","PUC CORAÇÃO EUCARÍSTICO","2026-05-20","0.1","2027-03-03","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["921325","PUC CORAÇÃO EUCARÍSTICO","2026-05-20","0.1","2027-03-03","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["922594","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["922585","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["922576","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["922639","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["922627","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["922623","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["922480","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["922438","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["922427","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["922524","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["922519","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["922506","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["928555","PUC CORAÇÃO EUCARÍSTICO","2026-06-03","0.05","2027-03-17","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["932827","PUC CORAÇÃO EUCARÍSTICO","2026-06-12","0.02","2027-03-25","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["932845","PUC CORAÇÃO EUCARÍSTICO","2026-06-12","0.02","2027-03-25","EM ATENDIMENTO",""],
-["932849","PUC CORAÇÃO EUCARÍSTICO","2026-06-12","0.02","2027-03-25","EM ATENDIMENTO",""],
-["932801","PUC CORAÇÃO EUCARÍSTICO","2026-06-12","0.02","2027-03-25","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["932822","PUC CORAÇÃO EUCARÍSTICO","2026-06-12","0.02","2027-03-25","EM ATENDIMENTO",""],
-["932826","PUC CORAÇÃO EUCARÍSTICO","2026-06-12","0.02","2027-03-25","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida"],
-["936268","PUC CORAÇÃO EUCARÍSTICO","2026-06-17","0","2027-04-01","EM ATENDIMENTO",""],
-["936266","PUC CORAÇÃO EUCARÍSTICO","2026-06-17","0","2027-04-01","EM ATENDIMENTO",""],
-["936279","PUC CORAÇÃO EUCARÍSTICO","2026-06-17","0","2027-04-01","EM ATENDIMENTO",""],
-["936277","PUC CORAÇÃO EUCARÍSTICO","2026-06-17","0","2027-04-01","EM ATENDIMENTO",""],
-["936256","PUC CORAÇÃO EUCARÍSTICO","2026-06-17","0","2027-04-01","EM ATENDIMENTO",""],
-["936251","PUC CORAÇÃO EUCARÍSTICO","2026-06-17","0","2027-04-01","EM ATENDIMENTO",""],
-["936264","PUC CORAÇÃO EUCARÍSTICO","2026-06-17","0","2027-04-01","EM ATENDIMENTO",""],
-["936259","PUC CORAÇÃO EUCARÍSTICO","2026-06-17","0","2027-04-01","EM ATENDIMENTO",""]
+["932007","PUC POÇOS DE CALDAS","2026-06-11","1.01","2026-06-18","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Serviços de formação e capacitação/Formação Docente/Formação para professor regente da disciplina híbrida"],
+["919760","PUC MINAS VIRTUAL","2026-05-18","1.35","2026-06-16","RESPONDIDO PELO USUÁRIO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Serviços de formação e capacitação/Formação em ferramentas tecnológicas/Capacitação específica para uso de tecnologias do processo de ensino-aprendizagem (Canvas, Teams e outras)"],
+["800576","PUC CORAÇÃO EUCARÍSTICO","2025-10-07",">200%","2025-12-03","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Projetos especiais da universidade/Produção/Produzir conteúdos especiais"],
+["885914","PUC CORAÇÃO EUCARÍSTICO","2026-03-20","1.51","2026-05-20","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Projetos especiais da universidade/Produção/Produzir conteúdos especiais"],
+["899931","PUC POÇOS DE CALDAS","2026-04-15","0.22","2027-01-27","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["899906","PUC POÇOS DE CALDAS","2026-04-15","0.22","2027-01-27","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["899935","PUC POÇOS DE CALDAS","2026-04-15","0.22","2027-01-27","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["899938","PUC POÇOS DE CALDAS","2026-04-15","0.22","2027-01-27","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["905608","PUC CORAÇÃO EUCARÍSTICO","2026-04-24","2","2026-05-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Serviços de formação e capacitação/Formação Docente/Formação para professor regente da disciplina de modalidade única"],
+["905322","PUC CORAÇÃO EUCARÍSTICO","2026-04-23","2","2026-05-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Serviços de formação e capacitação/Formação Docente/Formação para professor regente da disciplina de modalidade única"],
+["904190","PUC CORAÇÃO EUCARÍSTICO","2026-04-22","2","2026-04-29","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Serviços de formação e capacitação/Formação Docente/Formação para professor regente da disciplina de modalidade única"],
+["905615","PUC CORAÇÃO EUCARÍSTICO","2026-04-24","2","2026-05-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Serviços de formação e capacitação/Formação Docente/Formação para professor regente da disciplina de modalidade única"],
+["917495","PUC MINAS VIRTUAL","2026-05-13","2","2026-05-21","EM ATENDIMENTO","Jefferson Ubiratan de Araujo Medeiros","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Serviços de formação e capacitação/Formação em ferramentas tecnológicas/Capacitação específica para uso de tecnologias do processo de ensino-aprendizagem (Canvas, Teams e outras)"],
+["906707","PUC CORAÇÃO EUCARÍSTICO","2026-04-27","2","2026-05-05","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Serviços de formação e capacitação/Formação Docente/Formação para professor regente da disciplina de modalidade única"],
+["909180","PUC CORAÇÃO EUCARÍSTICO","2026-04-30","2","2026-05-08","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Serviços de formação e capacitação/Formação Docente/Formação para professor regente da disciplina de modalidade única"],
+["909165","PUC CORAÇÃO EUCARÍSTICO","2026-04-30","2","2026-05-08","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Serviços de formação e capacitação/Formação Docente/Formação para professor regente da disciplina de modalidade única"],
+["906021","PUC CORAÇÃO EUCARÍSTICO","2026-04-24","2","2026-05-05","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Serviços de formação e capacitação/Formação Docente/Formação para professor regente da disciplina de modalidade única"],
+["896332","PUC MINAS VIRTUAL","2026-04-09",">200%","2026-04-17","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Serviços de formação e capacitação/Formação em ferramentas tecnológicas/Capacitação específica para uso de tecnologias do processo de ensino-aprendizagem (Canvas, Teams e outras)"],
+["906701","PUC CORAÇÃO EUCARÍSTICO","2026-04-27","2","2026-05-05","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Serviços de formação e capacitação/Formação Docente/Formação para professor regente da disciplina de modalidade única"],
+["773219","PUC MINAS VIRTUAL","2025-08-26",">200%","2025-09-03","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Serviços de formação e capacitação/Formação Docente/Formação para professor mentor, autor ou tutor de outras modalidades"],
+["853625","PUC MINAS VIRTUAL","2026-01-29",">200%","2026-02-06","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Projetos especiais da universidade/Ajustes e alterações/Ajustar conteúdo/material didático em ambientes"],
+["932227","PUC CORAÇÃO EUCARÍSTICO","2026-06-11","0.94","2026-06-19","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Serviços de formação e capacitação/Formação Docente/Formação para professor regente da disciplina híbrida"],
+["934675","PUC CORAÇÃO EUCARÍSTICO","2026-06-15","0.55","2026-06-23","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Serviços de formação e capacitação/Formação Docente/Formação para professor regente da disciplina de modalidade única"],
+["892789","PUC MINAS LOURDES","2026-04-06","0.39","2026-10-06","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["894935","PUC MINAS LOURDES","2026-04-08","0.38","2026-10-08","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["935504","PUC CORAÇÃO EUCARÍSTICO","2026-06-16","0.34","2026-06-24","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Serviços de formação e capacitação/Formação Docente/Formação para professor regente da disciplina híbrida"],
+["915912","PUC MINAS VIRTUAL","2026-05-11","0.3","2026-09-17","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de disciplina de projeto"],
+["916179","PUC MINAS VIRTUAL","2026-05-11","0.3","2026-09-18","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de disciplina de projeto"],
+["917212","PUC MINAS VIRTUAL","2026-05-12","0.29","2026-09-21","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de disciplina de projeto"],
+["918574","PUC MINAS LOURDES","2026-05-14","0.26","2026-09-23","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de disciplina de projeto"],
+["897179","PUC BARREIRO","2026-04-10","0.23","2027-01-22","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["900433","PUC CORAÇÃO EUCARÍSTICO","2026-04-15","0.22","2027-01-28","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["900428","PUC CORAÇÃO EUCARÍSTICO","2026-04-15","0.22","2027-01-28","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["900431","PUC CORAÇÃO EUCARÍSTICO","2026-04-15","0.22","2027-01-28","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["903396","PUC BETIM","2026-04-20","0.2","2027-02-01","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["903391","PUC BETIM","2026-04-20","0.2","2027-02-01","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["903401","PUC BETIM","2026-04-20","0.2","2027-02-01","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["916345","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-02","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de disciplina de CC/DC com UDA"],
+["916239","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-02","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["916339","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-02","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de disciplina de CC/DC com UDA"],
+["916271","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-02","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["916272","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-02","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["916276","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-02","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["916294","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-02","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de disciplina de CC/DC com UDA"],
+["916285","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-02","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["906201","PUC CORAÇÃO EUCARÍSTICO","2026-04-25","0.19","2027-02-05","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["915940","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-01","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["916232","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-02","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["916252","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-02","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["915950","PUC MINAS VIRTUAL","2026-05-11","0.19","2026-12-01","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["917923","PUC MINAS VIRTUAL","2026-05-13","0.18","2026-12-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["917928","PUC MINAS VIRTUAL","2026-05-13","0.18","2026-12-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["917924","PUC MINAS VIRTUAL","2026-05-13","0.18","2026-12-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["917216","PUC MINAS VIRTUAL","2026-05-12","0.18","2026-12-03","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de disciplina de CC/DC com UDA"],
+["917217","PUC MINAS VIRTUAL","2026-05-12","0.18","2026-12-03","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["917215","PUC MINAS VIRTUAL","2026-05-12","0.18","2026-12-03","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de disciplina de CC/DC com UDA"],
+["917210","PUC MINAS VIRTUAL","2026-05-12","0.18","2026-12-03","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de disciplina de CC/DC com UDA"],
+["917810","PUC MINAS VIRTUAL","2026-05-13","0.18","2026-12-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["917929","PUC MINAS VIRTUAL","2026-05-13","0.18","2026-12-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["918603","PUC MINAS LOURDES","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["918474","PUC MINAS VIRTUAL","2026-05-14","0.17","2026-12-04","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["918835","PUC MINAS LOURDES","2026-05-15","0.17","2026-12-07","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["918499","PUC MINAS VIRTUAL","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["918492","PUC MINAS VIRTUAL","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["918501","PUC MINAS VIRTUAL","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["918547","PUC MINAS LOURDES","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["918541","PUC MINAS LOURDES","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["918491","PUC MINAS VIRTUAL","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["918551","PUC MINAS LOURDES","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["918554","PUC MINAS LOURDES","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["918552","PUC MINAS LOURDES","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["918485","PUC MINAS VIRTUAL","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["918482","PUC MINAS VIRTUAL","2026-05-14","0.17","2026-12-07","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["771802","PUC SÃO GABRIEL","2025-08-25","0.16","2026-10-29","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["919193","PUC MINAS LOURDES","2026-05-15","0.16","2026-12-08","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["771799","PUC SÃO GABRIEL","2025-08-25","0.16","2026-10-29","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["920728","PUC MINAS VIRTUAL","2026-05-19","0.15","2026-12-10","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["920730","PUC MINAS VIRTUAL","2026-05-19","0.15","2026-12-10","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["920719","PUC MINAS VIRTUAL","2026-05-19","0.15","2026-12-10","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["920724","PUC MINAS VIRTUAL","2026-05-19","0.15","2026-12-10","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Graduação EaD/Produção de conteúdos/materiais didáticos/Iniciar produção de microfundamento novo com UDA"],
+["921341","PUC CORAÇÃO EUCARÍSTICO","2026-05-20","0.1","2027-03-03","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["921338","PUC CORAÇÃO EUCARÍSTICO","2026-05-20","0.1","2027-03-03","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["921325","PUC CORAÇÃO EUCARÍSTICO","2026-05-20","0.1","2027-03-03","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["922594","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["922585","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["922576","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["922639","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["922627","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["922623","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["922480","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["922438","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["922427","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["922524","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["922519","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["922506","PUC CORAÇÃO EUCARÍSTICO","2026-05-22","0.09","2027-03-04","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["928555","PUC CORAÇÃO EUCARÍSTICO","2026-06-03","0.05","2027-03-17","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["932827","PUC CORAÇÃO EUCARÍSTICO","2026-06-12","0.02","2027-03-25","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["932845","PUC CORAÇÃO EUCARÍSTICO","2026-06-12","0.02","2027-03-25","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["932849","PUC CORAÇÃO EUCARÍSTICO","2026-06-12","0.02","2027-03-25","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["932801","PUC CORAÇÃO EUCARÍSTICO","2026-06-12","0.02","2027-03-25","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["932822","PUC CORAÇÃO EUCARÍSTICO","2026-06-12","0.02","2027-03-25","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["932826","PUC CORAÇÃO EUCARÍSTICO","2026-06-12","0.02","2027-03-25","EM ATENDIMENTO","Claudia Maria Rodrigues de Almeida","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["936268","PUC CORAÇÃO EUCARÍSTICO","2026-06-17","0","2027-04-01","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["936266","PUC CORAÇÃO EUCARÍSTICO","2026-06-17","0","2027-04-01","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["936279","PUC CORAÇÃO EUCARÍSTICO","2026-06-17","0","2027-04-01","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["936277","PUC CORAÇÃO EUCARÍSTICO","2026-06-17","0","2027-04-01","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["936256","PUC CORAÇÃO EUCARÍSTICO","2026-06-17","0","2027-04-01","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["936251","PUC CORAÇÃO EUCARÍSTICO","2026-06-17","0","2027-04-01","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["936264","PUC CORAÇÃO EUCARÍSTICO","2026-06-17","0","2027-04-01","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"],
+["936259","PUC CORAÇÃO EUCARÍSTICO","2026-06-17","0","2027-04-01","EM ATENDIMENTO","","CSC - Central de Serviços Compartilhados/Serviços do Núcleo de Educação Digital (NED)/Unidades Digitais de Aprendizagem - UDAs/Formação e produção/Formação do autor e produção de conteúdo para UDA"]
 ];
 
 function slaSt(raw, prev) {
@@ -285,31 +311,40 @@ function slaSt(raw, prev) {
   if (diff <= 3) return 'URGENTE';
   return 'NO PRAZO';
 }
-function fmt(iso) {
-  const [y,m,d] = iso.split('-');
-  return `${d}/${m}/${y}`;
-}
+function fmt(iso) { const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; }
 function shortName(s) {
   if (!s) return '';
   const p = s.trim().split(' ');
   return p[0] + (p[1] ? ' ' + p[1][0] + '.' : '');
+}
+function cscLeaf(path) { return path.split('/').pop(); }
+function cscSection(path) {
+  const parts = path.split('/');
+  return parts.length >= 3 ? parts[2] : parts[parts.length - 1];
 }
 
 const data = RAW.map(r => {
   const prev = new Date(r[4]);
   const diff = Math.floor((prev - TODAY) / 86400000);
   const slaCat = slaSt(r[3], r[4]);
-  return { cod: r[0], un: r[1], ab: r[2], sla: r[3], prev: r[4], st: r[5], resp: r[6] || '', diff, slaCat };
+  const cscPath = r[7] || '';
+  return { cod: r[0], un: r[1], ab: r[2], sla: r[3], prev: r[4], st: r[5], resp: r[6] || '',
+           cscPath, cscLeaf: cscLeaf(cscPath), cscSection: cscSection(cscPath), diff, slaCat };
 });
 
+// Populate filters
 const unidades = [...new Set(data.map(d => d.un))].sort();
 const resps    = [...new Set(data.map(d => d.resp))].filter(Boolean).sort();
+const sections = [...new Set(data.map(d => d.cscSection))].sort();
 const fU = document.getElementById('fUnidade');
 const fR = document.getElementById('fResp');
+const fC = document.getElementById('fCsc');
 unidades.forEach(u => { const o = document.createElement('option'); o.value = u; o.textContent = u; fU.appendChild(o); });
 resps.forEach(r => { const o = document.createElement('option'); o.value = r; o.textContent = shortName(r); fR.appendChild(o); });
+sections.forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; fC.appendChild(o); });
 
 let chartU, chartS, sortCol = 'slaCat', sortDir = 1;
+let activeKpi = '';
 
 function badgeSla(cat) {
   const cls = { VENCIDO: 'badge-danger', URGENTE: 'badge-warn', 'NO PRAZO': 'badge-ok' }[cat];
@@ -318,10 +353,11 @@ function badgeSla(cat) {
 }
 
 function render() {
-  const fu = fU.value, fr = fR.value, fs = document.getElementById('fSla').value;
+  const fu = fU.value, fr = fR.value, fc = fC.value, fs = document.getElementById('fSla').value || activeKpi;
   let f = data.filter(d => {
     if (fu && d.un !== fu) return false;
     if (fr && d.resp !== fr) return false;
+    if (fc && d.cscSection !== fc) return false;
     if (fs && d.slaCat !== fs) return false;
     return true;
   });
@@ -330,6 +366,11 @@ function render() {
   document.getElementById('kVencido').textContent = f.filter(d => d.slaCat === 'VENCIDO').length;
   document.getElementById('kUrgente').textContent = f.filter(d => d.slaCat === 'URGENTE').length;
   document.getElementById('kOk').textContent = f.filter(d => d.slaCat === 'NO PRAZO').length;
+
+  // highlight active KPI
+  document.querySelectorAll('.kpi').forEach(k => {
+    k.classList.toggle('active', k.dataset.filter === activeKpi && activeKpi !== '');
+  });
 
   const byUn = {};
   f.forEach(d => { byUn[d.un] = (byUn[d.un] || 0) + 1; });
@@ -366,7 +407,7 @@ function render() {
       responsive: true, maintainAspectRatio: false, cutout: '62%',
       plugins: {
         legend: { display: false },
-        tooltip: { callbacks: { label: ctx => ` ${ctx.parsed} chamados (${Math.round(ctx.parsed/f.length*100)}%)` } }
+        tooltip: { callbacks: { label: ctx => ` ${ctx.parsed} chamados (${f.length ? Math.round(ctx.parsed/f.length*100) : 0}%)` } }
       }
     }
   });
@@ -386,13 +427,15 @@ function render() {
 
   document.getElementById('tBody').innerHTML = sorted.map(d => {
     const diffCls = d.diff < 0 ? 'days-neg' : d.diff <= 3 ? 'days-warn' : '';
-    const diffTxt = d.diff < 0 ? `${d.diff} dias` : `+${d.diff} dias`;
+    const diffTxt = d.diff < 0 ? `${d.diff}d` : `+${d.diff}d`;
     const respHtml = d.resp
       ? `<span title="${d.resp}">${shortName(d.resp)}</span>`
-      : `<span class="no-resp">Não atribuído</span>`;
+      : `<span class="no-resp">—</span>`;
+    const cscHtml = `<div class="has-tip"><span class="csc-leaf">${d.cscLeaf}</span><span class="csc-path">${d.cscSection}</span><div class="tip">${d.cscPath.replace(/\//g,' › ')}</div></div>`;
     return `<tr>
       <td><span class="cod">${d.cod}</span></td>
-      <td>${d.un.replace('PUC ','')}</td>
+      <td style="font-size:12px">${d.un.replace('PUC ','')}</td>
+      <td style="max-width:220px">${cscHtml}</td>
       <td>${fmt(d.ab)}</td>
       <td>${d.sla === '>200%' ? '<span class="badge badge-danger">&gt;200%</span>' : (parseFloat(d.sla)*100).toFixed(0)+'%'}</td>
       <td>${fmt(d.prev)}</td>
@@ -408,17 +451,44 @@ function render() {
   });
 }
 
-['fUnidade','fResp','fSla'].forEach(id => document.getElementById(id).addEventListener('change', render));
+// KPI click filter
+document.querySelectorAll('.kpi').forEach(kpi => {
+  kpi.addEventListener('click', () => {
+    const f = kpi.dataset.filter;
+    activeKpi = activeKpi === f ? '' : f;
+    document.getElementById('fSla').value = '';
+    render();
+  });
+});
+
+['fUnidade','fResp','fCsc','fSla'].forEach(id =>
+  document.getElementById(id).addEventListener('change', () => { activeKpi = ''; render(); })
+);
+
 document.getElementById('btnReset').addEventListener('click', () => {
-  ['fUnidade','fResp','fSla'].forEach(id => document.getElementById(id).value = '');
+  ['fUnidade','fResp','fCsc','fSla'].forEach(id => document.getElementById(id).value = '');
+  activeKpi = '';
   render();
 });
+
 document.querySelectorAll('th[data-col]').forEach(th => {
   th.addEventListener('click', () => {
     const col = th.dataset.col;
     if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = 1; }
     render();
   });
+});
+
+// Download button — makes the page download itself
+document.getElementById('btnDownload').addEventListener('click', e => {
+  e.preventDefault();
+  const html = document.documentElement.outerHTML;
+  const blob = new Blob(['<!DOCTYPE html>\n' + html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'BI_Chamados_CINEA.html';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
 });
 
 render();
